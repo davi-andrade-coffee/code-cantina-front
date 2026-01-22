@@ -1,0 +1,58 @@
+<div class="min-h-screen flex items-center justify-center bg-base-200">
+  <div class="card w-full max-w-sm bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title justify-center mb-4">Login Cantina</h2>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
+
+          <div class="form-control w-full">
+            <input
+              type="text"
+              placeholder="E-mail"
+              class="input input-bordered w-full"
+              [class.input-error]="form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)"
+              formControlName="email"
+              autocomplete="username"
+            />
+            <div *ngIf="form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)" 
+                class="text-error text-xs mt-1 ml-1">
+              <span *ngIf="form.get('email')?.hasError('required')">O e-mail é obrigatório.</span>
+              <span *ngIf="form.get('email')?.hasError('email')">Formato de e-mail inválido.</span>
+            </div>
+          </div>
+
+          <div class="form-control w-full">
+            <input
+              type="password"
+              placeholder="Senha"
+              class="input input-bordered w-full"
+              [class.input-error]="form.get('password')?.invalid && (form.get('password')?.dirty || form.get('password')?.touched)"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <div *ngIf="form.get('password')?.invalid && (form.get('password')?.dirty || form.get('password')?.touched)" 
+                class="text-error text-xs mt-1 ml-1">
+              <span *ngIf="form.get('password')?.hasError('required')">A senha é obrigatória.</span>
+              <span *ngIf="form.get('password')?.hasError('minlength')">A senha deve ter no mínimo 2 caracteres.</span>
+            </div>
+          </div>
+
+          <div class="text-error text-sm text-center" *ngIf="error">{{ error() }}</div>
+
+          <button class="btn btn-primary w-full" type="submit" [disabled]="form.invalid || loading()">
+            <span *ngIf="!loading()">Entrar</span>
+            <span *ngIf="loading()" class="loading loading-spinner loading-sm"></span>
+          </button>
+
+          <div class="text-center opacity-60 text-xs">
+            © Cantina Escolar
+          </div>
+        </form>
+
+    </div>
+    
+  </div>
+  
+</div>
+
+

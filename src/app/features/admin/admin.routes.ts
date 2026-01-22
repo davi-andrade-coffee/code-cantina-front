@@ -1,0 +1,37 @@
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'cadastros/pessoas' },
+
+      // Operação
+      { path: 'operacao/pdv', loadComponent: () => import('./pages/pdv.page').then(m => m.PdvPage) },
+      { path: 'operacao/caixa/abertura', loadComponent: () => import('./pages/caixa-abertura.page').then(m => m.CaixaAberturaPage) },
+      { path: 'operacao/caixa/fechamento', loadComponent: () => import('./pages/caixa-fechamento.page').then(m => m.CaixaFechamentoPage) },
+      { path: 'operacao/caixa/sessoes', loadComponent: () => import('./pages/caixa-sessoes.page').then(m => m.CaixaSessoesPage) },
+
+      // Cadastros
+      { path: 'cadastros/pessoas', loadComponent: () => import('./pages/pessoas.page').then(m => m.PessoasPage) },
+      { path: 'cadastros/colaboradores', loadComponent: () => import('./pages/colaboradores.page').then(m => m.ColaboradoresPage) },
+      { path: 'cadastros/produtos', loadComponent: () => import('./pages/produtos.page').then(m => m.ProdutosPage) },
+      { path: 'cadastros/lojas', loadComponent: () => import('./pages/lojas.page').then(m => m.LojasPage) },
+      { path: 'cadastros/terminais', loadComponent: () => import('./pages/terminais.page').then(m => m.TerminaisPage) },
+
+      // Financeiro e Relatórios
+      { path: 'financeiro/contas-a-receber', loadComponent: () => import('./pages/contas-receber.page').then(m => m.ContasReceberPage) },
+      { path: 'relatorios/vendas', loadComponent: () => import('./pages/relatorio-vendas.page').then(m => m.RelatorioVendasPage) },
+      { path: 'relatorios/extrato-cliente', loadComponent: () => import('./pages/extrato-cliente.page').then(m => m.ExtratoClientePage) },
+
+      // Auditoria
+      { path: 'auditoria/logs', loadComponent: () => import('./pages/logs.page').then(m => m.LogsPage) },
+
+      // Configurações
+      { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja.page').then(m => m.ConfigLojaPage) },
+      { path: 'configuracoes/seguranca', loadComponent: () => import('./pages/seguranca.page').then(m => m.SegurancaPage) },
+    ],
+  },
+];
+
