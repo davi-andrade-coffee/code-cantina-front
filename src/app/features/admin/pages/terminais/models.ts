@@ -15,5 +15,5 @@ export interface TerminalPdv {
 export interface TerminaisFiltro {
   termo: string;
   status: TerminalStatus;
-  somenteAtivos: boolean;
+  // somenteAtivos: boolean;
 }

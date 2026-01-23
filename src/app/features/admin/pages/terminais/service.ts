@@ -66,7 +66,7 @@ export class TerminaisService {
     const termo = (filtro.termo || '').trim().toLowerCase();
 
     return items.filter((t) => {
-      if (filtro.somenteAtivos && !t.ativo) return false;
+      // if (filtro.somenteAtivos && !t.ativo) return false;
 
       if (filtro.status === 'ATIVOS' && !t.ativo) return false;
       if (filtro.status === 'INATIVOS' && t.ativo) return false;

@@ -37,15 +37,15 @@
       </select>
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input
-        type="checkbox"
-        class="checkbox checkbox-xs"
-        [checked]="filtro().somenteAtivos"
-        (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })"
-      />
-      <span class="label-text text-xs opacity-70">Somente ativos</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtro().somenteAtivos" -->
+    <!--     (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente ativos</span> -->
+    <!-- </label> -->
 
     <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>
@@ -67,8 +67,8 @@
           <th>Impressora</th>
           <th>Cupom</th>
           <th>Preview</th>
-          <th>Modo offline</th>
-          <th>Status</th>
+          <!-- <th>Modo offline</th> -->
+          <!-- <th>Status</th> -->
           <th class="text-center">Ativo</th>
           <th class="text-right">Ações</th>
         </tr>
@@ -81,8 +81,8 @@
           <td class="text-xs opacity-70">{{ t.impressoraFiscal || '—' }}</td>
           <td><span [class]="booleanBadge(t.imprimeCupom)">{{ t.imprimeCupom ? 'Sim' : 'Não' }}</span></td>
           <td><span [class]="booleanBadge(t.previewCupom)">{{ t.previewCupom ? 'Sim' : 'Não' }}</span></td>
-          <td><span [class]="booleanBadge(t.modoOffline)">{{ t.modoOffline ? 'Sim' : 'Não' }}</span></td>
-          <td><span [class]="statusBadge(t.ativo)">{{ t.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+          <!-- <td><span [class]="booleanBadge(t.modoOffline)">{{ t.modoOffline ? 'Sim' : 'Não' }}</span></td> -->
+          <!-- <td><span [class]="statusBadge(t.ativo)">{{ t.ativo ? 'Ativo' : 'Inativo' }}</span></td> -->
           <td class="text-center">
             <input
               type="checkbox"

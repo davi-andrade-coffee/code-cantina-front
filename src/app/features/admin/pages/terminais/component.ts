@@ -25,7 +25,7 @@ export class TerminaisPage implements OnInit {
   readonly filtro = signal<TerminaisFiltro>({
     termo: '',
     status: 'TODOS',
-    somenteAtivos: true,
+    // somenteAtivos: true,
   });
 
   readonly statusOptions = [
