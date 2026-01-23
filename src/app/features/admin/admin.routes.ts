@@ -31,7 +31,7 @@ export const routes: Routes = [
         // Financeiro e Relatórios
         { path: 'financeiro/contas-a-receber', loadComponent: () => import('./pages/contas-receber/component').then(m => m.ContasReceberPage) },
         { path: 'relatorios/vendas', loadComponent: () => import('./pages/relatorio-vendas.page').then(m => m.RelatorioVendasPage) },
-        { path: 'relatorios/extrato-cliente', loadComponent: () => import('./pages/extrato-cliente.page').then(m => m.ExtratoClientePage) },
+        { path: 'relatorios/extrato-cliente', loadComponent: () => import('./pages/extrato-cliente/component').then(m => m.ExtratoClientePage) },
 
         // Auditoria
         { path: 'auditoria/logs', loadComponent: () => import('./pages/logs.page').then(m => m.LogsPage) },
