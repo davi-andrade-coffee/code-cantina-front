@@ -1,0 +1,112 @@
+<div class="flex items-center justify-between mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">Pessoas</h1>
+    <p class="text-sm opacity-70">Alunos / Professores / Outros</p>
+  </div>
+
+  <a class="btn btn-success btn-sm" routerLink="/admin/cadastros/pessoas/novo">
+    + Novo cadastro
+  </a>
+</div>
+
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar</span>
+      </div>
+      <input class="input input-bordered input-sm" placeholder="Nome ou CPF/CNPJ" />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Tipo</span>
+      </div>
+      <select class="select select-bordered select-sm">
+        <option>Todos</option>
+        <option>Aluno</option>
+        <option>Professor</option>
+        <option>Outro</option>
+      </select>
+    </label>
+
+    <label class="label cursor-pointer gap-2 mt-6">
+      <input type="checkbox" class="checkbox checkbox-xs" checked />
+      <span class="label-text text-xs opacity-70">Somente ativos</span>
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6">Buscar</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Nome</th>
+          <th>CPF/CNPJ</th>
+          <th>Contato</th>
+          <th class="text-center">Notif.</th>
+          <th class="text-center">Ativo</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-secondary badge-sm">Professor</span></td>
+          <td>Guilherme Alonso</td>
+          <td>202.552.200-12</td>
+          <td class="text-xs opacity-70">guilherme.alonso@email.com</td>
+          <td class="text-center">
+            <input type="checkbox" class="checkbox checkbox-xs" checked />
+          </td>
+          <td class="text-center">
+            <input type="checkbox" class="toggle toggle-xs" checked />
+          </td>
+          <td class="text-right space-x-2">
+            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/1/editar">
+              Editar
+            </a>
+            <button class="btn btn-ghost btn-xs text-error">Desativar</button>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info badge-sm">Aluno</span></td>
+          <td>Davi Borges Gama</td>
+          <td>531.795.586-61</td>
+          <td class="text-xs opacity-70">davi.gama@email.com</td>
+          <td class="text-center">
+            <input type="checkbox" class="checkbox checkbox-xs" />
+          </td>
+          <td class="text-center">
+            <input type="checkbox" class="toggle toggle-xs" checked />
+          </td>
+          <td class="text-right space-x-2">
+            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/2/editar">
+              Editar
+            </a>
+            <button class="btn btn-ghost btn-xs text-error">Desativar</button>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-accent badge-sm">Outro</span></td>
+          <td>Thayná Martins Pinho</td>
+          <td>439.681.388-05</td>
+          <td class="text-xs opacity-70">thayna@email.com</td>
+          <td class="text-center">
+            <input type="checkbox" class="checkbox checkbox-xs" checked />
+          </td>
+          <td class="text-center">
+            <input type="checkbox" class="toggle toggle-xs" />
+          </td>
+          <td class="text-right space-x-2">
+            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/3/editar">
+              Editar
+            </a>
+            <button class="btn btn-ghost btn-xs text-success">Ativar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

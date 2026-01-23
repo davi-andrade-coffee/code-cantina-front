@@ -6,6 +6,8 @@ import { ADMIN_MENU } from './menu.data';
 import { MenuItem, MenuSection } from './menu.model';
 import { AuthService } from '../../../core/auth/auth.service';
 
+type Theme = 'dark' | 'light';
+
 @Component({
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink],
@@ -20,12 +22,27 @@ export class AdminLayoutComponent {
   userRole = this.auth.getSnapshotUser()?.role ?? 'ADMIN';
 
   breadcrumbs = computed(() => this.buildBreadcrumbs(this.currentUrl()));
+  theme: Theme = 'dark';
 
   constructor(private router: Router, private auth: AuthService) {
     this.currentUrl.set(this.router.url);
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e: any) => this.currentUrl.set(e.urlAfterRedirects));
+
+    const saved = (localStorage.getItem('cantina.theme') as Theme) || 'dark';
+    this.applyTheme(saved);
+  }
+
+  toggleTheme() {
+    this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
+  }
+
+  private applyTheme(theme: Theme) {
+    this.theme = theme;
+    localStorage.setItem('cantina.theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark'); // opcional
   }
 
   logout() {
