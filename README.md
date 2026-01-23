@@ -204,3 +204,265 @@ Consolidadas:
 Página “Produtos por loja” será substituída pelo Cadastro de Produtos,
 com filtro por loja.
 Ajustes e posição de estoque integrados ao fluxo de produto.
+
+-----
+----
+
+
+1) Financeiro e Relatórios — páginas finais (Admin)
+1. Contas a Receber (Convênio)
+
+Objetivo: identificar quem está “em aberto” no mês e cobrar.
+
+Aba 1 — Listagem
+
+Lista: pessoas do plano convênio com saldo do mês em aberto.
+
+Colunas:
+
+Pessoa (nome + tipo: aluno/prof/outros)
+
+Responsável (quando existir)
+
+Competência (mês/ano)
+
+Valor devido (R$)
+
+Valor pago (R$)
+
+Status: Em aberto / Parcial / Quitado / Vencido
+
+Última cobrança (data)
+
+Ações: ver extrato, enviar cobrança, marcar pagamento
+
+Filtros:
+
+Competência (mês/ano) obrigatório
+
+Status (todos/em aberto/vencido/quitado)
+
+Tipo de pessoa (aluno/prof/outros)
+
+Buscar por nome/registro/CPF
+
+Somente inadimplentes (checkbox)
+
+Aba 2 — Insights (gráficos)
+
+Total a receber (mês) + total recebido + saldo em aberto
+
+Gráfico (linha): “Evolução do recebimento no mês”
+
+Gráfico (barra): “Top 10 devedores do mês”
+
+Gráfico (pizza): “Distribuição por status”
+
+KPI: taxa de inadimplência (qtd e valor)
+
+2. Extrato do Cliente
+
+Objetivo: auditoria e transparência por pessoa (saldo e consumo).
+
+Aba 1 — Listagem (Extrato)
+
+Header (cards):
+
+Nome, tipo, responsável
+
+Saldo atual (se existir carteira)
+
+Consumo no mês (R$)
+
+Plano: saldo / convênio
+
+Lista (movimentações):
+
+Colunas:
+
+Data/hora
+
+Tipo: Compra / Recarga / Ajuste / Cancelamento / Estorno
+
+Origem: PDV/Terminal
+
+Descrição
+
+Valor (R$)
+
+Saldo após (R$)
+
+Ações: ver detalhes
+
+Filtros:
+
+Pessoa (obrigatório)
+
+Intervalo de data
+
+Tipo de movimento
+
+Terminal/Operador
+
+Texto (produto, observação)
+
+Aba 2 — Insights (gráficos)
+
+Gráfico (linha): consumo diário/semana no período
+
+Gráfico (barra): top produtos consumidos
+
+Gráfico (pizza): formas de pagamento (saldo/dinheiro/convênio)
+
+KPI: ticket médio, frequência (dias com compra), horário pico
+
+3. Relatório de Vendas (Transações)
+
+Objetivo: visão gerencial de vendas (conteúdo “comercial”).
+
+Aba 1 — Listagem (Vendas)
+
+Você tem duas opções:
+
+Lista de Vendas (agrupado por venda) com “expandir itens”
+
+ou Lista de Itens vendidos (melhor para produto/estoque)
+
+Recomendação: Vendas com expansão.
+
+Colunas (venda):
+
+Data/hora
+
+Terminal / Operador
+
+Cliente (quando aplicável)
+
+Total (R$)
+
+Forma(s) de pagamento (saldo/dinheiro/convênio)
+
+Nº itens
+
+Sessão de caixa (id curto)
+
+Ações: detalhes / estorno (se existir)
+
+Filtros:
+
+Intervalo de data (obrigatório)
+
+Terminal
+
+Operador
+
+Forma de pagamento
+
+Produto (filtra vendas que contenham o produto)
+
+Cliente (nome/registro)
+
+Status da venda: concluída / cancelada / estornada
+
+Aba 2 — Insights (gráficos)
+
+KPIs: total vendido, nº vendas, ticket médio, itens por venda
+
+Gráfico (linha): vendas por dia
+
+Gráfico (barra): top produtos
+
+Gráfico (barra): vendas por operador
+
+Gráfico (pizza): split por forma de pagamento
+
+“Horário de pico” (heatmap simples ou barra por hora)
+
+4. Caixa → Sessões (Ciclo Operacional)
+
+Objetivo: visão contábil/operacional do caixa. Aqui entra divergência.
+
+Aba 1 — Listagem (Sessões)
+
+Colunas:
+
+Data abertura
+
+Terminal
+
+Operador
+
+Abertura (R$)
+
+Total vendas dinheiro (R$)
+
+Total vendas saldo/convênio (R$) (opcional para conferência geral)
+
+Sangrias (R$)
+
+Reforços (R$)
+
+Esperado (R$)
+
+Fechamento informado (R$)
+
+Diferença (R$) (positivo/negativo)
+
+Status: aberta / fechada / auditada
+
+Ações: detalhes / fechar / auditar
+
+Filtros:
+
+Intervalo de data
+
+Terminal
+
+Operador
+
+Status
+
+“Somente com divergência” (checkbox)
+
+Aba 2 — Insights (gráficos)
+
+KPI: total de divergências no período (qtd e R$)
+
+Gráfico (barra): divergência por terminal
+
+Gráfico (barra): divergência por operador
+
+Gráfico (linha): evolução do caixa (dinheiro) por dia
+
+Ranking: sessões com maior divergência
+
+Detalhe importante: aqui também é onde você coloca acesso rápido para:
+
+Sangria
+
+Reforço
+
+Fechar caixa
+Mas isso é operação; o relatório mostra consolidado.
+
+2) Então… “Sessões de Caixa” e “Relatório de Vendas” são a mesma coisa?
+
+Não. Formalmente:
+
+Relatório de Vendas responde: o que foi vendido, para quem, quando, por quem, e por qual forma de pagamento.
+
+Sessões de Caixa responde: quanto dinheiro deveria existir no caixa físico no fim do ciclo, quanto foi contado, qual divergência, e quais movimentos não-venda ocorreram (sangria/reforço).
+
+Se você misturar, vira bagunça e dá problema de auditoria.
+
+3) Sugestão de Menu final (apenas a parte financeira)
+
+Financeiro e Relatórios
+
+Contas a Receber
+
+Relatório de Vendas
+
+Extrato do Cliente
+
+Sessões de Caixa (se você preferir manter em Operação, ok; mas conceitualmente cabe aqui também)

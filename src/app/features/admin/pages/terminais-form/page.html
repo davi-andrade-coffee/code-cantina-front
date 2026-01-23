@@ -1,0 +1,156 @@
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">{{ titulo() }}</h1>
+    <p class="text-sm opacity-70">{{ descricao() }}</p>
+  </div>
+
+  <div class="flex gap-2">
+    <a class="btn btn-ghost btn-sm" routerLink="/admin/cadastros/terminais">Voltar</a>
+    <button class="btn btn-success btn-sm" (click)="salvar()" [disabled]="saving() || loading()">
+      <span *ngIf="!saving()">Salvar</span>
+      <span *ngIf="saving()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+</div>
+
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Código *</span>
+      </div>
+      <input
+        class="input input-bordered"
+        placeholder="Ex: PDV-01"
+        [value]="form().codigo"
+        (input)="patchForm({ codigo: $any($event.target).value })"
+        [class.input-error]="!!fieldErrors().codigo"
+      />
+      <div class="label" *ngIf="fieldErrors().codigo">
+        <span class="label-text-alt text-error">{{ fieldErrors().codigo }}</span>
+      </div>
+    </label>
+
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Nome *</span>
+      </div>
+      <input
+        class="input input-bordered"
+        placeholder="Ex: Caixa Principal"
+        [value]="form().nome"
+        (input)="patchForm({ nome: $any($event.target).value })"
+        [class.input-error]="!!fieldErrors().nome"
+      />
+      <div class="label" *ngIf="fieldErrors().nome">
+        <span class="label-text-alt text-error">{{ fieldErrors().nome }}</span>
+      </div>
+    </label>
+
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Porta da balança</span>
+      </div>
+      <input
+        class="input input-bordered"
+        placeholder="Ex: COM1"
+        [value]="form().portaBalanca"
+        (input)="patchForm({ portaBalanca: $any($event.target).value })"
+      />
+      <div class="label">
+        <span class="label-text-alt text-xs opacity-70">
+          Deixe em branco para usar a configuração global.
+        </span>
+      </div>
+    </label>
+
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Impressora fiscal</span>
+      </div>
+      <input
+        class="input input-bordered"
+        placeholder="Nome da impressora no sistema"
+        [value]="form().impressoraFiscal"
+        (input)="patchForm({ impressoraFiscal: $any($event.target).value })"
+      />
+      <div class="label">
+        <span class="label-text-alt text-xs opacity-70">
+          Informe o nome configurado no sistema operacional.
+        </span>
+      </div>
+    </label>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4 lg:col-span-2">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold">Impressão de cupom</p>
+          <p class="text-xs opacity-70">
+            Ative para imprimir o comprovante automaticamente neste terminal.
+          </p>
+        </div>
+        <input
+          type="checkbox"
+          class="toggle toggle-success"
+          [checked]="form().imprimeCupom"
+          (change)="patchForm({ imprimeCupom: $any($event.target).checked })"
+        />
+      </div>
+
+      <div class="mt-3">
+        <label class="label cursor-pointer justify-start gap-2 text-xs">
+          <input
+            type="checkbox"
+            class="checkbox checkbox-xs"
+            [checked]="form().previewCupom"
+            [disabled]="!previewDisponivel()"
+            (change)="patchForm({ previewCupom: $any($event.target).checked })"
+          />
+          <span>Pré-visualizar cupom antes de imprimir</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- <div class="bg-base-200 rounded-lg border border-base-100 p-4 lg:col-span-2"> -->
+    <!--   <div class="flex items-start justify-between gap-3"> -->
+    <!--     <div> -->
+    <!--       <p class="text-sm font-semibold">Modo offline</p> -->
+    <!--       <p class="text-xs opacity-70"> -->
+    <!--         Permite manter vendas locais enquanto o servidor está indisponível. -->
+    <!--       </p> -->
+    <!--     </div> -->
+    <!--     <input -->
+    <!--       type="checkbox" -->
+    <!--       class="toggle toggle-success" -->
+    <!--       [checked]="form().modoOffline" -->
+    <!--       (change)="patchForm({ modoOffline: $any($event.target).checked })" -->
+    <!--     /> -->
+    <!--   </div> -->
+    <!-- </div> -->
+    
+  </div>
+
+  <div class="divider my-4"></div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-sm font-semibold">Ativar/Desativar terminal</p>
+      <p class="text-xs opacity-70">
+        Use para bloquear acessos ou preparar o terminal para manutenção.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs opacity-70">Status</span>
+      <input
+        type="checkbox"
+        class="toggle toggle-success"
+        [checked]="form().ativo"
+        (change)="patchForm({ ativo: $any($event.target).checked })"
+      />
+    </div>
+  </div>
+</section>
