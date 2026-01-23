@@ -37,15 +37,15 @@
       </select>
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input
-        type="checkbox"
-        class="checkbox checkbox-xs"
-        [checked]="filtro().somenteAtivos"
-        (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })"
-      />
-      <span class="label-text text-xs opacity-70">Somente ativos</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtro().somenteAtivos" -->
+    <!--     (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente ativos</span> -->
+    <!-- </label> -->
 
     <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>

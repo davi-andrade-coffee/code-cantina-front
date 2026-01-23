@@ -17,5 +17,5 @@ export interface Colaborador {
 export interface ColaboradoresFiltro {
   termo: string;
   status: ColaboradorStatus;
-  somenteAtivos: boolean;
+  // somenteAtivos: boolean;
 }

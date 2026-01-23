@@ -72,7 +72,7 @@ export class ColaboradoresService {
     const termo = (filtro.termo || '').trim().toLowerCase();
 
     return items.filter((c) => {
-      if (filtro.somenteAtivos && !c.ativa) return false;
+      // if (filtro.somenteAtivos && !c.ativa) return false;
 
       if (filtro.status === 'ATIVOS' && !c.ativa) return false;
       if (filtro.status === 'INATIVOS' && c.ativa) return false;

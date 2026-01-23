@@ -31,7 +31,7 @@ export class PessoasPage implements OnInit {
   readonly filtro = signal<PessoasFiltro>({
     termo: '',
     tipo: 'TODOS',
-    somenteAtivos: true,
+    // somenteAtivos: true,
   });
 
   // Constantes não precisam ser reativas se não mudam

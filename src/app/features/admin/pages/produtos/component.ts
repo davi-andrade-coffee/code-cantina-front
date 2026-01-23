@@ -27,7 +27,7 @@ export class ProdutosPage implements OnInit {
     termo: '',
     tipo: 'TODOS',
     status: 'TODOS',
-    somenteAtivos: true,
+    // somenteAtivos: true,
   });
 
   readonly tipos = [

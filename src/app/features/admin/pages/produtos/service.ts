@@ -63,7 +63,7 @@ export class ProdutosService {
     const termo = (filtro.termo || '').trim().toLowerCase();
 
     return items.filter((p) => {
-      if (filtro.somenteAtivos && !p.ativo) return false;
+      // if (filtro.somenteAtivos && !p.ativo) return false;
 
       if (filtro.status === 'ATIVOS' && !p.ativo) return false;
       if (filtro.status === 'INATIVOS' && p.ativo) return false;

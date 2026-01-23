@@ -16,5 +16,5 @@ export interface ProdutosFiltro {
   termo: string;
   tipo: ProdutoTipo | 'TODOS';
   status: ProdutoStatus;
-  somenteAtivos: boolean;
+  // somenteAtivos: boolean;
 }
