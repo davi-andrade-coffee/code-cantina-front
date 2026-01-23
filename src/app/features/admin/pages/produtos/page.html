@@ -1,0 +1,100 @@
+<div class="flex items-center justify-between mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">Produtos</h1>
+    <p class="text-sm opacity-70">Cadastro de itens unitários ou vendidos por peso</p>
+  </div>
+
+  <a class="btn btn-success btn-sm" routerLink="/admin/cadastros/produtos/novo">+ Novo produto</a>
+</div>
+
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar</span>
+      </div>
+      <input class="input input-bordered input-sm" placeholder="Nome ou descrição" />
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Tipo</span>
+      </div>
+      <select class="select select-bordered select-sm">
+        <option>Todos</option>
+        <option>Unitário</option>
+        <option>Por quilo</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Status</span>
+      </div>
+      <select class="select select-bordered select-sm">
+        <option>Todos</option>
+        <option>Ativos</option>
+        <option>Inativos</option>
+      </select>
+    </label>
+
+    <label class="label cursor-pointer gap-2 mt-6">
+      <input type="checkbox" class="checkbox checkbox-xs" checked />
+      <span class="label-text text-xs opacity-70">Somente ativos</span>
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6">Buscar</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th>Controle de estoque</th>
+          <th>Preço</th>
+          <th class="text-center">Ativo</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let produto of produtos">
+          <td class="font-medium">{{ produto.nome }}</td>
+          <td class="text-xs opacity-70">{{ produto.descricao }}</td>
+          <td>
+            @if (produto.tipo === 'Unitário') {
+              <span class="badge badge-success badge-sm">Unitário</span>
+            } @else if (produto.tipo === 'Por peso (kg)') {
+              <span class="badge badge-warning badge-sm whitespace-nowrap">Por peso (kg)</span>
+            }
+          </td>
+
+          <td>
+            <span
+              class="badge badge-sm"
+              [class.badge-success]="produto.tipo === 'Unitário' && produto.controleEstoque"
+              [class.badge-error]="produto.tipo === 'Unitário' && !produto.controleEstoque"
+              [class.badge-ghost]="produto.tipo !== 'Unitário'"
+            >
+              {{
+                produto.tipo === 'Unitário'
+                  ? (produto.controleEstoque ? 'Ativo' : 'Desativado')
+                  : 'Não aplicável'
+              }}
+            </span>
+          </td>
+          <td>{{ produto.preco }}</td>
+          <td class="text-center">
+            <input type="checkbox" class="toggle toggle-xs" [checked]="produto.ativo" />
+          </td>
+          <td class="text-right space-x-2">
+            <button class="btn btn-ghost btn-xs">Editar</button>
+            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

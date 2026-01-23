@@ -1,0 +1,77 @@
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">Cadastro de Produto</h1>
+    <p class="text-sm opacity-70">Preencha os dados para criar ou editar itens do cardápio.</p>
+  </div>
+
+  <div class="flex gap-2">
+    <a class="btn btn-ghost btn-sm" routerLink="/admin/cadastros/produtos">Voltar</a>
+    <button class="btn btn-success btn-sm">Salvar</button>
+  </div>
+</div>
+
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Nome *</span>
+      </div>
+      <input class="input input-bordered" placeholder="Nome do produto" />
+    </label>
+
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Tipo *</span>
+      </div>
+      <select class="select select-bordered">
+        <option>Unitário</option>
+        <option>Por peso (kg)</option>
+      </select>
+    </label>
+
+    <label class="form-control lg:col-span-2">
+      <div class="label">
+        <span class="label-text">Descrição</span>
+      </div>
+      <textarea
+        class="textarea textarea-bordered"
+        rows="3"
+        placeholder="Detalhes do produto, ingredientes, porções..."
+      ></textarea>
+    </label>
+
+    <label class="form-control">
+      <div class="label">
+        <span class="label-text">Preço unitário ou por quilo *</span>
+      </div>
+      <input class="input input-bordered" placeholder="R$ 0,00"  />
+    </label>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold">Controle de estoque</p>
+          <p class="text-xs opacity-70">
+            Disponível para produtos unitários. Ative para controlar saldo.
+          </p>
+        </div>
+        <input type="checkbox" class="toggle toggle-success" />
+      </div>
+    </div>
+  </div>
+
+  <div class="divider my-4"></div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-sm font-semibold">Ativar/Desativar produto</p>
+      <p class="text-xs opacity-70">
+        Use para bloquear vendas temporariamente ou reativar o item.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs opacity-70">Status</span>
+      <input type="checkbox" class="toggle toggle-success" checked />
+    </div>
+  </div>
+</section>
