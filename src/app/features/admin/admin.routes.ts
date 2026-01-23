@@ -18,7 +18,9 @@ export const routes: Routes = [
         { path: 'cadastros/pessoas/:id/editar', loadComponent: () => import('./pages/pessoas-form/component').then(m => m.PessoasFormPage) },
 
         // Cadastros
-        { path: 'cadastros/colaboradores', loadComponent: () => import('./pages/colaboradores.page').then(m => m.ColaboradoresPage) },
+        { path: 'cadastros/colaboradores', loadComponent: () => import('./pages/colaboradores/component').then(m => m.ColaboradoresPage) },
+        { path: 'cadastros/colaboradores/novo', loadComponent: () => import('./pages/colaboradores-form/component').then(m => m.ColaboradoresFormPage) },
+        { path: 'cadastros/colaboradores/:id/editar', loadComponent: () => import('./pages/colaboradores-form/component').then(m => m.ColaboradoresFormPage) },
         { path: 'cadastros/produtos', loadComponent: () => import('./pages/produtos.page').then(m => m.ProdutosPage) },
         { path: 'cadastros/terminais', loadComponent: () => import('./pages/terminais.page').then(m => m.TerminaisPage) },
 
@@ -36,4 +38,3 @@ export const routes: Routes = [
     ],
   },
 ];
-
