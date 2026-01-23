@@ -1,0 +1,323 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Contas a Receber (Convênio)</h1>
+    <p class="text-sm opacity-70">Relatórios financeiros de clientes em plano convênio.</p>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button class="btn btn-outline btn-sm" (click)="onAtualizarMock()" [disabled]="loading()">
+      Atualizar mock
+    </button>
+    <button class="btn btn-success btn-sm" (click)="onNovaCobranca()">+ Nova cobrança</button>
+  </div>
+</div>
+
+<div role="tablist" class="tabs tabs-lifted mb-4">
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'listagem'"
+    (click)="abaAtiva.set('listagem')"
+  >
+    Listagem
+  </button>
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'insights'"
+    (click)="abaAtiva.set('insights')"
+  >
+    Insights
+  </button>
+</div>
+
+<section
+  *ngIf="abaAtiva() === 'listagem'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4"
+>
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Competência *</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="month"
+        [value]="filtros().competencia"
+        (input)="patchFiltro({ competencia: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Status</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().status"
+        (change)="patchFiltro({ status: $any($event.target).value })"
+      >
+        <option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Tipo de pessoa</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().tipoPessoa"
+        (change)="patchFiltro({ tipoPessoa: $any($event.target).value })"
+      >
+        <option *ngFor="let tipo of tiposPessoa" [value]="tipo.value">{{ tipo.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[200px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Tipo de plano</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().tipoPlano"
+        (change)="patchFiltro({ tipoPlano: $any($event.target).value })"
+      >
+        <option *ngFor="let plano of tiposPlano" [value]="plano.value">{{ plano.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-sm">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome, registro ou CPF"
+        [value]="filtros().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
+    </label>
+
+    <label class="label cursor-pointer gap-2 mt-6">
+      <input
+        type="checkbox"
+        class="checkbox checkbox-xs"
+        [checked]="filtros().somenteInadimplentes"
+        (change)="patchFiltro({ somenteInadimplentes: $any($event.target).checked })"
+      />
+      <span class="label-text text-xs opacity-70">Somente inadimplentes</span>
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Pessoa</th>
+          <th>Plano</th>
+          <th>Responsável</th>
+          <th>Competência</th>
+          <th class="text-right">Valor devido</th>
+          <th class="text-right">Valor pago</th>
+          <th>Status</th>
+          <th>Última cobrança</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of paginaRecebiveis(); trackBy: trackById">
+          <td>
+            <div class="font-semibold">{{ item.pessoaNome }}</div>
+            <div class="text-xs opacity-70">
+              {{ tipoPessoaLabel(item.pessoaTipo) }} • {{ item.registro }}
+            </div>
+          </td>
+          <td>
+            <span class="badge badge-outline badge-sm">{{ tipoPlanoLabel(item.planoTipo) }}</span>
+          </td>
+          <td>
+            <div class="text-sm">{{ item.responsavel || '—' }}</div>
+            <div class="text-xs opacity-60">{{ item.documento }}</div>
+          </td>
+          <td>{{ competenciaLabel(item.competencia) }}</td>
+          <td class="text-right">{{ formatCurrency(item.valorDevido) }}</td>
+          <td class="text-right">{{ formatCurrency(item.valorPago) }}</td>
+          <td>
+            <span [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+          </td>
+          <td>{{ formatDate(item.ultimaCobranca) }}</td>
+          <td class="text-right space-x-2">
+            <button class="btn btn-ghost btn-xs" (click)="onVerExtrato(item)">Ver extrato</button>
+            <button class="btn btn-ghost btn-xs" (click)="onEnviarCobranca(item)">
+              Enviar cobrança
+            </button>
+            <button class="btn btn-ghost btn-xs text-success" (click)="onMarcarPagamento(item)">
+              Marcar pagamento
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="!loading() && paginaRecebiveis().length === 0">
+          <td colspan="9" class="text-center opacity-70 py-6">Nenhum registro encontrado.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+    <div class="text-xs opacity-70">
+      Mostrando {{ paginaRecebiveis().length }} de {{ recebiveisFiltrados().length }} registros
+    </div>
+    <div class="flex items-center gap-2">
+      <select
+        class="select select-bordered select-xs"
+        [value]="itensPorPagina()"
+        (change)="setItensPorPagina($any($event.target).value)"
+      >
+        <option *ngFor="let size of tamanhosPagina" [value]="size">{{ size }} / pág.</option>
+      </select>
+      <button class="btn btn-ghost btn-xs" (click)="voltarPagina()" [disabled]="paginaAtual() === 1">
+        Anterior
+      </button>
+      <span class="text-xs opacity-70">Página {{ paginaAtual() }} de {{ totalPaginas() }}</span>
+      <button
+        class="btn btn-ghost btn-xs"
+        (click)="avancarPagina()"
+        [disabled]="paginaAtual() === totalPaginas()"
+      >
+        Próxima
+      </button>
+    </div>
+  </div>
+</section>
+
+<section
+  *ngIf="abaAtiva() === 'insights'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4"
+>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Total a receber</div>
+      <div class="text-2xl font-semibold mt-1">{{ formatCurrency(totalAReceber()) }}</div>
+      <p class="text-xs opacity-60">Competência {{ competenciaLabel(filtros().competencia) }}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Total recebido</div>
+      <div class="text-2xl font-semibold mt-1 text-success">
+        {{ formatCurrency(totalRecebido()) }}
+      </div>
+      <p class="text-xs opacity-60">Atualizado em {{ hoje }}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Saldo em aberto</div>
+      <div class="text-2xl font-semibold mt-1 text-warning">
+        {{ formatCurrency(saldoEmAberto()) }}
+      </div>
+      <p class="text-xs opacity-60">Clientes {{ inadimplentes().length }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Evolução do recebimento no mês</div>
+      <div class="flex items-end gap-3 h-36">
+        <div *ngFor="let item of evolucaoRecebimento()" class="flex-1">
+          <div
+            class="bg-success/70 rounded-t-md"
+            [style.height.%]="item.percentual"
+            [title]="item.label + ': ' + formatCurrency(item.valor)"
+          ></div>
+          <div class="text-[10px] opacity-60 text-center mt-1">{{ item.label }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Top 10 devedores do mês</div>
+      <ul class="space-y-2">
+        <li *ngFor="let item of topDevedores()" class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold">{{ item.pessoaNome }}</div>
+            <div class="text-xs opacity-60">
+              {{ tipoPessoaLabel(item.pessoaTipo) }} • {{ tipoPlanoLabel(item.planoTipo) }}
+            </div>
+          </div>
+          <div class="text-sm text-warning font-semibold">
+            {{ formatCurrency(item.valorDevido - item.valorPago) }}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+    <div class="text-sm font-semibold mb-2">Distribuição por status</div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div
+        *ngFor="let item of distribuicaoStatus()"
+        class="bg-base-300 rounded-lg border border-base-100 p-3"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <span [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+          <span class="text-xs opacity-60">{{ item.quantidade }} clientes</span>
+        </div>
+        <div class="h-2 rounded-full bg-base-100">
+          <div class="h-2 rounded-full bg-primary" [style.width.%]="item.percentual"></div>
+        </div>
+        <div class="text-xs opacity-60 mt-1">{{ item.percentual | number: '1.0-0' }}%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<dialog class="modal" [open]="extratoAberto()">
+  <div class="modal-box">
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="text-sm opacity-70">Extrato do cliente</div>
+        <h3 class="text-lg font-semibold">{{ extratoSelecionado()?.pessoaNome }}</h3>
+        <p class="text-xs opacity-70">
+          {{ tipoPessoaLabel(extratoSelecionado()?.pessoaTipo) }} •
+          {{ tipoPlanoLabel(extratoSelecionado()?.planoTipo) }}
+        </p>
+      </div>
+      <button class="btn btn-ghost btn-xs" (click)="fecharExtrato()">Fechar</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Valor devido</div>
+        <div class="text-lg font-semibold">
+          {{ formatCurrency(extratoSelecionado()?.valorDevido || 0) }}
+        </div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Valor pago</div>
+        <div class="text-lg font-semibold text-success">
+          {{ formatCurrency(extratoSelecionado()?.valorPago || 0) }}
+        </div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Saldo</div>
+        <div [class]="saldoExtratoClass()" class="text-lg font-semibold">
+          {{ formatCurrency(saldoExtrato()) }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button (click)="fecharExtrato()">close</button>
+  </form>
+</dialog>

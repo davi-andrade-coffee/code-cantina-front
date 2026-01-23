@@ -1,0 +1,305 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Extrato do Cliente</h1>
+    <p class="text-sm opacity-70">Auditoria de saldo e consumo por pessoa.</p>
+  </div>
+</div>
+
+<div role="tablist" class="tabs tabs-lifted mb-4">
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'listagem'"
+    (click)="abaAtiva.set('listagem')"
+  >
+    Listagem
+  </button>
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'insights'"
+    (click)="abaAtiva.set('insights')"
+  >
+    Insights
+  </button>
+</div>
+
+<section
+  *ngIf="abaAtiva() === 'listagem'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4"
+>
+  <div class="flex flex-wrap items-end gap-3">
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Pessoa *</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().pessoaId"
+        (change)="patchFiltro({ pessoaId: $any($event.target).value })"
+      >
+        <option value="">Selecione</option>
+        <option *ngFor="let pessoa of pessoas()" [value]="pessoa.id">
+          {{ pessoa.nome }}
+        </option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data início</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataInicio"
+        (input)="patchFiltro({ dataInicio: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data fim</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataFim"
+        (input)="patchFiltro({ dataFim: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Tipo de movimento</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().tipoMovimento"
+        (change)="patchFiltro({ tipoMovimento: $any($event.target).value })"
+      >
+        <option *ngFor="let tipo of tiposMovimento" [value]="tipo.value">{{ tipo.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Terminal/Operador</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().terminal"
+        (change)="patchFiltro({ terminal: $any($event.target).value })"
+      >
+        <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-sm">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Texto</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Produto, observação"
+        [value]="filtros().texto"
+        (input)="patchFiltro({ texto: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Cliente</div>
+      <div class="text-sm font-semibold mt-1">{{ pessoaSelecionada()?.nome || '—' }}</div>
+      <div class="text-xs opacity-60">
+        {{ pessoaSelecionada() ? tipoPessoaLabel(pessoaSelecionada()?.tipo) : 'Selecione uma pessoa' }}
+      </div>
+      <div class="text-xs opacity-60">{{ pessoaSelecionada()?.responsavel || 'Sem responsável' }}</div>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Saldo atual</div>
+      <div class="text-xl font-semibold mt-1">{{ formatCurrency(pessoaSelecionada()?.saldoAtual || 0) }}</div>
+      <div class="text-xs opacity-60">Carteira ativa</div>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Consumo no mês</div>
+      <div class="text-xl font-semibold mt-1 text-warning">
+        {{ formatCurrency(consumoMes()) }}
+      </div>
+      <div class="text-xs opacity-60">Período filtrado</div>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Plano</div>
+      <div class="text-lg font-semibold mt-1">{{ planoLabel(pessoaSelecionada()?.plano) }}</div>
+      <div class="text-xs opacity-60">Saldo / Convênio</div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Data/hora</th>
+          <th>Origem</th>
+          <th>Descrição</th>
+          <th class="text-right">Valor</th>
+          <th class="text-right">Saldo após</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of movimentacoesFiltradas(); trackBy: trackById">
+          <td>{{ formatDateTime(item.dataHora) }}</td>
+          <td>
+            <div class="text-sm">{{ item.origem }}</div>
+            <div class="text-xs opacity-60">{{ item.operador }}</div>
+          </td>
+          <td>
+            <div class="text-sm font-semibold">{{ item.descricao }}</div>
+            <div class="text-xs opacity-60">{{ item.produto }}</div>
+          </td>
+          <td class="text-right">{{ formatCurrency(item.valor) }}</td>
+          <td class="text-right">{{ formatCurrency(item.saldoApos) }}</td>
+          <td class="text-right">
+            <button class="btn btn-ghost btn-xs" (click)="abrirDetalhes(item)">Ver detalhes</button>
+          </td>
+        </tr>
+        <tr *ngIf="!loading() && movimentacoesFiltradas().length === 0">
+          <td colspan="6" class="text-center opacity-70 py-6">Nenhuma movimentação encontrada.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section
+  *ngIf="abaAtiva() === 'insights'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4"
+>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Cliente</div>
+      <div class="text-lg font-semibold mt-1">{{ pessoaSelecionada()?.nome || '—' }}</div>
+      <p class="text-xs opacity-60">{{ pessoaSelecionada()?.documento || 'Selecione uma pessoa' }}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Saldo atual</div>
+      <div class="text-2xl font-semibold mt-1">{{ formatCurrency(pessoaSelecionada()?.saldoAtual || 0) }}</div>
+      <p class="text-xs opacity-60">Plano {{ planoLabel(pessoaSelecionada()?.plano) }}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Consumo no período</div>
+      <div class="text-2xl font-semibold mt-1 text-warning">{{ formatCurrency(consumoMes()) }}</div>
+      <p class="text-xs opacity-60">Dados da busca</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Consumo diário/semana no período</div>
+      <div class="flex items-end gap-3 h-36">
+        <div *ngFor="let item of consumoDiario()" class="flex-1">
+          <div
+            class="bg-primary/70 rounded-t-md"
+            [style.height.%]="item.percentual"
+            [title]="item.label + ': ' + formatCurrency(item.valor)"
+          ></div>
+          <div class="text-[10px] opacity-60 text-center mt-1">{{ item.label }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Top produtos consumidos</div>
+      <ul class="space-y-2">
+        <li *ngFor="let item of topProdutos()" class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold">{{ item.produto }}</div>
+            <div class="text-xs opacity-60">{{ item.quantidade }} pedidos</div>
+          </div>
+          <div class="text-sm text-warning font-semibold">{{ formatCurrency(item.valor) }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+    <div class="text-sm font-semibold mb-2">Formas de pagamento</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div
+        *ngFor="let item of distribuicaoPagamento()"
+        class="bg-base-300 rounded-lg border border-base-100 p-3"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold">{{ item.label }}</span>
+          <span class="text-xs opacity-60">{{ item.quantidade }} itens</span>
+        </div>
+        <div class="h-2 rounded-full bg-base-100">
+          <div class="h-2 rounded-full bg-success" [style.width.%]="item.percentual"></div>
+        </div>
+        <div class="text-xs opacity-60 mt-1">{{ item.percentual | number: '1.0-0' }}%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<dialog class="modal" [open]="detalheAberto()">
+  <div class="modal-box">
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="text-sm opacity-70">Detalhes da movimentação</div>
+        <h3 class="text-lg font-semibold">{{ detalheSelecionado()?.descricao }}</h3>
+        <p class="text-xs opacity-70">
+          {{ formatDateTime(detalheSelecionado()?.dataHora || '') }} •
+          {{ detalheSelecionado()?.origem }}
+        </p>
+      </div>
+      <button class="btn btn-ghost btn-xs" (click)="fecharDetalhes()">Fechar</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Tipo</div>
+        <div class="text-sm font-semibold">{{ tipoMovimentoLabel(detalheSelecionado()?.tipo) }}</div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Forma de pagamento</div>
+        <div class="text-sm font-semibold">{{ pagamentoLabel(detalheSelecionado()?.formaPagamento) }}</div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Valor</div>
+        <div class="text-sm font-semibold">{{ formatCurrency(detalheSelecionado()?.valor || 0) }}</div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Saldo após</div>
+        <div class="text-sm font-semibold">{{ formatCurrency(detalheSelecionado()?.saldoApos || 0) }}</div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Terminal</div>
+        <div class="text-sm font-semibold">{{ detalheSelecionado()?.terminal }}</div>
+      </div>
+      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
+        <div class="text-xs uppercase opacity-60">Operador</div>
+        <div class="text-sm font-semibold">{{ detalheSelecionado()?.operador }}</div>
+      </div>
+    </div>
+    <div class="bg-base-300 rounded-lg border border-base-100 p-3 mt-3">
+      <div class="text-xs uppercase opacity-60">Observação</div>
+      <div class="text-sm font-semibold">{{ detalheSelecionado()?.observacao || 'Sem observações' }}</div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button (click)="fecharDetalhes()">close</button>
+  </form>
+</dialog>
