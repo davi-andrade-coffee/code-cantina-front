@@ -69,7 +69,7 @@ export class PessoasService {
     const termo = (filtro.termo || '').trim().toLowerCase();
 
     return items.filter((p) => {
-      if (filtro.somenteAtivos && !p.ativa) return false;
+      // if (filtro.somenteAtivos && !p.ativa) return false;
 
       if (filtro.tipo !== 'TODOS' && p.tipo !== filtro.tipo) return false;
 

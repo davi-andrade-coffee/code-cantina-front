@@ -25,7 +25,7 @@ export class ColaboradoresPage implements OnInit {
   readonly filtro = signal<ColaboradoresFiltro>({
     termo: '',
     status: 'TODOS',
-    somenteAtivos: true,
+    // somenteAtivos: true,
   });
 
   readonly statusOptions = [

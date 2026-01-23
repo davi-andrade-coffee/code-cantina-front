@@ -48,15 +48,15 @@
       </select>
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input
-        type="checkbox"
-        class="checkbox checkbox-xs"
-        [checked]="filtro().somenteAtivos"
-        (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })"
-      />
-      <span class="label-text text-xs opacity-70">Somente ativos</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtro().somenteAtivos" -->
+    <!--     (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente ativos</span> -->
+    <!-- </label> -->
 
     <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>
@@ -86,8 +86,13 @@
         <tr *ngFor="let produto of produtos(); trackBy: trackById">
           <td class="font-medium">{{ produto.nome }}</td>
           <td class="text-xs opacity-70">{{ produto.descricao }}</td>
+
           <td>
-            <span [class]="tipoBadgeClass(produto.tipo)">{{ tipoLabel(produto.tipo) }}</span>
+            @if (produto.tipo === 'UNITARIO') {
+              <span class="badge badge-success badge-sm">Unitário</span>
+            } @else if (produto.tipo === 'QUILO') {
+              <span class="badge badge-warning badge-sm whitespace-nowrap">Por peso (kg)</span>
+            }
           </td>
 
           <td>
