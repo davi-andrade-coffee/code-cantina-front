@@ -15,27 +15,48 @@
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>
       </div>
-      <input class="input input-bordered input-sm" placeholder="Nome ou CPF/CNPJ" />
+
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome ou CPF/CNPJ"
+        [value]="filtro().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
     </label>
 
     <label class="form-control w-full max-w-[160px]">
       <div class="label">
         <span class="label-text text-xs opacity-70">Tipo</span>
       </div>
-      <select class="select select-bordered select-sm">
-        <option>Todos</option>
-        <option>Aluno</option>
-        <option>Professor</option>
-        <option>Outro</option>
+
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtro().tipo"
+        (change)="patchFiltro({ tipo: $any($event.target).value })"
+      >
+        <option *ngFor="let t of tipos" [value]="t.value">{{ t.label }}</option>
       </select>
     </label>
 
     <label class="label cursor-pointer gap-2 mt-6">
-      <input type="checkbox" class="checkbox checkbox-xs" checked />
+      <input
+        type="checkbox"
+        class="checkbox checkbox-xs"
+        [checked]="filtro().somenteAtivos"
+        (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })"
+      />
       <span class="label-text text-xs opacity-70">Somente ativos</span>
     </label>
 
-    <button class="btn btn-primary btn-sm mt-6">Buscar</button>
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
   </div>
 
   <div class="overflow-x-auto">
@@ -51,62 +72,52 @@
           <th class="text-right">Ações</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr>
-          <td><span class="badge badge-secondary badge-sm">Professor</span></td>
-          <td>Guilherme Alonso</td>
-          <td>202.552.200-12</td>
-          <td class="text-xs opacity-70">guilherme.alonso@email.com</td>
-          <td class="text-center">
-            <input type="checkbox" class="checkbox checkbox-xs" checked />
+        <tr *ngFor="let p of pessoas(); trackBy: trackById">
+          <td>
+            <span [class]="badgeClass(p.tipo)">{{ tipoLabel(p.tipo) }}</span>
           </td>
+
+          <td>{{ p.nome }}</td>
+          <td>{{ p.documento }}</td>
+          <td class="text-xs opacity-70">{{ p.email }}</td>
+
           <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" checked />
+            <input
+              type="checkbox"
+              class="checkbox checkbox-xs"
+              [checked]="p.notificacaoAtiva"
+              (change)="onToggleNotificacao(p.id, $any($event.target).checked)"
+            />
           </td>
+
+          <td class="text-center">
+            <input
+              type="checkbox"
+              class="toggle toggle-xs"
+              [checked]="p.ativa"
+              (change)="onToggleAtiva(p.id, $any($event.target).checked)"
+            />
+          </td>
+
           <td class="text-right space-x-2">
-            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/1/editar">
+            <a class="btn btn-ghost btn-xs" [routerLink]="['/admin/cadastros/pessoas', p.id, 'editar']">
               Editar
             </a>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+            <button class="btn btn-ghost btn-xs text-error" (click)="onExcluir(p.id)">
+              Excluir
+            </button>
           </td>
         </tr>
-        <tr>
-          <td><span class="badge badge-info badge-sm">Aluno</span></td>
-          <td>Davi Borges Gama</td>
-          <td>531.795.586-61</td>
-          <td class="text-xs opacity-70">davi.gama@email.com</td>
-          <td class="text-center">
-            <input type="checkbox" class="checkbox checkbox-xs" />
-          </td>
-          <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" checked />
-          </td>
-          <td class="text-right space-x-2">
-            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/2/editar">
-              Editar
-            </a>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td><span class="badge badge-accent badge-sm">Outro</span></td>
-          <td>Thayná Martins Pinho</td>
-          <td>439.681.388-05</td>
-          <td class="text-xs opacity-70">thayna@email.com</td>
-          <td class="text-center">
-            <input type="checkbox" class="checkbox checkbox-xs" checked />
-          </td>
-          <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" />
-          </td>
-          <td class="text-right space-x-2">
-            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/pessoas/3/editar">
-              Editar
-            </a>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+
+        <tr *ngIf="!loading() && pessoas().length === 0">
+          <td colspan="7" class="text-center opacity-70 py-6">
+            Nenhum registro encontrado.
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 </section>
+

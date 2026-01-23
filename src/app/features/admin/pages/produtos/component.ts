@@ -14,7 +14,7 @@ interface ProdutoItem {
 
 @Component({
   standalone: true,
-  imports: [NgFor, NgIf, RouterLink],
+  imports: [NgFor, RouterLink],
   templateUrl: './page.html',
 })
 export class ProdutosPage {

@@ -23,7 +23,7 @@
       <select class="select select-bordered select-sm">
         <option>Todos</option>
         <option>Unitário</option>
-        <option>Por peso (kg)</option>
+        <option>Por quilo</option>
       </select>
     </label>
 
@@ -64,9 +64,13 @@
           <td class="font-medium">{{ produto.nome }}</td>
           <td class="text-xs opacity-70">{{ produto.descricao }}</td>
           <td>
-            <span class="badge badge-success badge-sm" *ngIf="produto.tipo === 'Unitário'">Unitário</span>
-            <span class="badge badge-warning badge-sm" *ngIf="produto.tipo === 'Por peso (kg)'">Por peso (kg)</span>
+            @if (produto.tipo === 'Unitário') {
+              <span class="badge badge-success badge-sm">Unitário</span>
+            } @else if (produto.tipo === 'Por peso (kg)') {
+              <span class="badge badge-warning badge-sm whitespace-nowrap">Por peso (kg)</span>
+            }
           </td>
+
           <td>
             <span
               class="badge badge-sm"
