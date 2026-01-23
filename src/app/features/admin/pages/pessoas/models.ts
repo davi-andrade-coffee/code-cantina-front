@@ -13,6 +13,6 @@ export interface Pessoa {
 export interface PessoasFiltro {
   termo: string;
   tipo: PessoaTipo | 'TODOS';
-  somenteAtivos: boolean;
+  // somenteAtivos: boolean;
 }
 

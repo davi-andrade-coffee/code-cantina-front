@@ -15,26 +15,46 @@
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>
       </div>
-      <input class="input input-bordered input-sm" placeholder="Nome, CPF ou e-mail" />
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome, CPF, cargo ou e-mail"
+        [value]="filtro().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
     </label>
 
     <label class="form-control w-full max-w-[180px]">
       <div class="label">
         <span class="label-text text-xs opacity-70">Status</span>
       </div>
-      <select class="select select-bordered select-sm">
-        <option>Todos</option>
-        <option>Ativos</option>
-        <option>Inativos</option>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtro().status"
+        (change)="patchFiltro({ status: $any($event.target).value })"
+      >
+        <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
       </select>
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input type="checkbox" class="checkbox checkbox-xs" checked />
-      <span class="label-text text-xs opacity-70">Somente ativos</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtro().somenteAtivos" -->
+    <!--     (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente ativos</span> -->
+    <!-- </label> -->
 
-    <button class="btn btn-primary btn-sm mt-6">Buscar</button>
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
   </div>
 
   <div class="overflow-x-auto">
@@ -52,56 +72,44 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr *ngFor="let c of colaboradores(); trackBy: trackById">
           <td>
             <div class="avatar placeholder">
               <div class="bg-base-100 text-base-content rounded-full w-8 h-8">
-                <span>MT</span>
+                <img *ngIf="c.fotoUrl" [src]="c.fotoUrl" alt="Foto" />
+                <span *ngIf="!c.fotoUrl">{{ getInitials(c.nome) }}</span>
               </div>
             </div>
           </td>
-          <td>Mateus Torres</td>
-          <td>024.889.550-11</td>
+          <td>{{ c.nome }}</td>
+          <td>{{ c.cpf }}</td>
           <td class="text-xs opacity-70">
-            mateus.torres@email.com
-            <div>(11) 99999-0001</div>
+            {{ c.email }}
+            <div>{{ c.telefone }}</div>
           </td>
-          <td>14/09/1994</td>
-          <td>02/01/2023</td>
+          <td>{{ c.nascimento }}</td>
+          <td>{{ c.entrada }}</td>
           <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" checked />
+            <input
+              type="checkbox"
+              class="toggle toggle-xs"
+              [checked]="c.ativa"
+              (change)="onToggleAtivo(c.id, $any($event.target).checked)"
+            />
           </td>
           <td class="text-right space-x-2">
-            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/colaboradores/1/editar">
+            <a class="btn btn-ghost btn-xs" [routerLink]="['/admin/cadastros/colaboradores', c.id, 'editar']">
               Editar
             </a>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+            <button class="btn btn-ghost btn-xs text-error" (click)="onExcluir(c.id)">
+              Excluir
+            </button>
           </td>
         </tr>
-        <tr>
-          <td>
-            <div class="avatar placeholder">
-              <div class="bg-base-100 text-base-content rounded-full w-8 h-8">
-                <span>LA</span>
-              </div>
-            </div>
-          </td>
-          <td>Larissa Almeida</td>
-          <td>437.912.880-30</td>
-          <td class="text-xs opacity-70">
-            larissa.almeida@email.com
-            <div>(11) 98888-2222</div>
-          </td>
-          <td>03/06/1989</td>
-          <td>18/05/2021</td>
-          <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" />
-          </td>
-          <td class="text-right space-x-2">
-            <a class="btn btn-ghost btn-xs" routerLink="/admin/cadastros/colaboradores/2/editar">
-              Editar
-            </a>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+
+        <tr *ngIf="!loading() && colaboradores().length === 0">
+          <td colspan="8" class="text-center opacity-70 py-6">
+            Nenhum registro encontrado.
           </td>
         </tr>
       </tbody>

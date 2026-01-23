@@ -13,17 +13,25 @@
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>
       </div>
-      <input class="input input-bordered input-sm" placeholder="Nome ou descrição" />
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome ou descrição"
+        [value]="filtro().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
     </label>
 
     <label class="form-control w-full max-w-[180px]">
       <div class="label">
         <span class="label-text text-xs opacity-70">Tipo</span>
       </div>
-      <select class="select select-bordered select-sm">
-        <option>Todos</option>
-        <option>Unitário</option>
-        <option>Por quilo</option>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtro().tipo"
+        (change)="patchFiltro({ tipo: $any($event.target).value })"
+      >
+        <option *ngFor="let t of tipos" [value]="t.value">{{ t.label }}</option>
       </select>
     </label>
 
@@ -31,19 +39,33 @@
       <div class="label">
         <span class="label-text text-xs opacity-70">Status</span>
       </div>
-      <select class="select select-bordered select-sm">
-        <option>Todos</option>
-        <option>Ativos</option>
-        <option>Inativos</option>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtro().status"
+        (change)="patchFiltro({ status: $any($event.target).value })"
+      >
+        <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
       </select>
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input type="checkbox" class="checkbox checkbox-xs" checked />
-      <span class="label-text text-xs opacity-70">Somente ativos</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtro().somenteAtivos" -->
+    <!--     (change)="patchFiltro({ somenteAtivos: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente ativos</span> -->
+    <!-- </label> -->
 
-    <button class="btn btn-primary btn-sm mt-6">Buscar</button>
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
   </div>
 
   <div class="overflow-x-auto">
@@ -54,19 +76,21 @@
           <th>Descrição</th>
           <th>Tipo</th>
           <th>Controle de estoque</th>
+          <th>Qtd. estoque</th>
           <th>Preço</th>
           <th class="text-center">Ativo</th>
           <th class="text-right">Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let produto of produtos">
+        <tr *ngFor="let produto of produtos(); trackBy: trackById">
           <td class="font-medium">{{ produto.nome }}</td>
           <td class="text-xs opacity-70">{{ produto.descricao }}</td>
+
           <td>
-            @if (produto.tipo === 'Unitário') {
+            @if (produto.tipo === 'UNITARIO') {
               <span class="badge badge-success badge-sm">Unitário</span>
-            } @else if (produto.tipo === 'Por peso (kg)') {
+            } @else if (produto.tipo === 'QUILO') {
               <span class="badge badge-warning badge-sm whitespace-nowrap">Por peso (kg)</span>
             }
           </td>
@@ -74,24 +98,42 @@
           <td>
             <span
               class="badge badge-sm"
-              [class.badge-success]="produto.tipo === 'Unitário' && produto.controleEstoque"
-              [class.badge-error]="produto.tipo === 'Unitário' && !produto.controleEstoque"
-              [class.badge-ghost]="produto.tipo !== 'Unitário'"
+              [class.badge-success]="produto.tipo === 'UNITARIO' && produto.controleEstoque"
+              [class.badge-error]="produto.tipo === 'UNITARIO' && !produto.controleEstoque"
+              [class.badge-ghost]="produto.tipo !== 'UNITARIO'"
             >
               {{
-                produto.tipo === 'Unitário'
+                produto.tipo === 'UNITARIO'
                   ? (produto.controleEstoque ? 'Ativo' : 'Desativado')
                   : 'Não aplicável'
               }}
             </span>
           </td>
-          <td>{{ produto.preco }}</td>
+          <td class="text-xs opacity-70">
+            {{ produto.tipo === 'UNITARIO' ? (produto.quantidadeEstoque ?? '—') : '—' }}
+          </td>
+          <td>{{ formatPreco(produto.tipo, produto.precoCents) }}</td>
           <td class="text-center">
-            <input type="checkbox" class="toggle toggle-xs" [checked]="produto.ativo" />
+            <input
+              type="checkbox"
+              class="toggle toggle-xs"
+              [checked]="produto.ativo"
+              (change)="onToggleAtivo(produto.id, $any($event.target).checked)"
+            />
           </td>
           <td class="text-right space-x-2">
-            <button class="btn btn-ghost btn-xs">Editar</button>
-            <button class="btn btn-ghost btn-xs text-error">Excluir</button>
+            <a class="btn btn-ghost btn-xs" [routerLink]="['/admin/cadastros/produtos', produto.id, 'editar']">
+              Editar
+            </a>
+            <button class="btn btn-ghost btn-xs text-error" (click)="onExcluir(produto.id)">
+              Excluir
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading() && produtos().length === 0">
+          <td colspan="8" class="text-center opacity-70 py-6">
+            Nenhum registro encontrado.
           </td>
         </tr>
       </tbody>
