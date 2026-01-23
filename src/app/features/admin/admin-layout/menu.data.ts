@@ -21,7 +21,7 @@ export const ADMIN_MENU: MenuSection[] = [
       { label: 'Pessoas', path: '/admin/cadastros/pessoas' },
       { label: 'Colaboradores', path: '/admin/cadastros/colaboradores' },
       { label: 'Produtos', path: '/admin/cadastros/produtos' },
-      { label: 'Lojas', path: '/admin/cadastros/lojas' },
+      // { label: 'Lojas', path: '/admin/cadastros/lojas' },
       { label: 'Terminais PDV', path: '/admin/cadastros/terminais' },
     ],
   },

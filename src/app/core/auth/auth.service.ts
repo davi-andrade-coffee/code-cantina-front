@@ -48,9 +48,21 @@ export class AuthService {
 
   async login(input: LoginRequest): Promise<AuthUser> {
     try {
-      const res = await firstValueFrom(
-        this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
-      );
+      // const res = await firstValueFrom(
+      //   this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
+      // );
+    const res = {
+      token: 'Bearer token',
+      user: {
+        id: 'uuid',
+        email: input.email,
+        role: 
+         ( input.email.includes('superadmin') ? 'SUPERADMIN' :
+            input.email.includes('admin') ? 'ADMIN' :
+              input.email.includes('cliente') ? 'CLIENTE' :
+                'COLABORADOR') as Role
+      }
+    }
 
       this.storage.setToken(res.token);
       this.storage.setUser(res.user);
