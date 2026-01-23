@@ -4,7 +4,7 @@
     <p class="text-sm opacity-70">Cadastro de itens unitários ou vendidos por peso</p>
   </div>
 
-  <button class="btn btn-success btn-sm">+ Novo produto</button>
+  <a class="btn btn-success btn-sm" routerLink="/admin/cadastros/produtos/novo">+ Novo produto</a>
 </div>
 
 <section class="bg-base-300 rounded-lg border border-base-100 p-4">
@@ -50,7 +50,6 @@
     <table class="table table-zebra table-sm">
       <thead>
         <tr>
-          <th>Integração</th>
           <th>Nome</th>
           <th>Descrição</th>
           <th>Tipo</th>
@@ -62,29 +61,22 @@
       </thead>
       <tbody>
         <tr *ngFor="let produto of produtos">
-          <td>
-            <span
-              class="badge badge-outline badge-xs"
-              [class.badge-primary]="produto.integracao === 'IntegraCantina'"
-            >
-              {{ produto.integracao }}
-            </span>
-          </td>
           <td class="font-medium">{{ produto.nome }}</td>
           <td class="text-xs opacity-70">{{ produto.descricao }}</td>
           <td>
-            <span class="badge badge-secondary badge-sm" *ngIf="produto.tipo === 'Unitário'">Unitário</span>
-            <span class="badge badge-accent badge-sm" *ngIf="produto.tipo === 'Por peso (kg)'">Por peso (kg)</span>
+            <span class="badge badge-success badge-sm" *ngIf="produto.tipo === 'Unitário'">Unitário</span>
+            <span class="badge badge-warning badge-sm" *ngIf="produto.tipo === 'Por peso (kg)'">Por peso (kg)</span>
           </td>
           <td>
             <span
               class="badge badge-sm"
               [class.badge-success]="produto.tipo === 'Unitário' && produto.controleEstoque"
-              [class.badge-ghost]="produto.tipo !== 'Unitário' || !produto.controleEstoque"
+              [class.badge-error]="produto.tipo === 'Unitário' && !produto.controleEstoque"
+              [class.badge-ghost]="produto.tipo !== 'Unitário'"
             >
               {{
                 produto.tipo === 'Unitário'
-                  ? (produto.controleEstoque ? 'Ativo' : 'Opcional')
+                  ? (produto.controleEstoque ? 'Ativo' : 'Desativado')
                   : 'Não aplicável'
               }}
             </span>
@@ -95,7 +87,6 @@
           </td>
           <td class="text-right space-x-2">
             <button class="btn btn-ghost btn-xs">Editar</button>
-            <button class="btn btn-ghost btn-xs">Ativar/Desativar</button>
             <button class="btn btn-ghost btn-xs text-error">Excluir</button>
           </td>
         </tr>

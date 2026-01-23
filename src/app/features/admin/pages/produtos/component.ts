@@ -1,9 +1,9 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface ProdutoItem {
   id: number;
-  integracao: string;
   nome: string;
   descricao: string;
   tipo: 'Unitário' | 'Por peso (kg)';
@@ -14,14 +14,13 @@ interface ProdutoItem {
 
 @Component({
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, RouterLink],
   templateUrl: './page.html',
 })
 export class ProdutosPage {
   readonly produtos: ProdutoItem[] = [
     {
       id: 1,
-      integracao: 'IntegraCantina',
       nome: 'Coxinha tradicional',
       descricao: 'Salgado assado com frango desfiado',
       tipo: 'Unitário',
@@ -31,7 +30,6 @@ export class ProdutosPage {
     },
     {
       id: 2,
-      integracao: 'IntegraCantina',
       nome: 'Suco natural de laranja',
       descricao: 'Bebida preparada diariamente',
       tipo: 'Por peso (kg)',
@@ -40,7 +38,6 @@ export class ProdutosPage {
     },
     {
       id: 3,
-      integracao: 'Manual',
       nome: 'Bolo de cenoura',
       descricao: 'Fatia individual com cobertura de chocolate',
       tipo: 'Unitário',
