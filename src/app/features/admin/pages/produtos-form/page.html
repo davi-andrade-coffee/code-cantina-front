@@ -1,31 +1,50 @@
 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
   <div>
-    <h1 class="text-lg font-semibold">Cadastro de Produto</h1>
-    <p class="text-sm opacity-70">Preencha os dados para criar ou editar itens do cardápio.</p>
+    <h1 class="text-lg font-semibold">{{ titulo() }}</h1>
+    <p class="text-sm opacity-70">{{ descricao() }}</p>
   </div>
 
   <div class="flex gap-2">
     <a class="btn btn-ghost btn-sm" routerLink="/admin/cadastros/produtos">Voltar</a>
-    <button class="btn btn-success btn-sm">Salvar</button>
+    <button class="btn btn-success btn-sm" (click)="salvar()" [disabled]="saving() || loading()">
+      <span *ngIf="!saving()">Salvar</span>
+      <span *ngIf="saving()" class="loading loading-spinner loading-xs"></span>
+    </button>
   </div>
 </div>
 
 <section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
     <label class="form-control">
       <div class="label">
         <span class="label-text">Nome *</span>
       </div>
-      <input class="input input-bordered" placeholder="Nome do produto" />
+      <input
+        class="input input-bordered"
+        placeholder="Nome do produto"
+        [value]="form().nome"
+        (input)="patchForm({ nome: $any($event.target).value })"
+        [class.input-error]="!!fieldErrors().nome"
+      />
+      <div class="label" *ngIf="fieldErrors().nome">
+        <span class="label-text-alt text-error">{{ fieldErrors().nome }}</span>
+      </div>
     </label>
 
     <label class="form-control">
       <div class="label">
         <span class="label-text">Tipo *</span>
       </div>
-      <select class="select select-bordered">
-        <option>Unitário</option>
-        <option>Por peso (kg)</option>
+      <select
+        class="select select-bordered"
+        [value]="form().tipo"
+        (change)="patchForm({ tipo: $any($event.target).value })"
+      >
+        <option *ngFor="let t of tipos" [value]="t.value">{{ t.label }}</option>
       </select>
     </label>
 
@@ -37,17 +56,28 @@
         class="textarea textarea-bordered"
         rows="3"
         placeholder="Detalhes do produto, ingredientes, porções..."
+        [value]="form().descricao"
+        (input)="patchForm({ descricao: $any($event.target).value })"
       ></textarea>
     </label>
 
     <label class="form-control">
       <div class="label">
-        <span class="label-text">Preço unitário ou por quilo *</span>
+        <span class="label-text">{{ precoLabel() }}</span>
       </div>
-      <input class="input input-bordered" placeholder="R$ 0,00"  />
+      <input
+        class="input input-bordered"
+        placeholder="R$ 0,00"
+        [value]="precoInput()"
+        (input)="onPrecoInput($any($event.target).value)"
+        [class.input-error]="!!fieldErrors().precoCents"
+      />
+      <div class="label" *ngIf="fieldErrors().precoCents">
+        <span class="label-text-alt text-error">{{ fieldErrors().precoCents }}</span>
+      </div>
     </label>
 
-    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4" *ngIf="isUnitario()">
       <div class="flex items-start justify-between gap-3">
         <div>
           <p class="text-sm font-semibold">Controle de estoque</p>
@@ -55,9 +85,31 @@
             Disponível para produtos unitários. Ative para controlar saldo.
           </p>
         </div>
-        <input type="checkbox" class="toggle toggle-success" />
+        <input
+          type="checkbox"
+          class="toggle toggle-success"
+          [checked]="form().controleEstoque"
+          (change)="patchForm({ controleEstoque: $any($event.target).checked })"
+        />
       </div>
     </div>
+
+    <label class="form-control" *ngIf="isUnitario()">
+      <div class="label">
+        <span class="label-text">Quantidade em estoque</span>
+      </div>
+      <input
+        class="input input-bordered"
+        placeholder="0"
+        [value]="form().quantidadeEstoque ?? ''"
+        (input)="patchForm({ quantidadeEstoque: $any($event.target).value === '' ? null : +$any($event.target).value })"
+        [class.input-error]="!!fieldErrors().quantidadeEstoque"
+        [disabled]="!form().controleEstoque"
+      />
+      <div class="label" *ngIf="fieldErrors().quantidadeEstoque">
+        <span class="label-text-alt text-error">{{ fieldErrors().quantidadeEstoque }}</span>
+      </div>
+    </label>
   </div>
 
   <div class="divider my-4"></div>
@@ -71,7 +123,12 @@
     </div>
     <div class="flex items-center gap-3">
       <span class="text-xs opacity-70">Status</span>
-      <input type="checkbox" class="toggle toggle-success" checked />
+      <input
+        type="checkbox"
+        class="toggle toggle-success"
+        [checked]="form().ativo"
+        (change)="patchForm({ ativo: $any($event.target).checked })"
+      />
     </div>
   </div>
 </section>
