@@ -24,7 +24,9 @@ export const routes: Routes = [
         { path: 'cadastros/produtos', loadComponent: () => import('./pages/produtos/component').then(m => m.ProdutosPage) },
         { path: 'cadastros/produtos/novo', loadComponent: () => import('./pages/produtos-form/component').then(m => m.ProdutosFormPage) },
         { path: 'cadastros/produtos/:id/editar', loadComponent: () => import('./pages/produtos-form/component').then(m => m.ProdutosFormPage) },
-        { path: 'cadastros/terminais', loadComponent: () => import('./pages/terminais.page').then(m => m.TerminaisPage) },
+        { path: 'cadastros/terminais', loadComponent: () => import('./pages/terminais/component').then(m => m.TerminaisPage) },
+        { path: 'cadastros/terminais/novo', loadComponent: () => import('./pages/terminais-form/component').then(m => m.TerminaisFormPage) },
+        { path: 'cadastros/terminais/:id/editar', loadComponent: () => import('./pages/terminais-form/component').then(m => m.TerminaisFormPage) },
 
         // Financeiro e Relatórios
         { path: 'financeiro/contas-a-receber', loadComponent: () => import('./pages/contas-receber.page').then(m => m.ContasReceberPage) },

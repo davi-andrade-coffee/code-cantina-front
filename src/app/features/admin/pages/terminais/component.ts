@@ -5,9 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
-import { Produto, ProdutoTipo, ProdutosFiltro } from './models';
-import { ProdutosService } from './service';
-import { formatCentsToBRL } from './util';
+import { TerminalPdv, TerminaisFiltro } from './models';
+import { TerminaisService } from './service';
 
 @Component({
   standalone: true,
@@ -15,26 +14,19 @@ import { formatCentsToBRL } from './util';
   templateUrl: './page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProdutosPage implements OnInit {
-  private readonly service = inject(ProdutosService);
+export class TerminaisPage implements OnInit {
+  private readonly service = inject(TerminaisService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
-  readonly produtos = signal<Produto[]>([]);
+  readonly terminais = signal<TerminalPdv[]>([]);
 
-  readonly filtro = signal<ProdutosFiltro>({
+  readonly filtro = signal<TerminaisFiltro>({
     termo: '',
-    tipo: 'TODOS',
     status: 'TODOS',
     somenteAtivos: true,
   });
-
-  readonly tipos = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Unitário', value: 'UNITARIO' },
-    { label: 'Por quilo', value: 'QUILO' },
-  ] as const;
 
   readonly statusOptions = [
     { label: 'Todos', value: 'TODOS' },
@@ -59,73 +51,68 @@ export class ProdutosPage implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (items) => this.produtos.set(items),
+        next: (items) => this.terminais.set(items),
         error: (err: unknown) => {
           console.error(err);
-          this.errorMsg.set(err instanceof Error ? err.message : 'Falha ao carregar produtos');
+          this.errorMsg.set(err instanceof Error ? err.message : 'Falha ao carregar terminais');
         },
       });
   }
 
-  patchFiltro(patch: Partial<ProdutosFiltro>): void {
+  patchFiltro(patch: Partial<TerminaisFiltro>): void {
     this.filtro.update((cur) => ({ ...cur, ...patch }));
   }
 
-  onToggleAtivo(produtoId: string, value: boolean): void {
+  onToggleAtivo(terminalId: string, value: boolean): void {
     this.executarAcaoOtimista(
-      produtoId,
-      (p) => ({ ...p, ativo: value }),
-      () => this.service.toggleAtivo(produtoId, value)
+      terminalId,
+      (t) => ({ ...t, ativo: value }),
+      () => this.service.toggleAtivo(terminalId, value)
     );
   }
 
-  onExcluir(produtoId: string): void {
-    const snapshot = this.produtos();
-    this.produtos.update((arr) => arr.filter((p) => p.id !== produtoId));
+  onExcluir(terminalId: string): void {
+    const snapshot = this.terminais();
+    this.terminais.update((arr) => arr.filter((t) => t.id !== terminalId));
 
     this.service
-      .delete(produtoId)
+      .delete(terminalId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err: unknown) => {
           console.error(err);
-          this.produtos.set(snapshot);
-          this.errorMsg.set('Não foi possível excluir o produto.');
+          this.terminais.set(snapshot);
+          this.errorMsg.set('Não foi possível excluir o terminal.');
         },
       });
   }
 
-  tipoLabel(tipo: ProdutoTipo): string {
-    return tipo === 'UNITARIO' ? 'Unitário' : 'Por quilo';
+  statusBadge(ativo: boolean): string {
+    return ativo ? 'badge badge-success badge-sm' : 'badge badge-ghost badge-sm';
   }
 
-  tipoBadgeClass(tipo: ProdutoTipo): string {
-    return tipo === 'UNITARIO' ? 'badge badge-success badge-sm' : 'badge badge-warning badge-sm';
+  booleanBadge(value: boolean): string {
+    return value ? 'badge badge-success badge-sm' : 'badge badge-ghost badge-sm';
   }
 
-  formatPreco(tipo: ProdutoTipo, cents: number): string {
-    const valor = formatCentsToBRL(cents);
-    return tipo === 'UNITARIO' ? valor : `${valor}/kg`;
-  }
-
-  trackById(_: number, item: Produto): string {
+  trackById(_: number, item: TerminalPdv): string {
     return item.id;
   }
 
   private executarAcaoOtimista(
     id: string,
-    updateFn: (p: Produto) => Produto,
+    updateFn: (t: TerminalPdv) => TerminalPdv,
     serviceCall: () => any
   ) {
-    const snapshot = this.produtos();
-    this.produtos.update((arr) => arr.map((p) => (p.id === id ? updateFn(p) : p)));
+    const snapshot = this.terminais();
+    this.terminais.update((arr) => arr.map((t) => (t.id === id ? updateFn(t) : t)));
 
     serviceCall()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: (err: unknown) => {
           console.error(err);
-          this.produtos.set(snapshot);
+          this.terminais.set(snapshot);
           this.errorMsg.set('Falha ao sincronizar alteração.');
         },
       });
