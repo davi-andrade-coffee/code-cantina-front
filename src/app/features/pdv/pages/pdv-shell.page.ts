@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect } from '@angular/core';
 import { TerminalSelectPage } from './terminal-select.page';
 import { CashOpenPage } from './cash-open.page';
 import { PdvSalePage } from './pdv-sale.page';
@@ -30,9 +30,9 @@ import { CashMovementType } from '../models/cash-movement';
             *ngIf="terminalLabel"
             class="btn btn-outline btn-sm"
             type="button"
-            (click)="facade.clearTerminal()"
+            (click)="backToTerminal()"
           >
-            Trocar Terminal
+            Voltar
           </button>
         </div>
       </header>
@@ -90,8 +90,13 @@ import { CashMovementType } from '../models/cash-movement';
     </div>
   `,
 })
-export class PdvShellPage implements OnInit {
-  constructor(public facade: PdvFacade) {}
+export class PdvShellPage implements OnInit, OnDestroy {
+  constructor(public facade: PdvFacade) {
+    effect(() => {
+      const isActive = !!this.facade.selectedTerminal();
+      document.body.classList.toggle('pdv-fullscreen', isActive);
+    });
+  }
 
   ngOnInit(): void {
     void this.facade.init();
@@ -117,6 +122,14 @@ export class PdvShellPage implements OnInit {
 
   onCloseCash(counted: number, note?: string): void {
     void this.facade.closeSession(counted, note);
+  }
+
+  backToTerminal(): void {
+    this.facade.clearTerminal();
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('pdv-fullscreen');
   }
 
 }
