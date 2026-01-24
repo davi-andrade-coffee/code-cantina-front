@@ -37,7 +37,7 @@ export const routes: Routes = [
         { path: 'auditoria/logs', loadComponent: () => import('./pages/logs/component').then(m => m.LogsSistemaPage) },
 
         // Configurações
-        { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja.page').then(m => m.ConfigLojaPage) },
+        { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja/component').then(m => m.ConfigLojaPage) },
         { path: 'configuracoes/seguranca', loadComponent: () => import('./pages/seguranca.page').then(m => m.SegurancaPage) },
     ],
   },

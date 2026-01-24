@@ -1,0 +1,168 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Configuração da Loja</h1>
+    <p class="text-sm opacity-70">Dados cadastrais e complementares da cantina.</p>
+  </div>
+
+  <button class="btn btn-primary btn-sm" (click)="salvar()" [disabled]="salvando() || loading()">
+    <span *ngIf="!salvando()">Salvar alterações</span>
+    <span *ngIf="salvando()" class="loading loading-spinner loading-xs"></span>
+  </button>
+</div>
+
+<div *ngIf="errorMsg()" class="alert alert-error mb-4">
+  <span class="text-sm">{{ errorMsg() }}</span>
+</div>
+
+<div *ngIf="sucessoMsg()" class="alert alert-success mb-4">
+  <span class="text-sm">{{ sucessoMsg() }}</span>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4" *ngIf="configuracao() as config">
+  <section class="bg-base-300 rounded-lg border border-base-100 p-4 lg:col-span-1">
+    <div class="text-sm font-semibold mb-1">Identificação (somente leitura)</div>
+    <p class="text-xs opacity-70 mb-4">Dados vindos da integração / cadastro base.</p>
+
+    <label class="form-control w-full">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Código</span>
+      </div>
+      <input class="input input-bordered input-sm" [value]="config.identificacao.codigo" disabled />
+    </label>
+
+    <label class="form-control w-full mt-3">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Nome base</span>
+      </div>
+      <input class="input input-bordered input-sm" [value]="config.identificacao.nomeBase" disabled />
+    </label>
+  </section>
+
+  <section class="bg-base-300 rounded-lg border border-base-100 p-4 lg:col-span-2" *ngIf="complementar() as dados">
+    <div class="text-sm font-semibold mb-1">Dados complementares (Cantina)</div>
+    <p class="text-xs opacity-70 mb-4">
+      Estes dados são editáveis e usados em relatórios/recibos.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Nome para relatórios</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.nomeFantasia"
+          (input)="patchComplementar({ nomeFantasia: $any($event.target).value })"
+          placeholder="Cantina do Colégio X"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">CNPJ</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.cnpj"
+          (input)="patchComplementar({ cnpj: $any($event.target).value })"
+          placeholder="00.000.000/0000-00"
+        />
+      </label>
+    </div>
+
+    <div class="divider my-4">Endereço</div>
+    <p class="text-xs opacity-70 mb-3">Preencha o máximo possível para padronizar documentos.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <label class="form-control w-full md:col-span-2">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Rua / Av.</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.endereco.logradouro"
+          (input)="patchComplementar({ endereco: { logradouro: $any($event.target).value } })"
+          placeholder="Rua / Av. ..."
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Número</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.endereco.numero"
+          (input)="patchComplementar({ endereco: { numero: $any($event.target).value } })"
+          placeholder="123"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Bairro</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.endereco.bairro"
+          (input)="patchComplementar({ endereco: { bairro: $any($event.target).value } })"
+          placeholder="Centro"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Cidade</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.endereco.cidade"
+          (input)="patchComplementar({ endereco: { cidade: $any($event.target).value } })"
+          placeholder="São Paulo"
+        />
+      </label>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">CEP</span>
+        </div>
+        <input
+          class="input input-bordered input-sm"
+          [value]="dados.endereco.cep"
+          (input)="patchComplementar({ endereco: { cep: $any($event.target).value } })"
+          placeholder="00000-000"
+        />
+      </label>
+
+      <label class="form-control w-full md:col-span-2">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Informações adicionais</span>
+        </div>
+        <textarea
+          class="textarea textarea-bordered textarea-sm"
+          rows="3"
+          [value]="dados.endereco.complemento"
+          (input)="patchComplementar({ endereco: { complemento: $any($event.target).value } })"
+          placeholder="Informações adicionais..."
+        ></textarea>
+      </label>
+
+      <label class="form-control w-full md:col-span-2">
+        <div class="label">
+          <span class="label-text text-xs opacity-70">Observações internas</span>
+        </div>
+        <textarea
+          class="textarea textarea-bordered textarea-sm"
+          rows="3"
+          [value]="dados.observacoes"
+          (input)="patchComplementar({ observacoes: $any($event.target).value })"
+          placeholder="Informações adicionais para uso interno"
+        ></textarea>
+      </label>
+    </div>
+  </section>
+</div>
+
+<div *ngIf="loading()" class="flex items-center justify-center py-10">
+  <span class="loading loading-spinner loading-lg"></span>
+</div>
