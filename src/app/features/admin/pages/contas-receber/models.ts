@@ -20,7 +20,7 @@ export interface FiltroRecebiveis {
   status: 'TODOS' | StatusRecebivel;
   tipoPessoa: 'TODOS' | PessoaTipo;
   termo: string;
-  somenteInadimplentes: boolean;
+  // somenteInadimplentes: boolean;
 }
 
 export interface EvolucaoRecebimentoItem {

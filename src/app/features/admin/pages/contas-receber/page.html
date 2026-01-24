@@ -3,13 +3,6 @@
     <h1 class="text-lg font-semibold">Contas a Receber (Convênio)</h1>
     <p class="text-sm opacity-70">Relatórios financeiros de clientes em plano convênio.</p>
   </div>
-
-  <div class="flex items-center gap-2">
-    <button class="btn btn-outline btn-sm" (click)="onAtualizarMock()" [disabled]="loading()">
-      Atualizar mock
-    </button>
-    <button class="btn btn-success btn-sm" (click)="onNovaCobranca()">+ Nova cobrança</button>
-  </div>
 </div>
 
 <div role="tablist" class="tabs tabs-lifted mb-4">
@@ -89,15 +82,15 @@
       />
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input
-        type="checkbox"
-        class="checkbox checkbox-xs"
-        [checked]="filtros().somenteInadimplentes"
-        (change)="patchFiltro({ somenteInadimplentes: $any($event.target).checked })"
-      />
-      <span class="label-text text-xs opacity-70">Somente inadimplentes</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtros().somenteInadimplentes" -->
+    <!--     (change)="patchFiltro({ somenteInadimplentes: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente inadimplentes</span> -->
+    <!-- </label> -->
 
     <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>
@@ -136,10 +129,13 @@
           </td>
           <td>{{ competenciaLabel(item.competencia) }}</td>
           <td class="text-right">{{ formatCurrency(item.valorDevido) }}</td>
+          
           <td>
             <span [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
           </td>
+          
           <td>{{ formatDate(item.ultimaCobranca) }}</td>
+          
           <td class="text-right space-x-2">
             <button class="btn btn-ghost btn-xs" (click)="onEnviarCobranca(item)">
               Enviar cobrança
@@ -149,6 +145,7 @@
             </button>
           </td>
         </tr>
+        
         <tr *ngIf="!loading() && paginaRecebiveis().length === 0">
           <td colspan="7" class="text-center opacity-70 py-6">Nenhum registro encontrado.</td>
         </tr>

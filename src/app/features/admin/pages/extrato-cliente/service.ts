@@ -201,7 +201,6 @@ export class ExtratoClienteService {
     const filtradas = this.movimentacoes().filter((item) => {
       const pessoaOk = item.pessoaId === filtro.pessoaId;
       const tipoOk = filtro.tipoMovimento === 'TODOS' || item.tipo === filtro.tipoMovimento;
-      const terminalOk = filtro.terminal === 'TODOS' || item.terminal === filtro.terminal;
       const textoOk =
         textoLower.length === 0 ||
         item.descricao.toLowerCase().includes(textoLower) ||
@@ -211,7 +210,7 @@ export class ExtratoClienteService {
       const inicioOk = !inicio || dataItem >= inicio;
       const fimOk = !fim || dataItem <= new Date(fim.getTime() + 86400000 - 1);
 
-      return pessoaOk && tipoOk && terminalOk && textoOk && inicioOk && fimOk;
+      return pessoaOk && tipoOk && textoOk && inicioOk && fimOk;
     });
 
     return of(filtradas);

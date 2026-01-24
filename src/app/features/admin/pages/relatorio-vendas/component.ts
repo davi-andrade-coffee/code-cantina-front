@@ -5,7 +5,7 @@ import { finalize } from 'rxjs/operators';
 
 import { RelatorioVendasService } from './service';
 import { FormaPagamento, Venda, VendaFiltro } from './models';
-import { PAGAMENTO_LABELS, STATUS_CLASSES, STATUS_LABELS, formatCurrency, formatDateTime } from './utils';
+import { PAGAMENTO_LABELS, formatCurrency, formatDateTime } from './utils';
 
 @Component({
   standalone: true,
@@ -32,7 +32,6 @@ export class RelatorioVendasPage {
     formaPagamento: 'TODOS',
     produto: '',
     cliente: '',
-    status: 'TODOS',
   });
 
   readonly terminais = [
@@ -56,12 +55,6 @@ export class RelatorioVendasPage {
     { label: 'Convênio', value: 'CONVENIO' },
   ] as const;
 
-  readonly statusOptions = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Concluída', value: 'CONCLUIDA' },
-    { label: 'Cancelada', value: 'CANCELADA' },
-    { label: 'Estornada', value: 'ESTORNADA' },
-  ] as const;
 
   readonly vendasFiltradas = computed(() => this.vendas());
 
@@ -181,14 +174,6 @@ export class RelatorioVendasPage {
 
   subtotal(venda: Venda): number {
     return venda.itens.reduce((acc, item) => acc + item.total, 0);
-  }
-
-  statusLabel(status: Venda['status']): string {
-    return STATUS_LABELS[status];
-  }
-
-  statusClass(status: Venda['status']): string {
-    return STATUS_CLASSES[status];
   }
 
   pagamentoLabel(forma: FormaPagamento): string {

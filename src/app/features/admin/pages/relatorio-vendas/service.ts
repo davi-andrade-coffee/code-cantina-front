@@ -15,7 +15,6 @@ export class RelatorioVendasService {
       registroCliente: 'ALU-0231',
       total: 42,
       formaPagamento: 'CONVENIO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-01',
       itens: [
         { id: 'i1', vendaId: 'v1', produto: 'Sanduíche', quantidade: 2, valorUnitario: 8, total: 16 },
@@ -32,7 +31,6 @@ export class RelatorioVendasService {
       registroCliente: 'PRO-1802',
       total: 35,
       formaPagamento: 'SALDO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-02',
       itens: [
         { id: 'i4', vendaId: 'v2', produto: 'Prato executivo', quantidade: 1, valorUnitario: 28, total: 28 },
@@ -48,7 +46,6 @@ export class RelatorioVendasService {
       registroCliente: 'ALU-0491',
       total: 18,
       formaPagamento: 'DINHEIRO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-03',
       itens: [{ id: 'i6', vendaId: 'v3', produto: 'Pão de queijo', quantidade: 3, valorUnitario: 6, total: 18 }],
     },
@@ -61,7 +58,6 @@ export class RelatorioVendasService {
       registroCliente: 'ALU-0844',
       total: 52,
       formaPagamento: 'DINHEIRO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-02',
       itens: [
         { id: 'i7', vendaId: 'v4', produto: 'Prato executivo', quantidade: 1, valorUnitario: 28, total: 28 },
@@ -78,7 +74,6 @@ export class RelatorioVendasService {
       registroCliente: 'OUT-0788',
       total: 28,
       formaPagamento: 'CONVENIO',
-      status: 'ESTORNADA',
       caixaId: 'CX-01',
       itens: [
         { id: 'i10', vendaId: 'v5', produto: 'Sanduíche', quantidade: 1, valorUnitario: 8, total: 8 },
@@ -95,7 +90,6 @@ export class RelatorioVendasService {
       registroCliente: 'ALU-0670',
       total: 40,
       formaPagamento: 'DINHEIRO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-03',
       itens: [
         { id: 'i13', vendaId: 'v6', produto: 'Lanche integral', quantidade: 2, valorUnitario: 12, total: 24 },
@@ -111,7 +105,6 @@ export class RelatorioVendasService {
       registroCliente: 'OUT-0342',
       total: 30,
       formaPagamento: 'SALDO',
-      status: 'CANCELADA',
       caixaId: 'CX-01',
       itens: [
         { id: 'i15', vendaId: 'v7', produto: 'Prato executivo', quantidade: 1, valorUnitario: 28, total: 28 },
@@ -127,7 +120,6 @@ export class RelatorioVendasService {
       registroCliente: 'PRO-2220',
       total: 38,
       formaPagamento: 'CONVENIO',
-      status: 'CONCLUIDA',
       caixaId: 'CX-02',
       itens: [
         { id: 'i17', vendaId: 'v8', produto: 'Prato executivo', quantidade: 1, valorUnitario: 28, total: 28 },
@@ -149,7 +141,6 @@ export class RelatorioVendasService {
       const dataOk = dataVenda >= inicio && dataVenda <= new Date(fim.getTime() + 86400000 - 1);
       const terminalOk = filtro.terminal === 'TODOS' || venda.terminal === filtro.terminal;
       const operadorOk = filtro.operador === 'TODOS' || venda.operador === filtro.operador;
-      const statusOk = filtro.status === 'TODOS' || venda.status === filtro.status;
       const pagamentoOk = filtro.formaPagamento === 'TODOS' || venda.formaPagamento === filtro.formaPagamento;
       const produtoOk =
         produtoLower.length === 0 || venda.itens.some((item) => item.produto.toLowerCase().includes(produtoLower));
@@ -158,7 +149,7 @@ export class RelatorioVendasService {
         venda.cliente?.toLowerCase().includes(clienteLower) ||
         venda.registroCliente?.toLowerCase().includes(clienteLower);
 
-      return dataOk && terminalOk && operadorOk && statusOk && pagamentoOk && produtoOk && clienteOk;
+      return dataOk && terminalOk && operadorOk && pagamentoOk && produtoOk && clienteOk;
     });
 
     return of(filtradas);

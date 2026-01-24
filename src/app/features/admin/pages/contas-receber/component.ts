@@ -35,7 +35,7 @@ export class ContasReceberPage {
     status: 'TODOS',
     tipoPessoa: 'TODOS',
     termo: '',
-    somenteInadimplentes: false,
+    // somenteInadimplentes: false,
   });
 
   readonly recebiveis = signal<Recebivel[]>([]);
@@ -182,22 +182,6 @@ export class ContasReceberPage {
           this.errorMsg.set('Não foi possível marcar o pagamento.');
         },
       });
-  }
-
-  onAtualizarMock(): void {
-    this.service
-      .atualizarMock()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.buscar(),
-        error: () => {
-          this.errorMsg.set('Não foi possível atualizar o mock.');
-        },
-      });
-  }
-
-  onNovaCobranca(): void {
-    this.abaAtiva.set('listagem');
   }
 
   voltarPagina(): void {

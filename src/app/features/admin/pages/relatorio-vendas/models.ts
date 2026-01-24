@@ -1,4 +1,3 @@
-export type StatusVenda = 'CONCLUIDA' | 'CANCELADA' | 'ESTORNADA';
 export type FormaPagamento = 'SALDO' | 'DINHEIRO' | 'CONVENIO';
 
 export interface ItemVenda {
@@ -20,7 +19,6 @@ export interface Venda {
   total: number;
   formaPagamento: FormaPagamento;
   itens: ItemVenda[];
-  status: StatusVenda;
   caixaId: string;
 }
 
@@ -32,5 +30,4 @@ export interface VendaFiltro {
   formaPagamento: 'TODOS' | FormaPagamento;
   produto: string;
   cliente: string;
-  status: 'TODOS' | StatusVenda;
 }

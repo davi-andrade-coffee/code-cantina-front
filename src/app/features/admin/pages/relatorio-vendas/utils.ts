@@ -1,16 +1,4 @@
-import { FormaPagamento, StatusVenda } from './models';
-
-export const STATUS_LABELS: Record<StatusVenda, string> = {
-  CONCLUIDA: 'Concluída',
-  CANCELADA: 'Cancelada',
-  ESTORNADA: 'Estornada',
-};
-
-export const STATUS_CLASSES: Record<StatusVenda, string> = {
-  CONCLUIDA: 'badge badge-success badge-sm',
-  CANCELADA: 'badge badge-error badge-sm',
-  ESTORNADA: 'badge badge-warning badge-sm',
-};
+import { FormaPagamento } from './models';
 
 export const PAGAMENTO_LABELS: Record<FormaPagamento, string> = {
   SALDO: 'Saldo',

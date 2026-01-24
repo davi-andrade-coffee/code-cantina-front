@@ -36,7 +36,6 @@ export class ExtratoClientePage {
     dataInicio: '',
     dataFim: '',
     tipoMovimento: 'TODOS',
-    terminal: 'TODOS',
     texto: '',
   });
 
@@ -46,14 +45,7 @@ export class ExtratoClientePage {
     { label: 'Todos', value: 'TODOS' },
     { label: 'Consumo', value: 'CONSUMO' },
     { label: 'Carga', value: 'CARGA' },
-    { label: 'Ajuste', value: 'AJUSTE' },
-  ] as const;
-
-  readonly terminais = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Terminal 1 - Camila', value: 'Terminal 1' },
-    { label: 'Terminal 2 - Rafael', value: 'Terminal 2' },
-    { label: 'Terminal 3 - Maria', value: 'Terminal 3' },
+    { label: 'Pagamento', value: 'PAGAMENTO' },
   ] as const;
 
   readonly pessoaSelecionada = computed(() =>

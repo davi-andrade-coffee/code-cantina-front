@@ -92,19 +92,6 @@
       </select>
     </label>
 
-    <label class="form-control w-full max-w-[180px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Status</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().status"
-        (change)="patchFiltro({ status: $any($event.target).value })"
-      >
-        <option *ngFor="let item of statusOptions" [value]="item.value">{{ item.label }}</option>
-      </select>
-    </label>
-
     <label class="form-control w-full max-w-[220px]">
       <div class="label">
         <span class="label-text text-xs opacity-70">Produto</span>
@@ -151,7 +138,6 @@
           <th>Forma pagamento</th>
           <th class="text-center">Nº itens</th>
           <th>Caixa</th>
-          <th>Status</th>
           <th class="text-right">Ações</th>
         </tr>
       </thead>
@@ -175,9 +161,6 @@
             </td>
             <td class="text-center">{{ venda.itens.length }}</td>
             <td class="text-xs opacity-70">{{ venda.caixaId }}</td>
-            <td>
-              <span [class]="statusClass(venda.status)">{{ statusLabel(venda.status) }}</span>
-            </td>
             <td class="text-right">
               <button class="btn btn-ghost btn-xs" (click)="toggleItens(venda.id)">
                 {{ expandido(venda.id) ? 'Ocultar' : 'Expandir' }}

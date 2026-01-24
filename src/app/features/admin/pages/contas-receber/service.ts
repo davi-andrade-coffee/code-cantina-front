@@ -156,7 +156,6 @@ export class ContasReceberService {
     status: 'TODOS' | Recebivel['status'];
     tipoPessoa: 'TODOS' | Recebivel['pessoaTipo'];
     termo: string;
-    somenteInadimplentes: boolean;
   }): Observable<Recebivel[]> {
     const termoLower = filtro.termo.trim().toLowerCase();
     const filtradas = this.recebiveis().filter((item) => {
@@ -168,7 +167,7 @@ export class ContasReceberService {
         item.pessoaNome.toLowerCase().includes(termoLower) ||
         item.documento.toLowerCase().includes(termoLower) ||
         item.registro.toLowerCase().includes(termoLower);
-      const inadimplenteOk = !filtro.somenteInadimplentes || item.status !== 'QUITADO';
+      const inadimplenteOk = item.status !== 'QUITADO';
       return mesmaCompetencia && statusOk && pessoaOk && termoOk && inadimplenteOk;
     });
     return of(filtradas);
@@ -186,19 +185,6 @@ export class ContasReceberService {
       lista.map((item) =>
         item.id === id ? { ...item, valorPago: item.valorDevido, status: 'QUITADO' } : item
       )
-    );
-    return of(void 0);
-  }
-
-  atualizarMock(): Observable<void> {
-    this.recebiveis.update((lista) =>
-      lista.map((item, index) => ({
-        ...item,
-        valorPago:
-          item.status === 'QUITADO'
-            ? item.valorDevido
-            : Math.min(item.valorDevido, item.valorPago + (index % 4) * 25),
-      }))
     );
     return of(void 0);
   }

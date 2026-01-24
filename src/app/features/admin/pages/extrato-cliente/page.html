@@ -82,18 +82,18 @@
       </select>
     </label>
 
-    <label class="form-control w-full max-w-[180px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Terminal/Operador</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().terminal"
-        (change)="patchFiltro({ terminal: $any($event.target).value })"
-      >
-        <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option>
-      </select>
-    </label>
+    <!-- <label class="form-control w-full max-w-[180px]"> -->
+    <!--   <div class="label"> -->
+    <!--     <span class="label-text text-xs opacity-70">Terminal/Operador</span> -->
+    <!--   </div> -->
+    <!--   <select -->
+    <!--     class="select select-bordered select-sm" -->
+    <!--     [value]="filtros().terminal" -->
+    <!--     (change)="patchFiltro({ terminal: $any($event.target).value })" -->
+    <!--   > -->
+    <!--     <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option> -->
+    <!--   </select> -->
+    <!-- </label> -->
 
     <label class="form-control w-full max-w-sm">
       <div class="label">
