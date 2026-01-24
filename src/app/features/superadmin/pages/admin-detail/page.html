@@ -1,0 +1,125 @@
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">Detalhe do Admin</h1>
+    <p class="text-sm opacity-70">Gestão operacional das lojas e cobrança.</p>
+  </div>
+  <a class="btn btn-ghost btn-sm" routerLink="/superadmin/admins">Voltar</a>
+</div>
+
+<div *ngIf="errorMsg()" class="alert alert-error mb-4">
+  <span class="text-sm">{{ errorMsg() }}</span>
+</div>
+
+<section class="grid gap-4 mb-4">
+  <div class="rounded-xl border border-base-100 bg-base-200 p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-base font-semibold">{{ admin()?.nome || '—' }}</h2>
+        <p class="text-sm opacity-70">{{ admin()?.razaoSocial }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <superadmin-status-badge [status]="admin()?.status || '—'" kind="admin"></superadmin-status-badge>
+        <button class="btn btn-warning btn-sm" (click)="abrirBloqueio()">Bloquear Admin</button>
+        <button class="btn btn-success btn-sm">Desbloquear</button>
+        <button class="btn btn-primary btn-sm">Gerar fatura do mês</button>
+      </div>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-3 mt-4 text-sm">
+      <div>
+        <div class="text-xs opacity-70">Contato</div>
+        <div class="font-medium">{{ admin()?.email || '—' }}</div>
+      </div>
+      <div>
+        <div class="text-xs opacity-70">Documento</div>
+        <div class="font-medium">{{ admin()?.documento || '—' }}</div>
+      </div>
+      <div>
+        <div class="text-xs opacity-70">Plano</div>
+        <div class="font-medium">{{ admin()?.plano || '—' }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<superadmin-table-card title="Lojas vinculadas" subtitle="Controle individual de acesso por loja.">
+  <div table-actions>
+    <button class="btn btn-primary btn-sm" (click)="abrirNovaLoja()">+ Nova Loja</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Loja</th>
+          <th>Código</th>
+          <th>Status</th>
+          <th>Criada em</th>
+          <th>Último acesso</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let store of stores()">
+          <td class="font-medium">{{ store.nome }}</td>
+          <td class="text-sm">{{ store.codigo }}</td>
+          <td>
+            <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
+          </td>
+          <td class="text-sm">{{ store.criadoEm }}</td>
+          <td class="text-sm">{{ store.ultimoAcesso || '—' }}</td>
+          <td>
+            <div class="flex flex-wrap gap-2">
+              <button class="btn btn-ghost btn-xs">Editar</button>
+              <button class="btn btn-ghost btn-xs">Bloquear</button>
+              <button class="btn btn-ghost btn-xs">Desbloquear</button>
+              <button class="btn btn-ghost btn-xs">Ver financeiro</button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading() && stores().length === 0">
+          <td colspan="6" class="text-center opacity-70 py-6">
+            Nenhuma loja cadastrada para este Admin.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</superadmin-table-card>
+
+<section class="rounded-xl border border-base-100 bg-base-200 p-4 mt-4">
+  <h2 class="text-base font-semibold mb-3">Financeiro do Admin</h2>
+  <div class="grid gap-4 md:grid-cols-3 text-sm">
+    <div>
+      <div class="text-xs opacity-70">Lojas ativas (mês)</div>
+      <div class="font-semibold">{{ billing()?.lojasAtivasMes ?? lojasAtivas() }}</div>
+    </div>
+    <div>
+      <div class="text-xs opacity-70">Valor calculado</div>
+      <div class="font-semibold">R$ {{ billing()?.valorCalculado ?? 0 }}</div>
+    </div>
+    <div>
+      <div class="text-xs opacity-70">Status fatura mês</div>
+      <div class="font-semibold">{{ billing()?.statusFaturaMes ?? '—' }}</div>
+      <div class="text-xs opacity-60">Competência {{ billing()?.competencia }}</div>
+    </div>
+  </div>
+  <div class="mt-3">
+    <a class="link link-primary text-sm" routerLink="/superadmin/billing/invoices">Ver faturas</a>
+  </div>
+</section>
+
+<superadmin-block-modal
+  [open]="modalBloqueioAberto()"
+  title="Bloquear Admin"
+  subtitle="O bloqueio será aplicado a todas as lojas vinculadas."
+  (close)="fecharBloqueio()"
+  (confirm)="confirmarBloqueio()"
+></superadmin-block-modal>
+
+<superadmin-create-store-modal
+  [open]="modalLojaAberto()"
+  (close)="fecharNovaLoja()"
+  (confirm)="confirmarNovaLoja()"
+></superadmin-create-store-modal>
