@@ -38,7 +38,7 @@ export const routes: Routes = [
 
         // Configurações
         { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja/component').then(m => m.ConfigLojaPage) },
-        { path: 'configuracoes/seguranca', loadComponent: () => import('./pages/seguranca.page').then(m => m.SegurancaPage) },
+        { path: 'configuracoes/licenca', loadComponent: () => import('./pages/licenca/component').then(m => m.LicencaPage) },
     ],
   },
 ];

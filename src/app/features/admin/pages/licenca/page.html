@@ -1,0 +1,48 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Licença</h1>
+    <p class="text-sm opacity-70">Status e validade da licença por loja.</p>
+  </div>
+</div>
+
+<div *ngIf="errorMsg()" class="alert alert-error mb-4">
+  <span class="text-sm">{{ errorMsg() }}</span>
+</div>
+
+<section
+  class="bg-base-300 rounded-lg border border-base-100 p-4"
+  *ngIf="licenca() as info"
+>
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <span [class]="statusBadge(info.status)">
+      {{ info.status === 'VALIDA' ? 'Válida' : info.status === 'TOLERANCIA' ? 'Tolerância' : 'Expirada' }}
+    </span>
+    <span class="text-sm opacity-70">{{ statusLabel() }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Tenant</div>
+      <div class="text-lg font-semibold mt-1">{{ info.tenant }}</div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Status</div>
+      <div class="text-lg font-semibold mt-1">{{ statusLabel() }}</div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Data da validade</div>
+      <div class="text-lg font-semibold mt-1">{{ formatDate(info.validade) }}</div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Data de tolerância</div>
+      <div class="text-lg font-semibold mt-1">{{ formatDate(info.tolerancia) }}</div>
+    </div>
+  </div>
+</section>
+
+<div *ngIf="loading()" class="flex items-center justify-center py-10">
+  <span class="loading loading-spinner loading-lg"></span>
+</div>
