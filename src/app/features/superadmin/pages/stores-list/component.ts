@@ -4,24 +4,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { Admin } from '../../models/admin.model';
-import { Store, StoreInsights } from '../../models/store.model';
+import { Store } from '../../models/store.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
-import { BlockModalComponent } from '../../components/modals/block-modal.component';
-import { KpiCardComponent } from '../../components/kpi-card.component';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
 
 @Component({
   standalone: true,
-  imports: [
-    CommonModule,
-    BlockModalComponent,
-    KpiCardComponent,
-    PaginationComponent,
-    StatusBadgeComponent,
-    TableCardComponent,
-  ],
+  imports: [CommonModule, PaginationComponent, StatusBadgeComponent, TableCardComponent],
   templateUrl: './page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,11 +20,9 @@ export class StoresListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly activeTab = signal<'LISTA' | 'INSIGHTS'>('LISTA');
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
   readonly stores = signal<Store[]>([]);
-  readonly insights = signal<StoreInsights | null>(null);
   readonly admins = signal<Admin[]>([]);
 
   readonly filtros = signal({
@@ -55,12 +44,8 @@ export class StoresListPage {
     return this.stores().slice(inicio, inicio + this.itensPorPagina());
   });
 
-  readonly modalBloqueioAberto = signal(false);
-  readonly storeSelecionada = signal<Store | null>(null);
-
   constructor() {
     this.buscar();
-    this.carregarInsights();
     this.carregarAdmins();
   }
 
@@ -98,16 +83,6 @@ export class StoresListPage {
       });
   }
 
-  carregarInsights(): void {
-    this.facade
-      .getStoreInsights()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (insights) => this.insights.set(insights),
-        error: () => this.errorMsg.set('Falha ao carregar indicadores das lojas.'),
-      });
-  }
-
   patchFiltro(patch: Partial<{ termo: string; status: string; adminId: string }>): void {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
@@ -121,18 +96,20 @@ export class StoresListPage {
     this.paginaAtual.set(1);
   }
 
-  abrirBloqueio(store: Store): void {
-    this.storeSelecionada.set(store);
-    this.modalBloqueioAberto.set(true);
-  }
-
-  fecharBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
-    this.storeSelecionada.set(null);
-  }
-
-  confirmarBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
+  toggleStoreStatus(store: Store, ativo: boolean): void {
+    const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.facade
+      .updateStoreStatus(store.id, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          if (!updated) return;
+          this.stores.update((lista) =>
+            lista.map((item) => (item.id === updated.id ? updated : item))
+          );
+        },
+        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+      });
   }
 
   adminNome(adminId: string): string {

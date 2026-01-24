@@ -1,171 +1,114 @@
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-  <div>
-    <h1 class="text-lg font-semibold">Lojas</h1>
-    <p class="text-sm opacity-70">Visão global para operação rápida.</p>
-  </div>
-</div>
-
-<div class="tabs tabs-boxed mb-4">
-  <button class="tab" [class.tab-active]="activeTab() === 'LISTA'" (click)="activeTab.set('LISTA')">
-    Listagem
-  </button>
-  <button
-    class="tab"
-    [class.tab-active]="activeTab() === 'INSIGHTS'"
-    (click)="activeTab.set('INSIGHTS')"
-  >
-    Insights
-  </button>
-</div>
-
-<ng-container *ngIf="activeTab() === 'LISTA'; else insightsView">
-  <superadmin-table-card title="Lojas cadastradas" subtitle="Filtre por admin, status ou nome.">
-    <div table-actions class="flex flex-wrap items-center gap-2">
-      <label class="form-control w-full max-w-[220px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Buscar</span>
-        </div>
-        <input
-          class="input input-bordered input-sm"
-          placeholder="Loja ou admin"
-          [value]="filtros().termo"
-          (input)="patchFiltro({ termo: $any($event.target).value })"
-        />
-      </label>
-
-      <label class="form-control w-full max-w-[160px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Status</span>
-        </div>
-        <select
-          class="select select-bordered select-sm"
-          [value]="filtros().status"
-          (change)="patchFiltro({ status: $any($event.target).value })"
-        >
-          <option value="TODOS">Todos</option>
-          <option value="ATIVA">Ativa</option>
-          <option value="BLOQUEADA">Bloqueada</option>
-          <option value="CANCELADA">Cancelada</option>
-        </select>
-      </label>
-
-      <label class="form-control w-full max-w-[200px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Admin</span>
-        </div>
-        <select
-          class="select select-bordered select-sm"
-          [value]="filtros().adminId"
-          (change)="patchFiltro({ adminId: $any($event.target).value })"
-        >
-          <option value="TODOS">Todos</option>
-          <option *ngFor="let admin of admins()" [value]="admin.id">{{ admin.nome }}</option>
-        </select>
-      </label>
-
-      <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
-        <span *ngIf="!loading()">Buscar</span>
-        <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
-      </button>
-    </div>
-
-    <div *ngIf="errorMsg()" class="alert alert-error mb-4">
-      <span class="text-sm">{{ errorMsg() }}</span>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="table table-zebra table-sm">
-        <thead>
-          <tr>
-            <th>Loja</th>
-            <th>Admin</th>
-            <th>Mensalidade</th>
-            <th>Status</th>
-            <th>Criada em</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let store of paginaStores()">
-            <td>
-              <div class="font-semibold">{{ store.nome }}</div>
-              <div class="text-xs opacity-70">{{ store.codigo }}</div>
-            </td>
-            <td class="text-sm">
-              {{ adminNome(store.adminId) }}
-            </td>
-            <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
-            <td>
-              <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
-            </td>
-            <td class="text-sm">{{ store.criadoEm }}</td>
-            <td>
-              <div class="flex flex-wrap gap-2">
-                <button class="btn btn-ghost btn-xs" (click)="abrirBloqueio(store)">Bloquear</button>
-                <button class="btn btn-ghost btn-xs">Desbloquear</button>
-              </div>
-            </td>
-          </tr>
-
-          <tr *ngIf="!loading() && paginaStores().length === 0">
-            <td colspan="6" class="text-center opacity-70 py-6">
-              Nenhuma loja encontrada para os filtros selecionados.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <superadmin-pagination
-      [page]="paginaAtual()"
-      [totalPages]="totalPaginas()"
-      [totalItems]="stores().length"
-      [pageItems]="paginaStores().length"
-      [pageSize]="itensPorPagina()"
-      [pageSizes]="tamanhosPagina"
-      (pageChange)="alterarPagina($event)"
-      (pageSizeChange)="setItensPorPagina($event)"
-    ></superadmin-pagination>
-  </superadmin-table-card>
-</ng-container>
-
-<ng-template #insightsView>
-  <div class="grid gap-4">
-    <div class="grid gap-4 md:grid-cols-3">
-      <superadmin-kpi-card label="Lojas ativas" [value]="insights()?.totalAtivas ?? '—'"></superadmin-kpi-card>
-      <superadmin-kpi-card label="Lojas bloqueadas" [value]="insights()?.totalBloqueadas ?? '—'"></superadmin-kpi-card>
-      <superadmin-kpi-card label="Lojas canceladas" [value]="insights()?.totalCanceladas ?? '—'"></superadmin-kpi-card>
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="rounded-xl border border-base-100 bg-base-200 p-4">
-        <h3 class="text-sm font-semibold mb-2">Top Admins por nº de lojas</h3>
-        <div class="space-y-3">
-          <div *ngFor="let item of insights()?.topAdmins" class="flex items-center justify-between text-sm">
-            <span>{{ item.admin }}</span>
-            <div class="flex items-center gap-2">
-              <progress class="progress progress-primary w-32" [value]="item.total" [max]="10"></progress>
-              <span class="font-semibold">{{ item.total }}</span>
-            </div>
-          </div>
-        </div>
+<superadmin-table-card title="Lojas cadastradas" subtitle="Filtre por admin, status ou nome.">
+  <div table-actions class="flex flex-wrap items-center gap-2">
+  
+    <label class="form-control w-full max-w-[220px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar</span>
       </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Loja ou admin"
+        [value]="filtros().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+      />
+    </label>
 
-      <div class="rounded-xl border border-base-100 bg-base-200 p-4">
-        <h3 class="text-sm font-semibold mb-2">Bloqueios por inadimplência</h3>
-        <p class="text-sm opacity-70">Lojas bloqueadas por atraso de pagamento.</p>
-        <div class="mt-4 text-3xl font-semibold text-error">
-          {{ insights()?.bloqueadasPorInadimplencia ?? 0 }}
-        </div>
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Status</span>
       </div>
-    </div>
-  </div>
-</ng-template>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().status"
+        (change)="patchFiltro({ status: $any($event.target).value })"
+      >
+        <option value="TODOS">Todos</option>
+        <option value="ATIVA">Ativa</option>
+        <option value="BLOQUEADA">Bloqueada</option>
+        <option value="CANCELADA">Cancelada</option>
+      </select>
+    </label>
 
-<superadmin-block-modal
-  [open]="modalBloqueioAberto()"
-  [title]="'Bloquear loja ' + (storeSelecionada()?.nome ?? '')"
-  subtitle="Bloqueio aplicado por inadimplência ou ajuste operacional."
-  (close)="fecharBloqueio()"
-  (confirm)="confirmarBloqueio()"
-></superadmin-block-modal>
+    <label class="form-control w-full max-w-[200px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Admin</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().adminId"
+        (change)="patchFiltro({ adminId: $any($event.target).value })"
+      >
+        <option value="TODOS">Todos</option>
+        <option *ngFor="let admin of admins()" [value]="admin.id">{{ admin.nome }}</option>
+      </select>
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Loja</th>
+          <th>Admin</th>
+          <th>Mensalidade</th>
+          <th>Status</th>
+          <th>Criada em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let store of paginaStores()">
+          <td>
+            <div class="font-semibold">{{ store.nome }}</div>
+            <div class="text-xs opacity-70">{{ store.codigo }}</div>
+          </td>
+          <td class="text-sm">
+            {{ adminNome(store.adminId) }}
+          </td>
+          <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
+          <td>
+            <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
+          </td>
+          <td class="text-sm">{{ store.criadoEm }}</td>
+          <td>
+            <label class="label cursor-pointer justify-start gap-2">
+              <input
+                type="checkbox"
+                class="toggle toggle-xs"
+                [checked]="store.status === 'ATIVA'"
+                (change)="toggleStoreStatus(store, $any($event.target).checked)"
+              />
+              <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
+            </label>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading() && paginaStores().length === 0">
+          <td colspan="6" class="text-center opacity-70 py-6">
+            Nenhuma loja encontrada para os filtros selecionados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <superadmin-pagination
+    [page]="paginaAtual()"
+    [totalPages]="totalPaginas()"
+    [totalItems]="stores().length"
+    [pageItems]="paginaStores().length"
+    [pageSize]="itensPorPagina()"
+    [pageSizes]="tamanhosPagina"
+    (pageChange)="alterarPagina($event)"
+    (pageSizeChange)="setItensPorPagina($event)"
+  ></superadmin-pagination>
+</superadmin-table-card>
