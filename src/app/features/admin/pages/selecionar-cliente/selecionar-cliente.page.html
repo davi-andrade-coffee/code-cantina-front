@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-base-200 flex items-center justify-center px-6 py-10">
+  <div class="w-full max-w-5xl">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+      <div class="card-body gap-6">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 class="text-2xl font-semibold">Selecionar cliente</h1>
+            <p class="text-sm opacity-70">
+              Escolha a unidade para acessar o painel administrativo correspondente.
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <button class="btn btn-sm btn-outline" (click)="logout()">Sair</button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label class="input input-bordered flex items-center gap-2 flex-1">
+              <input
+                type="text"
+                class="grow"
+                placeholder="Buscar por nome, cidade ou CNPJ"
+                [value]="searchTerm()"
+                (input)="searchTerm.set($any($event.target).value)"
+              />
+              <span class="text-xs opacity-60">⌕</span>
+            </label>
+
+            <select
+              class="select select-bordered w-full sm:w-48"
+              [value]="statusFilter()"
+              (change)="statusFilter.set($any($event.target).value)"
+            >
+              <option value="TODOS">Todos</option>
+              <option value="ATIVOS">Ativos</option>
+              <option value="INATIVOS">Inativos</option>
+            </select>
+          </div>
+
+          <div class="grid gap-3">
+            <div
+              *ngFor="let client of filteredClients()"
+              class="border rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base font-semibold">{{ client.nome }}</h2>
+                  <span
+                    class="badge badge-sm"
+                    [class.badge-success]="client.status === 'ATIVO'"
+                    [class.badge-ghost]="client.status === 'INATIVO'"
+                  >
+                    {{ client.status }}
+                  </span>
+                </div>
+                <div class="text-sm opacity-70">{{ client.nomeFantasia }}</div>
+                <div class="text-xs opacity-60">{{ client.cidade }} · {{ client.cnpj }}</div>
+              </div>
+
+              <div class="flex flex-col items-start gap-1 sm:items-end">
+                <!-- <div class="text-xs opacity-60">Responsável: {{ client.responsavel }}</div> -->
+                <div class="text-xs opacity-60">
+                  Última atualização: {{ client.ultimaAtualizacao }}
+                </div>
+                <button class="btn btn-sm btn-primary mt-2" (click)="selectClient(client)">
+                  Selecionar
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="filteredClients().length === 0" class="text-sm opacity-70 text-center py-6">
+              Nenhum cliente encontrado com os filtros informados.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog class="modal" [open]="showInactiveModal()">
+  <div class="modal-box">
+    <h3 class="font-semibold text-lg">Licença inativa</h3>
+    <p class="py-3 text-sm opacity-80">
+      A licença do cliente <strong>{{ inactiveClientName() }}</strong> não está ativa.
+      Entre em contato com o suporte para regularizar e tente novamente.
+    </p>
+    <div class="modal-action">
+      <button class="btn btn-primary" (click)="closeInactiveModal()">Entendi</button>
+    </div>
+  </div>
+</dialog>

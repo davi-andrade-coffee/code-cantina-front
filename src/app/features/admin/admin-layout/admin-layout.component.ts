@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { ADMIN_MENU } from './menu.data';
 import { MenuItem, MenuSection } from './menu.model';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AdminClientService } from '../../../core/admin/admin-client.service';
 
 type Theme = 'dark' | 'light';
 
@@ -20,11 +21,16 @@ export class AdminLayoutComponent {
 
   userEmail = this.auth.getSnapshotUser()?.email ?? '—';
   userRole = this.auth.getSnapshotUser()?.role ?? 'ADMIN';
+  selectedClient = this.adminClient.selectedClient;
 
   breadcrumbs = computed(() => this.buildBreadcrumbs(this.currentUrl()));
   theme: Theme = 'dark';
 
-  constructor(private router: Router, private auth: AuthService) {
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private adminClient: AdminClientService
+  ) {
     this.currentUrl.set(this.router.url);
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
@@ -46,6 +52,7 @@ export class AdminLayoutComponent {
   }
 
   logout() {
+    this.adminClient.clearSelectedClient();
     this.auth.logout();
     this.router.navigateByUrl('/auth/login');
   }
@@ -71,4 +78,3 @@ export class AdminLayoutComponent {
     return parts.map(normalize);
   }
 }
-

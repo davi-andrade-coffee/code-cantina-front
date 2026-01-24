@@ -1,9 +1,19 @@
 import { Routes } from '@angular/router';
+import { adminClientGuard } from '../../core/admin/admin-client.guard';
 
 export const routes: Routes = [
   {
+    path: 'selecionar-cliente',
+    loadComponent: () =>
+      import('./pages/selecionar-cliente/selecionar-cliente.page').then(
+        m => m.SelecionarClientePage
+      ),
+  },
+  {
     path: '',
-    loadComponent: () => import('./admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
+    canMatch: [adminClientGuard],
+    loadComponent: () =>
+      import('./admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
     children: [
         { path: '', pathMatch: 'full', redirectTo: 'cadastros/pessoas' },
         // Operação

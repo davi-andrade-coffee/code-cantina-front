@@ -12,6 +12,20 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./features/auth/login/login.page').then(m => m.LoginPage),
       },
+      {
+        path: 'recuperar-senha',
+        loadComponent: () =>
+          import('./features/auth/recuperar-senha/recuperar-senha.page').then(
+            m => m.RecuperarSenhaPage
+          ),
+      },
+      {
+        path: 'trocar-senha',
+        loadComponent: () =>
+          import('./features/auth/trocar-senha/trocar-senha.page').then(
+            m => m.TrocarSenhaPage
+          ),
+      },
     ],
   },
   {
@@ -38,4 +52,3 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/login' },
   { path: '**', redirectTo: 'auth/login' },
 ];
-
