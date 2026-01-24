@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
 import { Admin, AdminBillingResumo, AdminFilters, AdminInsights } from '../models/admin.model';
-import { Store, StoreInsights } from '../models/store.model';
+import { Store, StoreInsights, StoreStatus } from '../models/store.model';
 
 const ADMIN_DATA: Admin[] = [
   {
@@ -190,6 +190,24 @@ export class SuperAdminMockService {
       admin.status = status;
     }
     return of(admin).pipe(delay(200));
+  }
+
+  updateStoreStatus(storeId: string, status: StoreStatus): Observable<Store | undefined> {
+    const store = STORE_DATA.find((item) => item.id === storeId);
+    if (store) {
+      store.status = status;
+    }
+    return of(store).pipe(delay(200));
+  }
+
+  updateStore(storeId: string, payload: { nome: string; codigo: string; mensalidade: number }): Observable<Store | undefined> {
+    const store = STORE_DATA.find((item) => item.id === storeId);
+    if (store) {
+      store.nome = payload.nome;
+      store.codigo = payload.codigo;
+      store.mensalidade = payload.mensalidade;
+    }
+    return of(store).pipe(delay(200));
   }
 
   getAdminInsights(): Observable<AdminInsights> {

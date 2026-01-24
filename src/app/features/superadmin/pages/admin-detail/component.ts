@@ -33,6 +33,8 @@ export class AdminDetailPage {
   readonly admin = signal<Admin | null>(null);
   readonly stores = signal<Store[]>([]);
   readonly modalLojaAberto = signal(false);
+  readonly modalLojaModo = signal<'CRIAR' | 'EDITAR'>('CRIAR');
+  readonly lojaSelecionada = signal<Store | null>(null);
 
   constructor() {
     this.carregarDetalhes();
@@ -69,15 +71,59 @@ export class AdminDetailPage {
   }
 
   abrirNovaLoja(): void {
+    this.modalLojaModo.set('CRIAR');
+    this.lojaSelecionada.set(null);
+    this.modalLojaAberto.set(true);
+  }
+
+  abrirEditarLoja(store: Store): void {
+    this.modalLojaModo.set('EDITAR');
+    this.lojaSelecionada.set(store);
     this.modalLojaAberto.set(true);
   }
 
   fecharNovaLoja(): void {
     this.modalLojaAberto.set(false);
+    this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(): void {
+  confirmarNovaLoja(payload?: { id?: string | null; nome: string; codigo: string; mensalidade: number }): void {
+    if (payload?.id) {
+      this.facade
+        .updateStore(payload.id, {
+          nome: payload.nome,
+          codigo: payload.codigo,
+          mensalidade: payload.mensalidade,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (updated) => {
+            if (!updated) return;
+            this.stores.update((lista) =>
+              lista.map((item) => (item.id === updated.id ? updated : item))
+            );
+          },
+          error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
+        });
+    }
     this.modalLojaAberto.set(false);
+    this.lojaSelecionada.set(null);
+  }
+
+  toggleStoreStatus(store: Store, ativo: boolean): void {
+    const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.facade
+      .updateStoreStatus(store.id, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          if (!updated) return;
+          this.stores.update((lista) =>
+            lista.map((item) => (item.id === updated.id ? updated : item))
+          );
+        },
+        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+      });
   }
 
   toggleAdminStatus(ativo: boolean): void {

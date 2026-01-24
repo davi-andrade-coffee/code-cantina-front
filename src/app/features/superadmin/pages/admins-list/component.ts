@@ -9,7 +9,6 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateAdminModalComponent } from '../../components/modals/create-admin-modal.component';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
-import { TableCardComponent } from '../../components/table-card.component';
 
 @Component({
   standalone: true,
@@ -19,7 +18,6 @@ import { TableCardComponent } from '../../components/table-card.component';
     CreateAdminModalComponent,
     PaginationComponent,
     StatusBadgeComponent,
-    TableCardComponent,
   ],
   templateUrl: './page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

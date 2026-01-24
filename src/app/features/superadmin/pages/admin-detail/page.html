@@ -74,6 +74,7 @@
           <th>Criada em</th>
           <th>Último acesso</th>
           <th>Ações</th>
+          <th>Bloqueio</th>
         </tr>
       </thead>
       <tbody>
@@ -88,15 +89,24 @@
           <td class="text-sm">{{ store.ultimoAcesso || '—' }}</td>
           <td>
             <div class="flex flex-wrap gap-2">
-              <button class="btn btn-ghost btn-xs">Editar</button>
-              <button class="btn btn-ghost btn-xs">Bloquear</button>
-              <button class="btn btn-ghost btn-xs">Desbloquear</button>
+              <button class="btn btn-ghost btn-xs" (click)="abrirEditarLoja(store)">Editar</button>
             </div>
+          </td>
+          <td>
+            <label class="label cursor-pointer justify-start gap-2">
+              <input
+                type="checkbox"
+                class="toggle toggle-xs"
+                [checked]="store.status === 'ATIVA'"
+                (change)="toggleStoreStatus(store, $any($event.target).checked)"
+              />
+              <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
+            </label>
           </td>
         </tr>
 
         <tr *ngIf="!loading() && stores().length === 0">
-          <td colspan="7" class="text-center opacity-70 py-6">
+          <td colspan="8" class="text-center opacity-70 py-6">
             Nenhuma loja cadastrada para este Admin.
           </td>
         </tr>
@@ -107,6 +117,9 @@
 
 <superadmin-create-store-modal
   [open]="modalLojaAberto()"
+  [mode]="modalLojaModo()"
+  [storeId]="lojaSelecionada()?.id"
+  [store]="lojaSelecionada()"
   (close)="fecharNovaLoja()"
-  (confirm)="confirmarNovaLoja()"
+  (confirm)="confirmarNovaLoja($event)"
 ></superadmin-create-store-modal>

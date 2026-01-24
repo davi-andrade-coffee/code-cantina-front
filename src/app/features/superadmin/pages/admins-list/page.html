@@ -11,8 +11,13 @@
   </div>
 </div>
 
-<superadmin-table-card title="Admins cadastrados" subtitle="Controle de acesso e cobrança por cliente.">
-  <div table-actions class="flex flex-wrap items-center gap-2">
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div class="mb-4">
+    <h2 class="text-base font-semibold">Cadastro de Admins</h2>
+    <p class="text-xs opacity-70">Controle de acesso e cobrança por cliente.</p>
+  </div>
+
+  <div class="flex flex-wrap items-end gap-3 mb-4">
     <label class="form-control w-full max-w-[220px]">
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>
@@ -117,7 +122,7 @@
     (pageChange)="alterarPagina($event)"
     (pageSizeChange)="setItensPorPagina($event)"
   ></superadmin-pagination>
-</superadmin-table-card>
+</section>
 
 <superadmin-create-admin-modal
   [open]="modalCadastroAberto()"
