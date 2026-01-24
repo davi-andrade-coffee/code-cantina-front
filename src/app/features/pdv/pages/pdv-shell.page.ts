@@ -11,7 +11,7 @@ import { CashMovementType } from '../models/cash-movement';
   standalone: true,
   imports: [CommonModule, TerminalSelectPage, CashOpenPage, PdvSalePage, CashClosePage],
   template: `
-    <div class="space-y-4">
+    <div class="pdv-shell space-y-4">
       <header class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-lg font-semibold">PDV</h1>
