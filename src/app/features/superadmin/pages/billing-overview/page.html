@@ -1,0 +1,89 @@
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">Recebimentos e Indicadores</h1>
+    <p class="text-sm opacity-70">Visão gerencial consolidada do SaaS.</p>
+  </div>
+</div>
+
+<div *ngIf="errorMsg()" class="alert alert-error mb-4">
+  <span class="text-sm">{{ errorMsg() }}</span>
+</div>
+
+<div class="grid gap-4">
+  <div class="grid gap-4 md:grid-cols-3">
+    <superadmin-kpi-card
+      label="Receita do mês"
+      [value]="overview()?.receitaMes ? ('R$ ' + overview()?.receitaMes) : '—'"
+    ></superadmin-kpi-card>
+    <superadmin-kpi-card
+      label="Receita acumulada (ano)"
+      [value]="overview()?.receitaAno ? ('R$ ' + overview()?.receitaAno) : '—'"
+    ></superadmin-kpi-card>
+    <superadmin-kpi-card
+      label="Taxa de inadimplência"
+      [value]="formatPercent(overview()?.taxaInadimplencia)"
+    ></superadmin-kpi-card>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-3">
+    <superadmin-kpi-card label="Admins ativos" [value]="overview()?.adminsAtivos ?? '—'"></superadmin-kpi-card>
+    <superadmin-kpi-card label="Lojas ativas" [value]="overview()?.lojasAtivas ?? '—'"></superadmin-kpi-card>
+    <superadmin-kpi-card label="Crescimento mensal" [value]="overview()?.novosAdminsMensal?.[3]?.total ?? '—'"></superadmin-kpi-card>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="rounded-xl border border-base-100 bg-base-200 p-4">
+      <h3 class="text-sm font-semibold mb-2">Receita mês a mês</h3>
+      <div class="space-y-3">
+        <div *ngFor="let item of overview()?.receitaMensal" class="flex items-center justify-between text-sm">
+          <span>{{ item.mes }}</span>
+          <div class="flex items-center gap-2">
+            <progress class="progress progress-primary w-32" [value]="item.valor" [max]="8000"></progress>
+            <span class="font-semibold">R$ {{ item.valor }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-base-100 bg-base-200 p-4">
+      <h3 class="text-sm font-semibold mb-2">Novos Admins por mês</h3>
+      <div class="space-y-3">
+        <div *ngFor="let item of overview()?.novosAdminsMensal" class="flex items-center justify-between text-sm">
+          <span>{{ item.mes }}</span>
+          <div class="flex items-center gap-2">
+            <progress class="progress progress-secondary w-32" [value]="item.total" [max]="6"></progress>
+            <span class="font-semibold">{{ item.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="rounded-xl border border-base-100 bg-base-200 p-4">
+      <h3 class="text-sm font-semibold mb-2">Lojas ativas por mês</h3>
+      <div class="space-y-3">
+        <div *ngFor="let item of overview()?.lojasAtivasMensal" class="flex items-center justify-between text-sm">
+          <span>{{ item.mes }}</span>
+          <div class="flex items-center gap-2">
+            <progress class="progress progress-accent w-32" [value]="item.total" [max]="60"></progress>
+            <span class="font-semibold">{{ item.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-base-100 bg-base-200 p-4">
+      <h3 class="text-sm font-semibold mb-2">Inadimplência por mês</h3>
+      <div class="space-y-3">
+        <div *ngFor="let item of overview()?.inadimplenciaMensal" class="flex items-center justify-between text-sm">
+          <span>{{ item.mes }}</span>
+          <div class="flex items-center gap-2">
+            <progress class="progress progress-error w-32" [value]="item.valor" [max]="12"></progress>
+            <span class="font-semibold">{{ item.valor }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
