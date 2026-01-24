@@ -3,6 +3,6 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('../pdv/pdv.routes').then(m => m.routes),
+    loadComponent: () => import('./pages/pdv-shell.page').then(m => m.PdvShellPage),
   },
 ];
