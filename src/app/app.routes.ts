@@ -23,14 +23,14 @@ export const routes: Routes = [
     path: 'admin',
     canMatch: [authGuard, roleGuard(['ADMIN'])],
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.routes),
-  },
+  },  
   {
-    path: 'collaborator',
+    path: 'colaborador',
     canMatch: [authGuard, roleGuard(['COLABORADOR'])],
     loadChildren: () => import('./features/collaborator/collaborator.routes').then(m => m.routes),
   },
   {
-    path: 'client',
+    path: 'cliente',
     canMatch: [authGuard, roleGuard(['CLIENTE'])],
     loadChildren: () => import('./features/client/client.routes').then(m => m.routes),
   },

@@ -6,12 +6,14 @@ import { PdvSalePage } from './pdv-sale.page';
 import { CashClosePage } from './cash-close.page';
 import { PdvFacade } from '../services/pdv.facade';
 import { CashMovementType } from '../models/cash-movement';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   standalone: true,
   imports: [CommonModule, TerminalSelectPage, CashOpenPage, PdvSalePage, CashClosePage],
   template: `
-    <div class="space-y-4">
+    <div class="p-4 space-y-4 min-h-screen bg-base-100">
       <header class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-lg font-semibold">PDV</h1>
@@ -33,6 +35,13 @@ import { CashMovementType } from '../models/cash-movement';
             (click)="facade.clearTerminal()"
           >
             Trocar Terminal
+          </button>
+          <button
+            class="btn btn-outline btn-sm"
+            type="button"
+            (click)="backToTerminal()"
+          >
+            Voltar
           </button>
         </div>
       </header>
@@ -91,7 +100,7 @@ import { CashMovementType } from '../models/cash-movement';
   `,
 })
 export class PdvShellPage implements OnInit {
-  constructor(public facade: PdvFacade) {}
+  constructor(public facade: PdvFacade, private auth: AuthService, private router: Router) {}
 
   ngOnInit(): void {
     void this.facade.init();
@@ -105,6 +114,20 @@ export class PdvShellPage implements OnInit {
 
   get operator(): string {
     return this.facade.operatorName();
+  }
+
+  backToTerminal() {
+    const user = this.auth.getSnapshotUser();
+    if (!user) {
+      this.auth.logout();
+      return;
+    }
+    if (user.role == 'ADMIN') {
+      this.router.navigateByUrl('/admin/relatorios/vendas');
+      return;
+    };
+    this.auth.logout();
+    this.router.navigateByUrl('/auth/login');  
   }
 
   onSelectTerminal(terminalId: string): void {

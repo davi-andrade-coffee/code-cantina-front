@@ -4,7 +4,7 @@ export const ADMIN_MENU: MenuSection[] = [
   {
     title: 'Operação',
     items: [
-      { label: 'PDV', path: '/admin/operacao/pdv' },
+      { label: 'PDV', path: '/admin/pdv' },
       {
         label: 'Caixa',
         children: [
