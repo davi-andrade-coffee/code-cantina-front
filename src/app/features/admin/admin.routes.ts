@@ -18,9 +18,7 @@ export const routes: Routes = [
         { path: '', pathMatch: 'full', redirectTo: 'cadastros/pessoas' },
         // Operação
         // { path: 'operacao/pdv', loadChildren: () => import('../pdv/pdv.routes').then(m => m.routes) },
-        { path: 'operacao/caixa/abertura', loadComponent: () => import('./pages/caixa-abertura.page').then(m => m.CaixaAberturaPage) },
-        { path: 'operacao/caixa/fechamento', loadComponent: () => import('./pages/caixa-fechamento.page').then(m => m.CaixaFechamentoPage) },
-        { path: 'operacao/caixa/sessoes', loadComponent: () => import('./pages/caixa-sessoes.page').then(m => m.CaixaSessoesPage) },
+        { path: 'operacao/caixa', loadComponent: () => import('./pages/cash/cash.page').then(m => m.CashPage) },
 
         // Cadastros Pessoas
         { path: 'cadastros/pessoas', loadComponent: () => import('./pages/pessoas/component').then(m => m.PessoasPage) },
