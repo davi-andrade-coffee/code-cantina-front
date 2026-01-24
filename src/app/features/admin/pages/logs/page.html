@@ -46,36 +46,6 @@
       </select>
     </label>
 
-    <label class="form-control w-full max-w-[180px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Operador</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().operador"
-        (change)="patchFiltro({ operador: $any($event.target).value })"
-      >
-        <option *ngFor="let item of operadores" [value]="item.value">
-          {{ item.label }}
-        </option>
-      </select>
-    </label>
-
-    <label class="form-control w-full max-w-[180px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Terminal</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().terminal"
-        (change)="patchFiltro({ terminal: $any($event.target).value })"
-      >
-        <option *ngFor="let item of terminais" [value]="item.value">
-          {{ item.label }}
-        </option>
-      </select>
-    </label>
-
     <label class="form-control w-full max-w-sm">
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>

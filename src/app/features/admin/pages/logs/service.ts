@@ -261,8 +261,6 @@ export class LogsSistemaService {
         const dentroInicio = dataInicio ? dataItem >= dataInicio : true;
         const dentroFim = dataFim ? dataItem <= dataFim : true;
         const categoriaOk = filtro.categoria === 'TODOS' || item.categoria === filtro.categoria;
-        const operadorOk = filtro.operador === 'TODOS' || item.operador === filtro.operador;
-        const terminalOk = filtro.terminal === 'TODOS' || item.terminal === filtro.terminal;
         const termoOk =
           termo.length === 0 ||
           item.descricao.toLowerCase().includes(termo) ||
@@ -272,7 +270,7 @@ export class LogsSistemaService {
           item.origem.toLowerCase().includes(termo) ||
           item.ip.toLowerCase().includes(termo);
 
-        return dentroInicio && dentroFim && categoriaOk && operadorOk && terminalOk && termoOk;
+        return dentroInicio && dentroFim && categoriaOk && termoOk;
       })
       .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime());
 

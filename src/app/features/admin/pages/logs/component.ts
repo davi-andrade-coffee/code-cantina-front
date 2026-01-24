@@ -32,30 +32,6 @@ export class LogsSistemaPage {
     })),
   ];
 
-  readonly operadores = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Administrador', value: 'Administrador' },
-    { label: 'Camila Souza', value: 'Camila Souza' },
-    { label: 'Rafael Nunes', value: 'Rafael Nunes' },
-    { label: 'Fernanda Silva', value: 'Fernanda Silva' },
-    { label: 'Ricardo Lima', value: 'Ricardo Lima' },
-    { label: 'Financeiro', value: 'Financeiro' },
-    { label: 'Atendimento', value: 'Atendimento' },
-    { label: 'Equipe Suporte', value: 'Equipe Suporte' },
-  ];
-
-  readonly terminais = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'PDV-01', value: 'PDV-01' },
-    { label: 'PDV-02', value: 'PDV-02' },
-    { label: 'PDV-03', value: 'PDV-03' },
-    { label: 'Admin-01', value: 'Admin-01' },
-    { label: 'Admin-02', value: 'Admin-02' },
-    { label: 'Admin-03', value: 'Admin-03' },
-    { label: 'Finance-01', value: 'Finance-01' },
-    { label: 'Admin-Help', value: 'Admin-Help' },
-  ];
-
   readonly tamanhosPagina = [6, 8, 12, 16];
   readonly paginaAtual = signal(1);
   readonly itensPorPagina = signal(8);
@@ -145,8 +121,6 @@ export class LogsSistemaPage {
       dataInicio: formatDateInput(inicio),
       dataFim: formatDateInput(hoje),
       categoria: 'TODOS',
-      operador: 'TODOS',
-      terminal: 'TODOS',
       termo: '',
     };
   }

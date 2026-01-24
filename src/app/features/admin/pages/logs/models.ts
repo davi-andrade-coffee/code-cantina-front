@@ -31,7 +31,5 @@ export interface LogFiltro {
   dataInicio: string;
   dataFim: string;
   categoria: LogCategoriaFiltro;
-  operador: string;
-  terminal: string;
   termo: string;
 }
