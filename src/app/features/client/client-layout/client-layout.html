@@ -11,6 +11,10 @@
         <div class="text-xs font-medium">Cliente</div>
       </div>
       <button class="btn btn-sm btn-error" (click)="logout()">Sair</button>
+
+      <button class="btn btn-sm btn-ghost" (click)="toggleTheme()">
+        {{ theme === 'dark' ? 'Light' : 'Dark' }}
+      </button>
     </div>
   </div>
 

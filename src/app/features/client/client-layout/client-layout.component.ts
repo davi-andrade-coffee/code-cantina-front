@@ -7,6 +7,8 @@ import { ClientFacade } from '../services/client.facade';
 import { CLIENT_MENU } from './client-menu.data';
 import { ClientMenuItem } from './client-menu.model';
 
+type Theme = 'dark' | 'light';
+
 @Component({
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink],
@@ -16,6 +18,7 @@ export class ClientLayoutComponent {
   readonly menu = CLIENT_MENU;
   readonly currentUrl = signal<string>('/cliente');
   readonly userEmail = this.auth.getSnapshotUser()?.email ?? '—';
+  theme: Theme = 'dark';
 
   constructor(
     private router: Router,
@@ -27,6 +30,9 @@ export class ClientLayoutComponent {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(event => this.currentUrl.set((event as NavigationEnd).urlAfterRedirects));
+
+    const saved = (localStorage.getItem('cantina.theme') as Theme) || 'dark';
+    this.applyTheme(saved);
   }
 
   logout(): void {
@@ -37,4 +43,16 @@ export class ClientLayoutComponent {
   isActive(item: ClientMenuItem): boolean {
     return this.currentUrl().startsWith(item.path);
   }
+
+  toggleTheme() {
+    this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
+  }
+
+  private applyTheme(theme: Theme) {
+    this.theme = theme;
+    localStorage.setItem('cantina.theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark'); // opcional
+  }
+
 }
