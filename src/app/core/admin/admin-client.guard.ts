@@ -6,7 +6,12 @@ export const adminClientGuard: CanMatchFn = () => {
   const router = inject(Router);
   const adminClient = inject(AdminClientService);
 
-  if (adminClient.getSelectedClient()) return true;
+  const selected = adminClient.getSelectedClient();
+  if (adminClient.isClientActive(selected)) return true;
+
+  if (selected && !adminClient.isClientActive(selected)) {
+    adminClient.clearSelectedClient();
+  }
 
   router.navigateByUrl('/admin/selecionar-cliente');
   return false;

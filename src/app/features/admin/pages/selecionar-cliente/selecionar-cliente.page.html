@@ -79,3 +79,16 @@
     </div>
   </div>
 </div>
+
+<dialog class="modal" [open]="showInactiveModal()">
+  <div class="modal-box">
+    <h3 class="font-semibold text-lg">Licença inativa</h3>
+    <p class="py-3 text-sm opacity-80">
+      A licença do cliente <strong>{{ inactiveClientName() }}</strong> não está ativa.
+      Entre em contato com o suporte para regularizar e tente novamente.
+    </p>
+    <div class="modal-action">
+      <button class="btn btn-primary" (click)="closeInactiveModal()">Entendi</button>
+    </div>
+  </div>
+</dialog>

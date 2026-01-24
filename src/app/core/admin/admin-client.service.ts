@@ -71,6 +71,10 @@ export class AdminClientService {
     return this.selectedClientSignal();
   }
 
+  isClientActive(client: AdminClient | null): boolean {
+    return !!client && client.status === 'ATIVO';
+  }
+
   setSelectedClient(client: AdminClient): void {
     this.selectedClientSignal.set(client);
     localStorage.setItem(this.storageKey, JSON.stringify(client));

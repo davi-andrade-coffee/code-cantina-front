@@ -14,6 +14,8 @@ type StatusFilter = 'TODOS' | 'ATIVOS' | 'INATIVOS';
 export class SelecionarClientePage {
   searchTerm = signal('');
   statusFilter = signal<StatusFilter>('TODOS');
+  showInactiveModal = signal(false);
+  inactiveClientName = signal('');
   private readonly allClients = this.clientService.listClients();
 
   filteredClients = computed(() => {
@@ -44,8 +46,18 @@ export class SelecionarClientePage {
   ) {}
 
   selectClient(client: AdminClient) {
+    if (!this.clientService.isClientActive(client)) {
+      this.inactiveClientName.set(client.nome);
+      this.showInactiveModal.set(true);
+      return;
+    }
     this.clientService.setSelectedClient(client);
     this.router.navigateByUrl('/admin');
+  }
+
+  closeInactiveModal() {
+    this.showInactiveModal.set(false);
+    this.inactiveClientName.set('');
   }
 
   logout() {
