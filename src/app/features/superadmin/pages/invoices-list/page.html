@@ -1,187 +1,117 @@
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-  <div>
-    <h1 class="text-lg font-semibold">Faturas / Cobranças</h1>
-    <p class="text-sm opacity-70">Controle por competência e status de pagamento.</p>
-  </div>
-</div>
-
-<div class="tabs tabs-boxed mb-4">
-  <button class="tab" [class.tab-active]="activeTab() === 'LISTA'" (click)="activeTab.set('LISTA')">
-    Listagem
-  </button>
-  <button
-    class="tab"
-    [class.tab-active]="activeTab() === 'INSIGHTS'"
-    (click)="activeTab.set('INSIGHTS')"
-  >
-    Insights
-  </button>
-</div>
-
-<ng-container *ngIf="activeTab() === 'LISTA'; else insightsView">
-  <superadmin-table-card title="Faturas por competência" subtitle="Monitoramento de cobrança mensal.">
-    <div table-actions class="flex flex-wrap items-center gap-2">
-      <label class="form-control w-full max-w-[180px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Competência</span>
-        </div>
-        <input
-          class="input input-bordered input-sm"
-          placeholder="08/2024"
-          [value]="filtros().competencia"
-          (input)="patchFiltro({ competencia: $any($event.target).value })"
-        />
-      </label>
-
-      <label class="form-control w-full max-w-[160px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Status</span>
-        </div>
-        <select
-          class="select select-bordered select-sm"
-          [value]="filtros().status"
-          (change)="patchFiltro({ status: $any($event.target).value })"
-        >
-          <option value="TODOS">Todos</option>
-          <option value="EM_ABERTO">Em aberto</option>
-          <option value="PAGA">Paga</option>
-          <option value="VENCIDA">Vencida</option>
-        </select>
-      </label>
-
-      <label class="form-control w-full max-w-[200px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Buscar admin</span>
-        </div>
-        <input
-          class="input input-bordered input-sm"
-          placeholder="Nome do admin"
-          [value]="filtros().termo"
-          (input)="patchFiltro({ termo: $any($event.target).value })"
-        />
-      </label>
-
-      <label class="form-control w-full max-w-[160px]">
-        <div class="label">
-          <span class="label-text text-xs opacity-70">Vencidas</span>
-        </div>
-        <select
-          class="select select-bordered select-sm"
-          [value]="filtros().somenteVencidas ? 'SIM' : 'NAO'"
-          (change)="patchFiltro({ somenteVencidas: $any($event.target).value === 'SIM' })"
-        >
-          <option value="NAO">Todas</option>
-          <option value="SIM">Somente vencidas</option>
-        </select>
-      </label>
-
-      <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
-        <span *ngIf="!loading()">Buscar</span>
-        <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
-      </button>
-    </div>
-
-    <div *ngIf="errorMsg()" class="alert alert-error mb-4">
-      <span class="text-sm">{{ errorMsg() }}</span>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="table table-zebra table-sm">
-        <thead>
-          <tr>
-            <th>Competência</th>
-            <th>Admin</th>
-            <th>Lojas ativas</th>
-            <th>Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let invoice of paginaInvoices()">
-            <td class="text-sm">{{ invoice.competencia }}</td>
-            <td class="font-medium">{{ invoice.adminNome }}</td>
-            <td class="text-sm">{{ invoice.lojasAtivas }}</td>
-            <td class="text-sm">R$ {{ invoice.valor }}</td>
-            <td class="text-sm">{{ invoice.vencimento }}</td>
-            <td>
-              <superadmin-status-badge [status]="invoice.status" kind="invoice"></superadmin-status-badge>
-            </td>
-            <td>
-              <div class="flex flex-wrap gap-2">
-                <button class="btn btn-ghost btn-xs">Detalhes</button>
-                <button class="btn btn-ghost btn-xs">Marcar paga</button>
-                <button class="btn btn-ghost btn-xs">Baixar boleto</button>
-              </div>
-            </td>
-          </tr>
-
-          <tr *ngIf="!loading() && paginaInvoices().length === 0">
-            <td colspan="7" class="text-center opacity-70 py-6">
-              Nenhuma fatura encontrada para os filtros selecionados.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <superadmin-pagination
-      [page]="paginaAtual()"
-      [totalPages]="totalPaginas()"
-      [totalItems]="invoices().length"
-      [pageItems]="paginaInvoices().length"
-      [pageSize]="itensPorPagina()"
-      [pageSizes]="tamanhosPagina"
-      (pageChange)="alterarPagina($event)"
-      (pageSizeChange)="setItensPorPagina($event)"
-    ></superadmin-pagination>
-  </superadmin-table-card>
-</ng-container>
-
-<ng-template #insightsView>
-  <div class="grid gap-4">
-    <div class="grid gap-4 md:grid-cols-3">
-      <superadmin-kpi-card
-        label="Receita do mês"
-        [value]="insights()?.receitaMes ? ('R$ ' + insights()?.receitaMes) : '—'"
-      ></superadmin-kpi-card>
-      <superadmin-kpi-card
-        label="Receita em aberto"
-        [value]="insights()?.receitaEmAberto ? ('R$ ' + insights()?.receitaEmAberto) : '—'"
-      ></superadmin-kpi-card>
-      <superadmin-kpi-card
-        label="Inadimplência (%)"
-        [value]="formatPercent(insights()?.inadimplenciaPercentual)"
-      ></superadmin-kpi-card>
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="rounded-xl border border-base-100 bg-base-200 p-4">
-        <h3 class="text-sm font-semibold mb-2">Receita por mês</h3>
-        <div class="space-y-3">
-          <div *ngFor="let item of insights()?.receitaPorMes" class="flex items-center justify-between text-sm">
-            <span>{{ item.mes }}</span>
-            <div class="flex items-center gap-2">
-              <progress class="progress progress-primary w-32" [value]="item.valor" [max]="8000"></progress>
-              <span class="font-semibold">R$ {{ item.valor }}</span>
-            </div>
-          </div>
-        </div>
+<superadmin-table-card title="Faturas por competência" subtitle="Monitoramento de cobrança mensal.">
+  <div table-actions class="flex flex-wrap items-center gap-2">
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Competência</span>
       </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="08/2024"
+        [value]="filtros().competencia"
+        (input)="patchFiltro({ competencia: $any($event.target).value })"
+      />
+    </label>
 
-      <div class="rounded-xl border border-base-100 bg-base-200 p-4">
-        <h3 class="text-sm font-semibold mb-2">Status das faturas</h3>
-        <div class="space-y-3">
-          <div *ngFor="let item of insights()?.statusResumo" class="flex items-center justify-between text-sm">
-            <span>{{ item.status }}</span>
-            <div class="flex items-center gap-2">
-              <progress class="progress progress-secondary w-24" [value]="item.total" [max]="10"></progress>
-              <span class="font-semibold">{{ item.total }}</span>
-            </div>
-          </div>
-        </div>
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Status</span>
       </div>
-    </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().status"
+        (change)="patchFiltro({ status: $any($event.target).value })"
+      >
+        <option value="TODOS">Todos</option>
+        <option value="EM_ABERTO">Em aberto</option>
+        <option value="PAGA">Paga</option>
+        <option value="VENCIDA">Vencida</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[200px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar admin</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome do admin"
+        [value]="filtros().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Vencidas</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().somenteVencidas ? 'SIM' : 'NAO'"
+        (change)="patchFiltro({ somenteVencidas: $any($event.target).value === 'SIM' })"
+      >
+        <option value="NAO">Todas</option>
+        <option value="SIM">Somente vencidas</option>
+      </select>
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
   </div>
-</ng-template>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Competência</th>
+          <th>Admin</th>
+          <th>Lojas ativas</th>
+          <th>Valor</th>
+          <th>Vencimento</th>
+          <th>Status</th>
+          <th>Cobrança</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of paginaInvoices()">
+          <td class="text-sm">{{ invoice.competencia }}</td>
+          <td class="font-medium">{{ invoice.adminNome }}</td>
+          <td class="text-sm">{{ invoice.lojasAtivas }}</td>
+          <td class="text-sm">R$ {{ invoice.valor }}</td>
+          <td class="text-sm">{{ invoice.vencimento }}</td>
+          <td>
+            <superadmin-status-badge [status]="invoice.status" kind="invoice"></superadmin-status-badge>
+          </td>
+          <td>
+            <div class="flex flex-wrap gap-2">
+              <button class="btn btn-ghost btn-xs">Marcar paga</button>
+              <button class="btn btn-ghost btn-xs">Enviar cobranças</button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading() && paginaInvoices().length === 0">
+          <td colspan="7" class="text-center opacity-70 py-6">
+            Nenhuma fatura encontrada para os filtros selecionados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <superadmin-pagination
+    [page]="paginaAtual()"
+    [totalPages]="totalPaginas()"
+    [totalItems]="invoices().length"
+    [pageItems]="paginaInvoices().length"
+    [pageSize]="itensPorPagina()"
+    [pageSizes]="tamanhosPagina"
+    (pageChange)="alterarPagina($event)"
+    (pageSizeChange)="setItensPorPagina($event)"
+  ></superadmin-pagination>
+</superadmin-table-card>
