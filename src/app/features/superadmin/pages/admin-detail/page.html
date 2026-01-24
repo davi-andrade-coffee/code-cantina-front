@@ -19,9 +19,6 @@
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <superadmin-status-badge [status]="admin()?.status || '—'" kind="admin"></superadmin-status-badge>
-        <button class="btn btn-warning btn-sm" (click)="abrirBloqueio()">Bloquear Admin</button>
-        <button class="btn btn-success btn-sm">Desbloquear</button>
-        <button class="btn btn-primary btn-sm">Gerar fatura do mês</button>
       </div>
     </div>
 
@@ -39,6 +36,25 @@
         <div class="font-medium">{{ admin()?.plano || '—' }}</div>
       </div>
     </div>
+
+    <div class="divider my-4"></div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold">Ativar/Desativar admin</p>
+        <p class="text-xs opacity-70">Use para bloquear o acesso ou reativar o cliente.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs opacity-70">Status</span>
+        <input
+          type="checkbox"
+          class="toggle toggle-success"
+          [checked]="admin()?.status === 'ATIVO'"
+          (change)="toggleAdminStatus($any($event.target).checked)"
+        />
+      </div>
+    </div>
   </div>
 </section>
 
@@ -53,6 +69,7 @@
         <tr>
           <th>Loja</th>
           <th>Código</th>
+          <th>Mensalidade</th>
           <th>Status</th>
           <th>Criada em</th>
           <th>Último acesso</th>
@@ -63,6 +80,7 @@
         <tr *ngFor="let store of stores()">
           <td class="font-medium">{{ store.nome }}</td>
           <td class="text-sm">{{ store.codigo }}</td>
+          <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
           <td>
             <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
           </td>
@@ -73,13 +91,12 @@
               <button class="btn btn-ghost btn-xs">Editar</button>
               <button class="btn btn-ghost btn-xs">Bloquear</button>
               <button class="btn btn-ghost btn-xs">Desbloquear</button>
-              <button class="btn btn-ghost btn-xs">Ver financeiro</button>
             </div>
           </td>
         </tr>
 
         <tr *ngIf="!loading() && stores().length === 0">
-          <td colspan="6" class="text-center opacity-70 py-6">
+          <td colspan="7" class="text-center opacity-70 py-6">
             Nenhuma loja cadastrada para este Admin.
           </td>
         </tr>
@@ -87,36 +104,6 @@
     </table>
   </div>
 </superadmin-table-card>
-
-<section class="rounded-xl border border-base-100 bg-base-200 p-4 mt-4">
-  <h2 class="text-base font-semibold mb-3">Financeiro do Admin</h2>
-  <div class="grid gap-4 md:grid-cols-3 text-sm">
-    <div>
-      <div class="text-xs opacity-70">Lojas ativas (mês)</div>
-      <div class="font-semibold">{{ billing()?.lojasAtivasMes ?? lojasAtivas() }}</div>
-    </div>
-    <div>
-      <div class="text-xs opacity-70">Valor calculado</div>
-      <div class="font-semibold">R$ {{ billing()?.valorCalculado ?? 0 }}</div>
-    </div>
-    <div>
-      <div class="text-xs opacity-70">Status fatura mês</div>
-      <div class="font-semibold">{{ billing()?.statusFaturaMes ?? '—' }}</div>
-      <div class="text-xs opacity-60">Competência {{ billing()?.competencia }}</div>
-    </div>
-  </div>
-  <div class="mt-3">
-    <a class="link link-primary text-sm" routerLink="/superadmin/billing/invoices">Ver faturas</a>
-  </div>
-</section>
-
-<superadmin-block-modal
-  [open]="modalBloqueioAberto()"
-  title="Bloquear Admin"
-  subtitle="O bloqueio será aplicado a todas as lojas vinculadas."
-  (close)="fecharBloqueio()"
-  (confirm)="confirmarBloqueio()"
-></superadmin-block-modal>
 
 <superadmin-create-store-modal
   [open]="modalLojaAberto()"

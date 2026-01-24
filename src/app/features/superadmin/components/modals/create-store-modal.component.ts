@@ -25,11 +25,24 @@ import { FormsModule } from '@angular/forms';
             </div>
             <input class="input input-bordered" [(ngModel)]="codigo" placeholder="EX: UNI-001" />
           </label>
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text text-xs opacity-70">Mensalidade por loja (R$)</span>
+            </div>
+            <input
+              class="input input-bordered"
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="mensalidade"
+              placeholder="Ex.: 120,00"
+            />
+          </label>
         </div>
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ nome, codigo })">
+          <button class="btn btn-primary" (click)="confirm.emit({ nome, codigo, mensalidade })">
             Salvar loja
           </button>
         </div>
@@ -40,14 +53,16 @@ import { FormsModule } from '@angular/forms';
 export class CreateStoreModalComponent {
   @Input() open = false;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ nome: string; codigo: string }>();
+  @Output() confirm = new EventEmitter<{ nome: string; codigo: string; mensalidade: number }>();
 
   nome = '';
   codigo = '';
+  mensalidade = 0;
 
   onClose(): void {
     this.nome = '';
     this.codigo = '';
+    this.mensalidade = 0;
     this.close.emit();
   }
 }

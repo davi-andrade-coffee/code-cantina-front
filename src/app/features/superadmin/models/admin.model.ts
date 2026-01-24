@@ -28,7 +28,6 @@ export interface AdminInsights {
 export interface AdminFilters {
   termo: string;
   status: AdminStatus | 'TODOS';
-  somenteInadimplentes: boolean;
 }
 
 export interface AdminBillingResumo {

@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Admin, AdminBillingResumo } from '../../models/admin.model';
+import { Admin, AdminStatus } from '../../models/admin.model';
 import { Store } from '../../models/store.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
-import { BlockModalComponent } from '../../components/modals/block-modal.component';
 import { CreateStoreModalComponent } from '../../components/modals/create-store-modal.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
@@ -17,7 +16,6 @@ import { TableCardComponent } from '../../components/table-card.component';
   imports: [
     CommonModule,
     RouterLink,
-    BlockModalComponent,
     CreateStoreModalComponent,
     StatusBadgeComponent,
     TableCardComponent,
@@ -34,12 +32,7 @@ export class AdminDetailPage {
   readonly errorMsg = signal<string | null>(null);
   readonly admin = signal<Admin | null>(null);
   readonly stores = signal<Store[]>([]);
-  readonly billing = signal<AdminBillingResumo | null>(null);
-
-  readonly modalBloqueioAberto = signal(false);
   readonly modalLojaAberto = signal(false);
-
-  readonly lojasAtivas = computed(() => this.stores().filter((store) => store.status === 'ATIVA').length);
 
   constructor() {
     this.carregarDetalhes();
@@ -73,26 +66,6 @@ export class AdminDetailPage {
         next: (stores) => this.stores.set(stores),
         error: () => this.errorMsg.set('Falha ao carregar lojas vinculadas.'),
       });
-
-    this.facade
-      .getAdminBillingResumo(adminId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (resumo) => this.billing.set(resumo),
-        error: () => this.errorMsg.set('Falha ao carregar resumo financeiro.'),
-      });
-  }
-
-  abrirBloqueio(): void {
-    this.modalBloqueioAberto.set(true);
-  }
-
-  fecharBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
-  }
-
-  confirmarBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
   }
 
   abrirNovaLoja(): void {
@@ -105,5 +78,21 @@ export class AdminDetailPage {
 
   confirmarNovaLoja(): void {
     this.modalLojaAberto.set(false);
+  }
+
+  toggleAdminStatus(ativo: boolean): void {
+    const admin = this.admin();
+    if (!admin) return;
+    const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+    this.facade
+      .updateAdminStatus(admin.id, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          if (!updated) return;
+          this.admin.set(updated);
+        },
+        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
+      });
   }
 }
