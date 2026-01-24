@@ -3,7 +3,11 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./collaborator.page').then(m => m.CollaboratorPage),
+    pathMatch: 'full',
+    redirectTo: 'pdv',
+  },
+  {
+    path: 'pdv',
+    loadChildren: () => import('../pdv/pdv.routes').then(m => m.routes),
   },
 ];
-
