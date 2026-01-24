@@ -6,12 +6,12 @@ export const ADMIN_MENU: MenuSection[] = [
     items: [
       { label: 'PDV', path: '/admin/pdv' },
       {
-        label: 'Caixa',
-        children: [
-          { label: 'Abertura', path: '/admin/operacao/caixa/abertura' },
-          { label: 'Fechamento', path: '/admin/operacao/caixa/fechamento' },
-          { label: 'Sessões', path: '/admin/operacao/caixa/sessoes' },
-        ],
+        label: 'Caixa', path: '/admin/operacao/caixa'
+        // children: [
+        //   { label: 'Abertura', path: '/admin/operacao/caixa/abertura' },
+        //   { label: 'Fechamento', path: '/admin/operacao/caixa/fechamento' },
+        //   { label: 'Sessões', path: '/admin/operacao/caixa/sessoes' },
+        // ],
       },
     ],
   },
