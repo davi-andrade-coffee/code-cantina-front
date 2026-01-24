@@ -1,0 +1,144 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Logs do Sistema</h1>
+    <p class="text-sm opacity-70">Histórico de operações e auditoria.</p>
+  </div>
+</div>
+
+<section class="bg-base-300 rounded-lg border border-base-100 p-4">
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data início</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataInicio"
+        (input)="patchFiltro({ dataInicio: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data fim</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataFim"
+        (input)="patchFiltro({ dataFim: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[200px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Categoria</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().categoria"
+        (change)="patchFiltro({ categoria: $any($event.target).value })"
+      >
+        <option *ngFor="let item of categorias" [value]="item.value">
+          {{ item.label }}
+        </option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-sm">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Buscar</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Descrição, referência, IP"
+        [value]="filtros().termo"
+        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Categoria</th>
+          <th>Operador / Terminal</th>
+          <th>Descrição</th>
+          <th>Origem</th>
+          <th>Referência</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of paginaLogs(); trackBy: trackById">
+          <td class="text-sm whitespace-nowrap">
+            <div class="font-semibold">{{ formatDateTime(item.dataHora) }}</div>
+            <div class="text-xs opacity-60">IP {{ item.ip }}</div>
+          </td>
+          <td>
+            <span [class]="categoriaBadge(item.categoria)">
+              {{ categoriaLabel(item.categoria) }}
+            </span>
+          </td>
+          <td>
+            <div class="font-semibold">{{ item.operador }}</div>
+            <div class="text-xs opacity-60">{{ item.terminal }}</div>
+          </td>
+          <td class="text-sm">
+            <div>{{ item.descricao }}</div>
+          </td>
+          <td>
+            <span [class]="origemBadge(item.origem)">{{ item.origem }}</span>
+          </td>
+          <td>
+            <span class="badge badge-ghost badge-sm">{{ item.referencia }}</span>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading() && paginaLogs().length === 0">
+          <td colspan="6" class="text-center opacity-70 py-6">
+            Nenhum log encontrado para os filtros selecionados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+    <div class="text-xs opacity-70">
+      Mostrando {{ paginaLogs().length }} de {{ logs().length }} registros
+    </div>
+    <div class="flex items-center gap-2">
+      <select
+        class="select select-bordered select-xs"
+        [value]="itensPorPagina()"
+        (change)="setItensPorPagina($any($event.target).value)"
+      >
+        <option *ngFor="let size of tamanhosPagina" [value]="size">{{ size }} / pág.</option>
+      </select>
+      <button class="btn btn-ghost btn-xs" (click)="voltarPagina()" [disabled]="paginaAtual() === 1">
+        Anterior
+      </button>
+      <span class="text-xs opacity-70">Página {{ paginaAtual() }} de {{ totalPaginas() }}</span>
+      <button
+        class="btn btn-ghost btn-xs"
+        (click)="avancarPagina()"
+        [disabled]="paginaAtual() === totalPaginas()"
+      >
+        Próxima
+      </button>
+    </div>
+  </div>
+</section>

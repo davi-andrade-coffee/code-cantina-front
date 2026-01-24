@@ -34,11 +34,11 @@ export const routes: Routes = [
         { path: 'relatorios/extrato-cliente', loadComponent: () => import('./pages/extrato-cliente/component').then(m => m.ExtratoClientePage) },
 
         // Auditoria
-        { path: 'auditoria/logs', loadComponent: () => import('./pages/logs.page').then(m => m.LogsPage) },
+        { path: 'auditoria/logs', loadComponent: () => import('./pages/logs/component').then(m => m.LogsSistemaPage) },
 
         // Configurações
-        { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja.page').then(m => m.ConfigLojaPage) },
-        { path: 'configuracoes/seguranca', loadComponent: () => import('./pages/seguranca.page').then(m => m.SegurancaPage) },
+        { path: 'configuracoes/loja', loadComponent: () => import('./pages/config-loja/component').then(m => m.ConfigLojaPage) },
+        { path: 'configuracoes/licenca', loadComponent: () => import('./pages/licenca/component').then(m => m.LicencaPage) },
     ],
   },
 ];

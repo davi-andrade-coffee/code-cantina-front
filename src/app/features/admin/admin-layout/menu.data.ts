@@ -41,8 +41,7 @@ export const ADMIN_MENU: MenuSection[] = [
     title: 'Configurações',
     items: [
       { label: 'Configurações da Loja', path: '/admin/configuracoes/loja' },
-      { label: 'Segurança', path: '/admin/configuracoes/seguranca' },
+      { label: 'Licença', path: '/admin/configuracoes/licenca' },
     ],
   },
 ];
-
