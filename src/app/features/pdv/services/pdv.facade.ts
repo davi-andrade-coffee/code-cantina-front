@@ -2,6 +2,7 @@ import { Injectable, signal, computed, WritableSignal } from '@angular/core';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CashMovement, CashMovementType } from '../models/cash-movement';
 import { CashSession } from '../models/cash-session';
+import { Customer } from '../models/customer';
 import { Product } from '../models/product';
 import { PaymentMethod, Sale, SaleItem } from '../models/sale';
 import { Terminal } from '../models/terminal';
@@ -29,6 +30,11 @@ export interface CashSessionSummary {
   expectedBalance: number;
 }
 
+export interface BalanceWarning {
+  customer: Customer;
+  total: number;
+}
+
 const STORAGE_KEY_TERMINAL = 'pdv.selectedTerminal';
 
 @Injectable({ providedIn: 'root' })
@@ -40,8 +46,11 @@ export class PdvFacade {
   private readonly cartItems = signal<SaleItem[]>([]);
   private readonly sales = signal<Sale[]>([]);
   private readonly movements = signal<CashMovement[]>([]);
+  private readonly customers = signal<Customer[]>([]);
+  private readonly selectedCustomer = signal<Customer | null>(null);
   private readonly currentView = signal<'terminal' | 'cash-open' | 'sale' | 'cash-close'>('terminal');
   private readonly notice = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  private readonly balanceWarning = signal<BalanceWarning | null>(null);
 
   readonly terminalState = signal<OperationState>({ status: 'idle' });
   readonly sessionState = signal<OperationState>({ status: 'idle' });
@@ -57,6 +66,9 @@ export class PdvFacade {
   readonly sessionView = this.activeSession.asReadonly();
   readonly productsView = this.products.asReadonly();
   readonly cartItemsView = this.cartItems.asReadonly();
+  readonly customersView = this.customers.asReadonly();
+  readonly selectedCustomerView = this.selectedCustomer.asReadonly();
+  readonly balanceWarningView = this.balanceWarning.asReadonly();
   readonly noticeView = this.notice.asReadonly();
   readonly viewMode = this.currentView.asReadonly();
   readonly operatorName = computed(() => {
@@ -125,6 +137,9 @@ export class PdvFacade {
     this.products.set([]);
     this.sales.set([]);
     this.movements.set([]);
+    this.customers.set([]);
+    this.selectedCustomer.set(null);
+    this.balanceWarning.set(null);
     this.currentView.set('terminal');
     localStorage.removeItem(STORAGE_KEY_TERMINAL);
   }
@@ -183,8 +198,7 @@ export class PdvFacade {
     await this.runOperation(this.closeState, async () => {
       const updated = await this.withTimeout(this.dataSource.closeSession(input));
       this.activeSession.set(updated.status === 'OPEN' ? updated : null);
-      this.cartItems.set([]);
-      this.products.set([]);
+      this.clearSale();
       this.currentView.set('cash-open');
       this.setNotice('success', 'Caixa fechado.');
     });
@@ -274,6 +288,28 @@ export class PdvFacade {
   clearSale(): void {
     this.cartItems.set([]);
     this.products.set([]);
+    this.selectedCustomer.set(null);
+    this.customers.set([]);
+  }
+
+  async searchCustomers(term: string): Promise<void> {
+    await this.runOperation(this.productState, async () => {
+      const customers = await this.withTimeout(this.dataSource.searchCustomers(term));
+      this.customers.set(customers);
+    });
+  }
+
+  selectCustomer(customer: Customer): void {
+    if (customer.blocked) {
+      this.setNotice('error', 'Cliente bloqueado para compras.');
+      return;
+    }
+    this.selectedCustomer.set(customer);
+  }
+
+  clearCustomer(): void {
+    this.selectedCustomer.set(null);
+    this.customers.set([]);
   }
 
   async finalizeSale(paymentMethod: PaymentMethod): Promise<void> {
@@ -282,15 +318,27 @@ export class PdvFacade {
       this.setNotice('error', 'Abra o caixa antes de registrar vendas.');
       return;
     }
+    this.balanceWarning.set(null);
     const items = this.cartItems();
     if (!items.length) {
       this.setNotice('error', 'Adicione itens ao cupom.');
       return;
     }
+    const customer = this.selectedCustomer();
+    if (!customer) {
+      this.setNotice('error', 'Identifique o cliente antes de finalizar.');
+      return;
+    }
     const subtotal = items.reduce((acc, item) => acc + item.total, 0);
+    if (paymentMethod !== 'DINHEIRO' && subtotal > customer.balance) {
+      this.balanceWarning.set({ customer, total: subtotal });
+      this.clearSale();
+      return;
+    }
     const input: CreateSaleInput = {
       sessionId: session.id,
       items,
+      customerId: customer.id,
       paymentMethod,
       subtotal,
       total: subtotal,
@@ -327,6 +375,10 @@ export class PdvFacade {
     if (this.activeSession()) {
       this.currentView.set('sale');
     }
+  }
+
+  clearBalanceWarning(): void {
+    this.balanceWarning.set(null);
   }
 
   private async refreshSessionData(sessionId: string): Promise<void> {

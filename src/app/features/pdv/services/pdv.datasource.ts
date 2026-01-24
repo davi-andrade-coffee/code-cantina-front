@@ -1,5 +1,6 @@
 import { CashMovement } from '../models/cash-movement';
 import { CashSession } from '../models/cash-session';
+import { Customer } from '../models/customer';
 import { Product } from '../models/product';
 import { PaymentMethod, Sale, SaleItem } from '../models/sale';
 import { Terminal } from '../models/terminal';
@@ -19,6 +20,7 @@ export interface CloseCashSessionInput {
 export interface CreateSaleInput {
   sessionId: string;
   items: SaleItem[];
+  customerId: string;
   paymentMethod: PaymentMethod;
   subtotal: number;
   total: number;
@@ -37,6 +39,7 @@ export interface PdvDataSource {
   openSession(input: OpenCashSessionInput): Promise<CashSession>;
   closeSession(input: CloseCashSessionInput): Promise<CashSession>;
   searchProducts(term: string): Promise<Product[]>;
+  searchCustomers(term: string): Promise<Customer[]>;
   createSale(input: CreateSaleInput): Promise<Sale>;
   registerMovement(input: RegisterCashMovementInput): Promise<CashMovement>;
   listSalesBySession(sessionId: string): Promise<Sale[]>;

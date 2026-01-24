@@ -14,6 +14,7 @@ export interface SaleItem {
 export interface Sale {
   id: string;
   sessionId: string;
+  customerId: string;
   items: SaleItem[];
   subtotal: number;
   total: number;

@@ -8,6 +8,7 @@ import {
 } from './pdv.datasource';
 import { CashMovement } from '../models/cash-movement';
 import { CashSession } from '../models/cash-session';
+import { Customer } from '../models/customer';
 import { Product } from '../models/product';
 import { Sale } from '../models/sale';
 import { Terminal } from '../models/terminal';
@@ -31,6 +32,13 @@ const PRODUCTS: Product[] = [
   { id: 'prod-4', code: '100', name: 'Salada Fitness', price: 39.9, soldByWeight: true, unitLabel: 'kg' },
   { id: 'prod-5', code: '101', name: 'Arroz Integral', price: 18.5, soldByWeight: true, unitLabel: 'kg' },
   { id: 'prod-6', code: '200', name: 'Água 500ml', price: 4.0, soldByWeight: false, unitLabel: 'un' },
+];
+
+const CUSTOMERS: Customer[] = [
+  { id: 'cust-1', name: 'João Silva', document: '123.456.789-00', balance: 25.5 },
+  { id: 'cust-2', name: 'Maria Santos', document: '987.654.321-00', balance: 5.0 },
+  { id: 'cust-3', name: 'Professor Lucas', document: '321.654.987-00', balance: 120.0 },
+  { id: 'cust-4', name: 'Aluno Pedro', document: '111.222.333-44', balance: 0, blocked: true },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -91,12 +99,22 @@ export class PdvMockService implements PdvDataSource {
     );
   }
 
+  async searchCustomers(term: string): Promise<Customer[]> {
+    await this.delay();
+    if (!term.trim()) return [];
+    const normalized = term.trim().toLowerCase();
+    return CUSTOMERS.filter(customer =>
+      customer.name.toLowerCase().includes(normalized) || customer.document.includes(normalized)
+    );
+  }
+
   async createSale(input: CreateSaleInput): Promise<Sale> {
     await this.delay();
     const sales = this.readStorage<Sale[]>(STORAGE_KEYS.sales, []);
     const sale: Sale = {
       id: this.generateId('sale'),
       sessionId: input.sessionId,
+      customerId: input.customerId,
       items: input.items,
       subtotal: input.subtotal,
       total: input.total,

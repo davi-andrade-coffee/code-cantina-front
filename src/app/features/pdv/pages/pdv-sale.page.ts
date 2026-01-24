@@ -9,7 +9,12 @@ import { ReceiptItemsComponent } from '../components/receipt-items.component';
 import { SaleSummaryComponent } from '../components/sale-summary.component';
 import { PaymentModalComponent } from '../components/payment-modal.component';
 import { CashMovementModalComponent } from '../components/cash-movement-modal.component';
+import { CustomerSearchModalComponent } from '../components/customer-search-modal.component';
+import { BalanceWarningModalComponent } from '../components/balance-warning-modal.component';
+import { PeripheralsStatusComponent, PeripheralStatus } from '../components/peripherals-status.component';
+import { Customer } from '../models/customer';
 import { Product } from '../models/product';
+import { BalanceWarning } from '../services/pdv.facade';
 
 @Component({
   selector: 'pdv-sale-page',
@@ -22,6 +27,9 @@ import { Product } from '../models/product';
     SaleSummaryComponent,
     PaymentModalComponent,
     CashMovementModalComponent,
+    CustomerSearchModalComponent,
+    BalanceWarningModalComponent,
+    PeripheralsStatusComponent,
   ],
   template: `
     <div class="grid grid-cols-12 gap-4">
@@ -67,12 +75,34 @@ import { Product } from '../models/product';
         <div class="rounded-lg border border-base-200 bg-base-300 p-4">
           <h3 class="text-sm font-semibold mb-3">Resumo</h3>
           <pdv-sale-summary [subtotal]="subtotal" [total]="total"></pdv-sale-summary>
+          <div class="mt-4 rounded-lg border border-base-200 bg-base-200 p-3">
+            <div class="text-xs uppercase opacity-60">Cliente</div>
+            <div class="mt-1 text-sm font-semibold">
+              {{ selectedCustomer?.name || 'Não identificado' }}
+            </div>
+            <div class="text-xs opacity-70" *ngIf="selectedCustomer">
+              {{ selectedCustomer.document }} · Saldo R$ {{ selectedCustomer.balance | number: '1.2-2' }}
+            </div>
+            <div class="mt-3 flex gap-2">
+              <button class="btn btn-outline btn-xs" type="button" (click)="openCustomerModal()">
+                {{ selectedCustomer ? 'Trocar cliente' : 'Identificar cliente' }}
+              </button>
+              <button
+                *ngIf="selectedCustomer"
+                class="btn btn-ghost btn-xs text-error"
+                type="button"
+                (click)="clearCustomer.emit()"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
           <div class="mt-4">
             <button
               class="btn btn-success w-full"
               type="button"
               [disabled]="!items.length"
-              (click)="openPaymentModal()"
+              (click)="handleFinalizeClick()"
             >
               Finalizar Compra
             </button>
@@ -82,10 +112,13 @@ import { Product } from '../models/product';
           </div>
         </div>
 
-        <div class="rounded-lg border border-base-200 bg-base-300 p-4">
-          <div class="text-sm font-semibold mb-2">Status</div>
+        <div class="rounded-lg border border-base-200 bg-base-300 p-4 space-y-2">
+          <div class="text-sm font-semibold">Status</div>
           <div class="text-xs opacity-70">Terminal: {{ terminalLabel }}</div>
           <div class="text-xs opacity-70">Operador: {{ operator }}</div>
+          <div class="mt-3">
+            <pdv-peripherals-status [items]="peripherals"></pdv-peripherals-status>
+          </div>
           <button class="btn btn-outline btn-sm mt-3" type="button" (click)="closeCash.emit()">
             Fechamento de Caixa
           </button>
@@ -106,6 +139,19 @@ import { Product } from '../models/product';
       (save)="saveMovement($event)"
       (cancel)="movementModalOpen.set(false)"
     ></pdv-cash-movement-modal>
+
+    <pdv-customer-search-modal
+      [open]="customerModalOpen()"
+      [customers]="customers"
+      (search)="searchCustomer.emit($event)"
+      (select)="handleCustomerSelect($event)"
+      (close)="customerModalOpen.set(false)"
+    ></pdv-customer-search-modal>
+
+    <pdv-balance-warning-modal
+      [warning]="balanceWarning"
+      (close)="dismissBalanceWarning.emit()"
+    ></pdv-balance-warning-modal>
   `,
 })
 export class PdvSalePage {
@@ -113,6 +159,9 @@ export class PdvSalePage {
   @Input() operator = '';
   @Input() products: Product[] = [];
   @Input() items: SaleItem[] = [];
+  @Input() customers: Customer[] = [];
+  @Input() selectedCustomer: Customer | null = null;
+  @Input() balanceWarning: BalanceWarning | null = null;
   @Output() search = new EventEmitter<string>();
   @Output() add = new EventEmitter<{ product: Product; quantity?: number; weight?: number }>();
   @Output() remove = new EventEmitter<string>();
@@ -120,6 +169,10 @@ export class PdvSalePage {
   @Output() weightChange = new EventEmitter<{ id: string; weight: number }>();
   @Output() clear = new EventEmitter<void>();
   @Output() finalize = new EventEmitter<PaymentMethod>();
+  @Output() searchCustomer = new EventEmitter<string>();
+  @Output() selectCustomer = new EventEmitter<Customer>();
+  @Output() clearCustomer = new EventEmitter<void>();
+  @Output() dismissBalanceWarning = new EventEmitter<void>();
   @Output() saveMovementRequest = new EventEmitter<{ type: CashMovementType; amount: number; note?: string }>();
   @Output() closeCash = new EventEmitter<void>();
 
@@ -127,6 +180,13 @@ export class PdvSalePage {
   paymentModalOpen = signal(false);
   movementModalOpen = signal(false);
   movementType = signal<CashMovementType>('SANGRIA');
+  customerModalOpen = signal(false);
+
+  peripherals: PeripheralStatus[] = [
+    { id: 'printer', label: 'Impressora', status: 'OFFLINE', icon: '🖨️' },
+    { id: 'scale', label: 'Balança', status: 'OFFLINE', icon: '⚖️' },
+    { id: 'bio', label: 'Biometria', status: 'OFFLINE', icon: '🔒' },
+  ];
 
   get terminalLabel(): string {
     if (!this.terminal) return '-';
@@ -143,6 +203,26 @@ export class PdvSalePage {
 
   openPaymentModal(): void {
     this.paymentModalOpen.set(true);
+  }
+
+  handleFinalizeClick(): void {
+    if (!this.selectedCustomer) {
+      this.openCustomerModal();
+      return;
+    }
+    this.openPaymentModal();
+  }
+
+  openCustomerModal(): void {
+    this.customerModalOpen.set(true);
+  }
+
+  handleCustomerSelect(customer: Customer): void {
+    this.selectCustomer.emit(customer);
+    this.customerModalOpen.set(false);
+    if (this.items.length) {
+      this.openPaymentModal();
+    }
   }
 
   confirmPayment(method: PaymentMethod): void {

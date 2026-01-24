@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
 import { TerminalSelectPage } from './terminal-select.page';
 import { CashOpenPage } from './cash-open.page';
 import { PdvSalePage } from './pdv-sale.page';
@@ -36,7 +34,6 @@ import { CashMovementType } from '../models/cash-movement';
           >
             Trocar Terminal
           </button>
-          <button class="btn btn-error btn-sm" type="button" (click)="logout()">Sair</button>
         </div>
       </header>
 
@@ -65,6 +62,9 @@ import { CashMovementType } from '../models/cash-movement';
           [operator]="operator"
           [products]="facade.productsView()"
           [items]="facade.cartItemsView()"
+          [customers]="facade.customersView()"
+          [selectedCustomer]="facade.selectedCustomerView()"
+          [balanceWarning]="facade.balanceWarningView()"
           (search)="facade.searchProducts($event)"
           (add)="facade.addItem($event.product, $event.quantity, $event.weight)"
           (remove)="facade.removeItem($event)"
@@ -72,6 +72,10 @@ import { CashMovementType } from '../models/cash-movement';
           (weightChange)="facade.updateItemWeight($event.id, $event.weight)"
           (clear)="facade.clearSale()"
           (finalize)="facade.finalizeSale($event)"
+          (searchCustomer)="facade.searchCustomers($event)"
+          (selectCustomer)="facade.selectCustomer($event)"
+          (clearCustomer)="facade.clearCustomer()"
+          (dismissBalanceWarning)="facade.clearBalanceWarning()"
           (saveMovementRequest)="onSaveMovement($event)"
           (closeCash)="facade.openCashClose()"
         ></pdv-sale-page>
@@ -87,11 +91,7 @@ import { CashMovementType } from '../models/cash-movement';
   `,
 })
 export class PdvShellPage implements OnInit {
-  constructor(
-    public facade: PdvFacade,
-    private router: Router,
-    private auth: AuthService
-  ) {}
+  constructor(public facade: PdvFacade) {}
 
   ngOnInit(): void {
     void this.facade.init();
@@ -119,9 +119,4 @@ export class PdvShellPage implements OnInit {
     void this.facade.closeSession(counted, note);
   }
 
-  logout(): void {
-    this.facade.clearSale();
-    this.auth.logout();
-    this.router.navigateByUrl('/auth/login');
-  }
 }
