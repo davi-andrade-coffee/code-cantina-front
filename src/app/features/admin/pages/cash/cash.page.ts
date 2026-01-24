@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { CashDatasource } from './cash.datasource';
 import { CashDetailModalComponent } from './cash.detail-modal.component';
@@ -7,8 +7,6 @@ import { CashFacade } from './cash.facade';
 import { CashFiltersComponent, SelectOption } from './cash.filters.component';
 import { CashMockService } from './cash.mock.service';
 import { CashTableComponent } from './cash.table.component';
-
-type CashTab = 'SESSOES' | 'ABERTURA' | 'FECHAMENTO';
 
 @Component({
   standalone: true,
@@ -29,93 +27,58 @@ type CashTab = 'SESSOES' | 'ABERTURA' | 'FECHAMENTO';
         </p>
       </header>
 
-      <div class="tabs tabs-boxed">
-        <button
-          type="button"
-          class="tab"
-          [class.tab-active]="activeTab() === 'SESSOES'"
-          (click)="setTab('SESSOES')"
-        >
-          Sessões
-        </button>
-        <button
-          type="button"
-          class="tab"
-          [class.tab-active]="activeTab() === 'ABERTURA'"
-          (click)="setTab('ABERTURA')"
-        >
-          Abertura
-        </button>
-        <button
-          type="button"
-          class="tab"
-          [class.tab-active]="activeTab() === 'FECHAMENTO'"
-          (click)="setTab('FECHAMENTO')"
-        >
-          Fechamento
-        </button>
+      <app-cash-filters
+        [filters]="facade.filters()"
+        [terminals]="terminais"
+        [operators]="operadores"
+        (filtersChange)="facade.updateFilters($event)"
+        (submit)="facade.buscar()"
+      />
+
+      <div *ngIf="facade.errorList()" class="alert alert-error">
+        <span>{{ facade.errorList() }}</span>
       </div>
 
-      <ng-container *ngIf="activeTab() === 'SESSOES'">
-        <app-cash-filters
-          [filters]="facade.filters()"
-          [terminals]="terminais"
-          [operators]="operadores"
-          (filtersChange)="facade.updateFilters($event)"
-          (submit)="facade.buscar()"
-        />
+      <app-cash-table
+        [sessions]="facade.sessions()"
+        [loading]="facade.loadingList()"
+        (openDetail)="facade.openDetail($event)"
+      />
 
-        <div *ngIf="facade.errorList()" class="alert alert-error">
-          <span>{{ facade.errorList() }}</span>
+      <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+        <div class="text-sm opacity-70">
+          Página {{ facade.page() }} de {{ facade.totalPages() }} •
+          {{ facade.totalItems() }} sessões
         </div>
 
-        <app-cash-table
-          [sessions]="facade.sessions()"
-          [loading]="facade.loadingList()"
-          (openDetail)="facade.openDetail($event)"
-        />
-
-        <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
-          <div class="text-sm opacity-70">
-            Página {{ facade.page() }} de {{ facade.totalPages() }} •
-            {{ facade.totalItems() }} sessões
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              class="btn btn-outline btn-sm"
-              type="button"
-              (click)="facade.changePage(facade.page() - 1)"
-              [disabled]="facade.page() === 1"
-            >
-              Anterior
-            </button>
-            <button
-              class="btn btn-outline btn-sm"
-              type="button"
-              (click)="facade.changePage(facade.page() + 1)"
-              [disabled]="facade.page() === facade.totalPages()"
-            >
-              Próxima
-            </button>
-            <select
-              class="select select-bordered select-sm"
-              [value]="facade.pageSize()"
-              (change)="changePageSize($event)"
-            >
-              <option *ngFor="let size of pageSizes" [value]="size">
-                {{ size }} por página
-              </option>
-            </select>
-          </div>
+        <div class="flex items-center gap-2">
+          <button
+            class="btn btn-outline btn-sm"
+            type="button"
+            (click)="facade.changePage(facade.page() - 1)"
+            [disabled]="facade.page() === 1"
+          >
+            Anterior
+          </button>
+          <button
+            class="btn btn-outline btn-sm"
+            type="button"
+            (click)="facade.changePage(facade.page() + 1)"
+            [disabled]="facade.page() === facade.totalPages()"
+          >
+            Próxima
+          </button>
+          <select
+            class="select select-bordered select-sm"
+            [value]="facade.pageSize()"
+            (change)="changePageSize($event)"
+          >
+            <option *ngFor="let size of pageSizes" [value]="size">
+              {{ size }} por página
+            </option>
+          </select>
         </div>
-      </ng-container>
-
-      <ng-container *ngIf="activeTab() !== 'SESSOES'">
-        <section class="bg-base-300 rounded-lg border border-base-100 p-6 text-sm opacity-70">
-          Conteúdo da aba em desenvolvimento.
-        </section>
-      </ng-container>
+      </div>
     </div>
 
     <app-cash-detail-modal
@@ -130,7 +93,6 @@ type CashTab = 'SESSOES' | 'ABERTURA' | 'FECHAMENTO';
 export class CashPage {
   readonly facade = inject(CashFacade);
 
-  readonly activeTab = signal<CashTab>('SESSOES');
   readonly pageSizes = [10, 20];
 
   readonly terminais: SelectOption[] = [
@@ -156,10 +118,6 @@ export class CashPage {
     { label: 'Helena Dias', value: 'Helena Dias' },
     { label: 'Joana Ferreira', value: 'Joana Ferreira' },
   ];
-
-  setTab(tab: CashTab): void {
-    this.activeTab.set(tab);
-  }
 
   changePageSize(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);
