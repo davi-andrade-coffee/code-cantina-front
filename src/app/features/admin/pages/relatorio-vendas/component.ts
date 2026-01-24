@@ -23,7 +23,6 @@ export class RelatorioVendasPage {
 
   readonly vendas = signal<Venda[]>([]);
   readonly expandidoIds = signal<Set<string>>(new Set());
-  readonly vendaSelecionada = signal<Venda | null>(null);
 
   readonly filtros = signal<VendaFiltro>({
     dataInicio: '2024-09-01',
@@ -35,8 +34,6 @@ export class RelatorioVendasPage {
     cliente: '',
     status: 'TODOS',
   });
-
-  readonly filtrosAplicados = signal<VendaFiltro>({ ...this.filtros() });
 
   readonly terminais = [
     { label: 'Todos', value: 'TODOS' },
@@ -66,33 +63,7 @@ export class RelatorioVendasPage {
     { label: 'Estornada', value: 'ESTORNADA' },
   ] as const;
 
-  readonly vendasFiltradas = computed(() => {
-    const filtros = this.filtrosAplicados();
-    if (!filtros.dataInicio || !filtros.dataFim) return [];
-
-    const inicio = new Date(filtros.dataInicio);
-    const fim = new Date(filtros.dataFim);
-    const produtoLower = filtros.produto.trim().toLowerCase();
-    const clienteLower = filtros.cliente.trim().toLowerCase();
-
-    return this.vendas().filter((venda) => {
-      const dataVenda = new Date(venda.dataHora);
-      const dataOk = dataVenda >= inicio && dataVenda <= new Date(fim.getTime() + 86400000 - 1);
-      const terminalOk = filtros.terminal === 'TODOS' || venda.terminal === filtros.terminal;
-      const operadorOk = filtros.operador === 'TODOS' || venda.operador === filtros.operador;
-      const statusOk = filtros.status === 'TODOS' || venda.status === filtros.status;
-      const pagamentoOk =
-        filtros.formaPagamento === 'TODOS' || venda.formasPagamento.includes(filtros.formaPagamento as FormaPagamento);
-      const produtoOk =
-        produtoLower.length === 0 || venda.itens.some((item) => item.produto.toLowerCase().includes(produtoLower));
-      const clienteOk =
-        clienteLower.length === 0 ||
-        venda.cliente?.toLowerCase().includes(clienteLower) ||
-        venda.registroCliente?.toLowerCase().includes(clienteLower);
-
-      return dataOk && terminalOk && operadorOk && statusOk && pagamentoOk && produtoOk && clienteOk;
-    });
-  });
+  readonly vendasFiltradas = computed(() => this.vendas());
 
   readonly totalVendido = computed(() =>
     this.vendasFiltradas().reduce((acc, venda) => acc + venda.total, 0)
@@ -150,9 +121,7 @@ export class RelatorioVendasPage {
     const total = this.vendasFiltradas().length || 1;
     const agrupado = new Map<FormaPagamento, number>();
     this.vendasFiltradas().forEach((venda) => {
-      venda.formasPagamento.forEach((forma) => {
-        agrupado.set(forma, (agrupado.get(forma) || 0) + 1);
-      });
+      agrupado.set(venda.formaPagamento, (agrupado.get(venda.formaPagamento) || 0) + 1);
     });
     return Array.from(agrupado.entries()).map(([forma, quantidade]) => ({
       label: this.pagamentoLabel(forma),
@@ -160,8 +129,6 @@ export class RelatorioVendasPage {
       percentual: (quantidade / total) * 100,
     }));
   });
-
-  readonly detalhesAberto = computed(() => this.vendaSelecionada() !== null);
 
   constructor() {
     this.carregarDados();
@@ -172,7 +139,7 @@ export class RelatorioVendasPage {
     this.errorMsg.set(null);
 
     this.service
-      .listVendas()
+      .listVendas(this.filtros())
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
@@ -189,7 +156,7 @@ export class RelatorioVendasPage {
       return;
     }
     this.errorMsg.set(null);
-    this.filtrosAplicados.set({ ...this.filtros() });
+    this.carregarDados();
   }
 
   patchFiltro(patch: Partial<VendaFiltro>): void {
@@ -212,18 +179,8 @@ export class RelatorioVendasPage {
     return this.expandidoIds().has(vendaId);
   }
 
-  abrirDetalhes(venda: Venda): void {
-    this.vendaSelecionada.set(venda);
-  }
-
-  fecharDetalhes(): void {
-    this.vendaSelecionada.set(null);
-  }
-
-  onEstornar(venda: Venda): void {
-    this.vendas.update((lista) =>
-      lista.map((item) => (item.id === venda.id ? { ...item, status: 'ESTORNADA' } : item))
-    );
+  subtotal(venda: Venda): number {
+    return venda.itens.reduce((acc, item) => acc + item.total, 0);
   }
 
   statusLabel(status: Venda['status']): string {

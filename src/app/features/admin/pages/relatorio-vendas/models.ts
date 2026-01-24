@@ -18,7 +18,7 @@ export interface Venda {
   cliente?: string;
   registroCliente?: string;
   total: number;
-  formasPagamento: FormaPagamento[];
+  formaPagamento: FormaPagamento;
   itens: ItemVenda[];
   status: StatusVenda;
   caixaId: string;

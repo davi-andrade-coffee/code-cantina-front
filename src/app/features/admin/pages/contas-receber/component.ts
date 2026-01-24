@@ -8,7 +8,6 @@ import { EvolucaoRecebimentoItem, FiltroRecebiveis, Recebivel, StatusRecebivel }
 import {
   STATUS_CLASSES,
   STATUS_LABELS,
-  PLANO_LABELS,
   PESSOA_LABELS,
   competenciaLabel,
   formatCurrency,
@@ -35,13 +34,11 @@ export class ContasReceberPage {
     competencia: '2024-09',
     status: 'TODOS',
     tipoPessoa: 'TODOS',
-    tipoPlano: 'TODOS',
     termo: '',
     somenteInadimplentes: false,
   });
 
   readonly recebiveis = signal<Recebivel[]>([]);
-  readonly extratoSelecionado = signal<Recebivel | null>(null);
 
   readonly paginaAtual = signal(1);
   readonly itensPorPagina = signal(5);
@@ -60,33 +57,9 @@ export class ContasReceberPage {
     { label: 'Outros', value: 'OUTRO' },
   ] as const;
 
-  readonly tiposPlano = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Convênio', value: 'CONVENIO' },
-    { label: 'Pré-pago', value: 'PRE_PAGO' },
-  ] as const;
-
   readonly tamanhosPagina = [5, 10, 20];
 
-  readonly recebiveisFiltrados = computed(() => {
-    const { competencia, status, tipoPessoa, tipoPlano, termo, somenteInadimplentes } = this.filtros();
-    const termoLower = termo.trim().toLowerCase();
-
-    return this.recebiveis().filter((item) => {
-      const mesmaCompetencia = item.competencia === competencia;
-      const statusOk = status === 'TODOS' || item.status === status;
-      const pessoaOk = tipoPessoa === 'TODOS' || item.pessoaTipo === tipoPessoa;
-      const planoOk = tipoPlano === 'TODOS' || item.planoTipo === tipoPlano;
-      const termoOk =
-        termoLower.length === 0 ||
-        item.pessoaNome.toLowerCase().includes(termoLower) ||
-        item.documento.toLowerCase().includes(termoLower) ||
-        item.registro.toLowerCase().includes(termoLower);
-      const inadimplenteOk = !somenteInadimplentes || item.status !== 'QUITADO';
-
-      return mesmaCompetencia && statusOk && pessoaOk && planoOk && termoOk && inadimplenteOk;
-    });
-  });
+  readonly recebiveisFiltrados = computed(() => this.recebiveis());
 
   readonly totalPaginas = computed(() =>
     Math.max(1, Math.ceil(this.recebiveisFiltrados().length / this.itensPorPagina()))
@@ -143,13 +116,6 @@ export class ContasReceberPage {
     });
   });
 
-  readonly extratoAberto = computed(() => this.extratoSelecionado() !== null);
-  readonly saldoExtrato = computed(() => {
-    const extrato = this.extratoSelecionado();
-    if (!extrato) return 0;
-    return extrato.valorDevido - extrato.valorPago;
-  });
-
   constructor() {
     this.buscar();
   }
@@ -161,7 +127,7 @@ export class ContasReceberPage {
     this.errorMsg.set(null);
 
     this.service
-      .list()
+      .list(this.filtros())
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
@@ -183,14 +149,6 @@ export class ContasReceberPage {
     this.paginaAtual.set(1);
   }
 
-  onVerExtrato(item: Recebivel): void {
-    this.extratoSelecionado.set(item);
-  }
-
-  fecharExtrato(): void {
-    this.extratoSelecionado.set(null);
-  }
-
   onEnviarCobranca(item: Recebivel): void {
     const dataHoje = new Date().toISOString().slice(0, 10);
     const snapshot = this.recebiveis();
@@ -198,8 +156,6 @@ export class ContasReceberPage {
     this.recebiveis.update((lista) =>
       lista.map((entry) => (entry.id === item.id ? { ...entry, ultimaCobranca: dataHoje } : entry))
     );
-    this.extratoSelecionado.set({ ...item, ultimaCobranca: dataHoje });
-
     this.service
       .enviarCobranca(item.id, dataHoje)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -216,7 +172,6 @@ export class ContasReceberPage {
     const atualizado = { ...item, valorPago: item.valorDevido, status: 'QUITADO' as const };
 
     this.recebiveis.update((lista) => lista.map((entry) => (entry.id === item.id ? atualizado : entry)));
-    this.extratoSelecionado.set(atualizado);
 
     this.service
       .marcarPagamento(item.id)
@@ -269,14 +224,6 @@ export class ContasReceberPage {
 
   tipoPessoaLabel(tipo?: Recebivel['pessoaTipo']): string {
     return tipo ? PESSOA_LABELS[tipo] : '—';
-  }
-
-  tipoPlanoLabel(tipo?: Recebivel['planoTipo']): string {
-    return tipo ? PLANO_LABELS[tipo] : '—';
-  }
-
-  saldoExtratoClass(): string {
-    return this.saldoExtrato() < 0 ? 'text-success' : 'text-warning';
   }
 
   competenciaLabel(competencia: string): string {

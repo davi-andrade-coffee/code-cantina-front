@@ -1,4 +1,4 @@
-import { PlanoTipo, PessoaTipo, StatusRecebivel } from './models';
+import { PessoaTipo, StatusRecebivel } from './models';
 
 export const STATUS_LABELS: Record<StatusRecebivel, string> = {
   EM_ABERTO: 'Em aberto',
@@ -16,11 +16,6 @@ export const PESSOA_LABELS: Record<PessoaTipo, string> = {
   ALUNO: 'Aluno',
   PROFESSOR: 'Professor',
   OUTRO: 'Outro',
-};
-
-export const PLANO_LABELS: Record<PlanoTipo, string> = {
-  CONVENIO: 'Convênio',
-  PRE_PAGO: 'Pré-pago',
 };
 
 export const formatCurrency = (valor: number): string =>
