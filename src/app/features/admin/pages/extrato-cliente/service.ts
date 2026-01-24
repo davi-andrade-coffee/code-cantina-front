@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { Movimentacao, PessoaExtrato } from './models';
+import { ExtratoFiltro, Movimentacao, PessoaExtrato } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class ExtratoClienteService {
@@ -191,7 +191,28 @@ export class ExtratoClienteService {
     return of(this.pessoas());
   }
 
-  listMovimentacoes(): Observable<Movimentacao[]> {
-    return of(this.movimentacoes());
+  listMovimentacoes(filtro: ExtratoFiltro): Observable<Movimentacao[]> {
+    if (!filtro.pessoaId) return of([]);
+
+    const textoLower = filtro.texto.trim().toLowerCase();
+    const inicio = filtro.dataInicio ? new Date(filtro.dataInicio) : null;
+    const fim = filtro.dataFim ? new Date(filtro.dataFim) : null;
+
+    const filtradas = this.movimentacoes().filter((item) => {
+      const pessoaOk = item.pessoaId === filtro.pessoaId;
+      const tipoOk = filtro.tipoMovimento === 'TODOS' || item.tipo === filtro.tipoMovimento;
+      const textoOk =
+        textoLower.length === 0 ||
+        item.descricao.toLowerCase().includes(textoLower) ||
+        item.produto.toLowerCase().includes(textoLower) ||
+        item.observacao?.toLowerCase().includes(textoLower);
+      const dataItem = new Date(item.dataHora);
+      const inicioOk = !inicio || dataItem >= inicio;
+      const fimOk = !fim || dataItem <= new Date(fim.getTime() + 86400000 - 1);
+
+      return pessoaOk && tipoOk && textoOk && inicioOk && fimOk;
+    });
+
+    return of(filtradas);
   }
 }

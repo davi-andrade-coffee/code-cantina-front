@@ -36,11 +36,8 @@ export class ExtratoClientePage {
     dataInicio: '',
     dataFim: '',
     tipoMovimento: 'TODOS',
-    terminal: 'TODOS',
     texto: '',
   });
-
-  readonly filtrosAplicados = signal<ExtratoFiltro>({ ...this.filtros() });
 
   readonly detalheSelecionado = signal<Movimentacao | null>(null);
 
@@ -48,53 +45,21 @@ export class ExtratoClientePage {
     { label: 'Todos', value: 'TODOS' },
     { label: 'Consumo', value: 'CONSUMO' },
     { label: 'Carga', value: 'CARGA' },
-    { label: 'Ajuste', value: 'AJUSTE' },
-  ] as const;
-
-  readonly terminais = [
-    { label: 'Todos', value: 'TODOS' },
-    { label: 'Terminal 1 - Camila', value: 'Terminal 1' },
-    { label: 'Terminal 2 - Rafael', value: 'Terminal 2' },
-    { label: 'Terminal 3 - Maria', value: 'Terminal 3' },
+    { label: 'Pagamento', value: 'PAGAMENTO' },
   ] as const;
 
   readonly pessoaSelecionada = computed(() =>
-    this.pessoas().find((pessoa) => pessoa.id === this.filtrosAplicados().pessoaId)
+    this.pessoas().find((pessoa) => pessoa.id === this.filtros().pessoaId)
   );
 
-  readonly movimentacoesFiltradas = computed(() => {
-    const filtros = this.filtrosAplicados();
-    if (!filtros.pessoaId) return [];
-
-    const textoLower = filtros.texto.trim().toLowerCase();
-    const inicio = filtros.dataInicio ? new Date(filtros.dataInicio) : null;
-    const fim = filtros.dataFim ? new Date(filtros.dataFim) : null;
-
-    return this.movimentacoes().filter((item) => {
-      const pessoaOk = item.pessoaId === filtros.pessoaId;
-      const tipoOk = filtros.tipoMovimento === 'TODOS' || item.tipo === filtros.tipoMovimento;
-      const terminalOk = filtros.terminal === 'TODOS' || item.terminal === filtros.terminal;
-      const textoOk =
-        textoLower.length === 0 ||
-        item.descricao.toLowerCase().includes(textoLower) ||
-        item.produto.toLowerCase().includes(textoLower) ||
-        item.observacao?.toLowerCase().includes(textoLower);
-      const dataItem = new Date(item.dataHora);
-      const inicioOk = !inicio || dataItem >= inicio;
-      const fimOk = !fim || dataItem <= new Date(fim.getTime() + 86400000 - 1);
-
-      return pessoaOk && tipoOk && terminalOk && textoOk && inicioOk && fimOk;
-    });
-  });
-
   readonly consumoMes = computed(() =>
-    this.movimentacoesFiltradas()
+    this.movimentacoes()
       .filter((item) => item.tipo === 'CONSUMO')
       .reduce((acc, item) => acc + item.valor, 0)
   );
 
   readonly consumoDiario = computed(() => {
-    const consumos = this.movimentacoesFiltradas().filter((item) => item.tipo === 'CONSUMO');
+    const consumos = this.movimentacoes().filter((item) => item.tipo === 'CONSUMO');
     const agrupado = new Map<string, number>();
 
     consumos.forEach((item) => {
@@ -112,7 +77,7 @@ export class ExtratoClientePage {
   });
 
   readonly topProdutos = computed(() => {
-    const consumos = this.movimentacoesFiltradas().filter((item) => item.tipo === 'CONSUMO');
+    const consumos = this.movimentacoes().filter((item) => item.tipo === 'CONSUMO');
     const agrupado = new Map<string, { quantidade: number; valor: number }>();
 
     consumos.forEach((item) => {
@@ -130,7 +95,7 @@ export class ExtratoClientePage {
   });
 
   readonly distribuicaoPagamento = computed(() => {
-    const consumos = this.movimentacoesFiltradas().filter((item) => item.tipo === 'CONSUMO');
+    const consumos = this.movimentacoes().filter((item) => item.tipo === 'CONSUMO');
     const total = consumos.length || 1;
     const agrupado = new Map<Movimentacao['formaPagamento'], number>();
 
@@ -146,6 +111,18 @@ export class ExtratoClientePage {
   });
 
   readonly detalheAberto = computed(() => this.detalheSelecionado() !== null);
+  readonly saldoValor = computed(() => {
+    const pessoa = this.pessoaSelecionada();
+    if (!pessoa) return '—';
+    if (pessoa.plano === 'CONVENIO') return '—';
+    return this.formatCurrency(pessoa.saldoAtual);
+  });
+  readonly saldoDescricao = computed(() => {
+    const pessoa = this.pessoaSelecionada();
+    if (!pessoa) return 'Carteira não selecionada';
+    if (pessoa.plano === 'CONVENIO') return 'Convênio (sem saldo)';
+    return 'Carteira ativa';
+  });
 
   constructor() {
     this.carregarDados();
@@ -166,21 +143,13 @@ export class ExtratoClientePage {
           this.pessoas.set(pessoas);
           if (!this.filtros().pessoaId && pessoas.length > 0) {
             this.filtros.update((current) => ({ ...current, pessoaId: pessoas[0].id }));
-            this.filtrosAplicados.set({ ...this.filtros() });
           }
+          this.buscar();
         },
         error: (err) => {
           console.error(err);
           this.errorMsg.set('Falha ao carregar pessoas.');
         },
-      });
-
-    this.service
-      .listMovimentacoes()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (movimentacoes) => this.movimentacoes.set(movimentacoes),
-        error: () => this.errorMsg.set('Falha ao carregar movimentações.'),
       });
   }
 
@@ -191,7 +160,13 @@ export class ExtratoClientePage {
     }
 
     this.errorMsg.set(null);
-    this.filtrosAplicados.set({ ...this.filtros() });
+    this.service
+      .listMovimentacoes(this.filtros())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (movimentacoes) => this.movimentacoes.set(movimentacoes),
+        error: () => this.errorMsg.set('Falha ao carregar movimentações.'),
+      });
   }
 
   patchFiltro(patch: Partial<ExtratoFiltro>): void {

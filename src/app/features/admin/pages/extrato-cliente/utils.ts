@@ -15,7 +15,7 @@ export const PLANO_LABELS: Record<PlanoTipo, string> = {
 export const MOVIMENTO_LABELS: Record<TipoMovimento, string> = {
   CONSUMO: 'Consumo',
   CARGA: 'Carga',
-  AJUSTE: 'Ajuste',
+  PAGAMENTO: 'Pagamento',
 };
 
 export const PAGAMENTO_LABELS: Record<FormaPagamento, string> = {

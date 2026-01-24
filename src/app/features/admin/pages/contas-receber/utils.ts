@@ -1,4 +1,4 @@
-import { PlanoTipo, PessoaTipo, StatusRecebivel } from './models';
+import { PessoaTipo, StatusRecebivel } from './models';
 
 export const STATUS_LABELS: Record<StatusRecebivel, string> = {
   EM_ABERTO: 'Em aberto',
@@ -7,20 +7,15 @@ export const STATUS_LABELS: Record<StatusRecebivel, string> = {
 };
 
 export const STATUS_CLASSES: Record<StatusRecebivel, string> = {
-  EM_ABERTO: 'badge badge-info badge-sm',
-  QUITADO: 'badge badge-success badge-sm',
-  VENCIDO: 'badge badge-error badge-sm',
+  EM_ABERTO: 'badge badge-info badge-sm whitespace-nowrap',
+  QUITADO: 'badge badge-success badge-sm whitespace-nowrap',
+  VENCIDO: 'badge badge-error badge-sm whitespace-nowrap',
 };
 
 export const PESSOA_LABELS: Record<PessoaTipo, string> = {
   ALUNO: 'Aluno',
   PROFESSOR: 'Professor',
   OUTRO: 'Outro',
-};
-
-export const PLANO_LABELS: Record<PlanoTipo, string> = {
-  CONVENIO: 'Convênio',
-  PRE_PAGO: 'Pré-pago',
 };
 
 export const formatCurrency = (valor: number): string =>

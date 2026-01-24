@@ -1,6 +1,6 @@
 export type PessoaTipo = 'ALUNO' | 'PROFESSOR' | 'OUTRO';
 export type PlanoTipo = 'CONVENIO' | 'PRE_PAGO' | 'SALDO';
-export type TipoMovimento = 'CONSUMO' | 'CARGA' | 'AJUSTE';
+export type TipoMovimento = 'CONSUMO' | 'CARGA' | 'PAGAMENTO';
 export type FormaPagamento = 'SALDO' | 'DINHEIRO' | 'CONVENIO';
 
 export interface PessoaExtrato {
@@ -34,6 +34,5 @@ export interface ExtratoFiltro {
   dataInicio: string;
   dataFim: string;
   tipoMovimento: 'TODOS' | TipoMovimento;
-  terminal: 'TODOS' | string;
   texto: string;
 }

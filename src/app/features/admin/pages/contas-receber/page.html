@@ -3,13 +3,6 @@
     <h1 class="text-lg font-semibold">Contas a Receber (Convênio)</h1>
     <p class="text-sm opacity-70">Relatórios financeiros de clientes em plano convênio.</p>
   </div>
-
-  <div class="flex items-center gap-2">
-    <button class="btn btn-outline btn-sm" (click)="onAtualizarMock()" [disabled]="loading()">
-      Atualizar mock
-    </button>
-    <button class="btn btn-success btn-sm" (click)="onNovaCobranca()">+ Nova cobrança</button>
-  </div>
 </div>
 
 <div role="tablist" class="tabs tabs-lifted mb-4">
@@ -76,19 +69,6 @@
       </select>
     </label>
 
-    <label class="form-control w-full max-w-[200px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Tipo de plano</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().tipoPlano"
-        (change)="patchFiltro({ tipoPlano: $any($event.target).value })"
-      >
-        <option *ngFor="let plano of tiposPlano" [value]="plano.value">{{ plano.label }}</option>
-      </select>
-    </label>
-
     <label class="form-control w-full max-w-sm">
       <div class="label">
         <span class="label-text text-xs opacity-70">Buscar</span>
@@ -102,15 +82,15 @@
       />
     </label>
 
-    <label class="label cursor-pointer gap-2 mt-6">
-      <input
-        type="checkbox"
-        class="checkbox checkbox-xs"
-        [checked]="filtros().somenteInadimplentes"
-        (change)="patchFiltro({ somenteInadimplentes: $any($event.target).checked })"
-      />
-      <span class="label-text text-xs opacity-70">Somente inadimplentes</span>
-    </label>
+    <!-- <label class="label cursor-pointer gap-2 mt-6"> -->
+    <!--   <input -->
+    <!--     type="checkbox" -->
+    <!--     class="checkbox checkbox-xs" -->
+    <!--     [checked]="filtros().somenteInadimplentes" -->
+    <!--     (change)="patchFiltro({ somenteInadimplentes: $any($event.target).checked })" -->
+    <!--   /> -->
+    <!--   <span class="label-text text-xs opacity-70">Somente inadimplentes</span> -->
+    <!-- </label> -->
 
     <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>
@@ -127,11 +107,9 @@
       <thead>
         <tr>
           <th>Pessoa</th>
-          <th>Plano</th>
           <th>Responsável</th>
           <th>Competência</th>
           <th class="text-right">Valor devido</th>
-          <th class="text-right">Valor pago</th>
           <th>Status</th>
           <th>Última cobrança</th>
           <th class="text-right">Ações</th>
@@ -146,21 +124,19 @@
             </div>
           </td>
           <td>
-            <span class="badge badge-outline badge-sm">{{ tipoPlanoLabel(item.planoTipo) }}</span>
-          </td>
-          <td>
             <div class="text-sm">{{ item.responsavel || '—' }}</div>
             <div class="text-xs opacity-60">{{ item.documento }}</div>
           </td>
           <td>{{ competenciaLabel(item.competencia) }}</td>
           <td class="text-right">{{ formatCurrency(item.valorDevido) }}</td>
-          <td class="text-right">{{ formatCurrency(item.valorPago) }}</td>
+          
           <td>
             <span [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
           </td>
+          
           <td>{{ formatDate(item.ultimaCobranca) }}</td>
+          
           <td class="text-right space-x-2">
-            <button class="btn btn-ghost btn-xs" (click)="onVerExtrato(item)">Ver extrato</button>
             <button class="btn btn-ghost btn-xs" (click)="onEnviarCobranca(item)">
               Enviar cobrança
             </button>
@@ -169,8 +145,9 @@
             </button>
           </td>
         </tr>
+        
         <tr *ngIf="!loading() && paginaRecebiveis().length === 0">
-          <td colspan="9" class="text-center opacity-70 py-6">Nenhum registro encontrado.</td>
+          <td colspan="7" class="text-center opacity-70 py-6">Nenhum registro encontrado.</td>
         </tr>
       </tbody>
     </table>
@@ -251,7 +228,7 @@
           <div>
             <div class="text-sm font-semibold">{{ item.pessoaNome }}</div>
             <div class="text-xs opacity-60">
-              {{ tipoPessoaLabel(item.pessoaTipo) }} • {{ tipoPlanoLabel(item.planoTipo) }}
+              {{ tipoPessoaLabel(item.pessoaTipo) }}
             </div>
           </div>
           <div class="text-sm text-warning font-semibold">
@@ -281,43 +258,3 @@
     </div>
   </div>
 </section>
-
-<dialog class="modal" [open]="extratoAberto()">
-  <div class="modal-box">
-    <div class="flex items-start justify-between">
-      <div>
-        <div class="text-sm opacity-70">Extrato do cliente</div>
-        <h3 class="text-lg font-semibold">{{ extratoSelecionado()?.pessoaNome }}</h3>
-        <p class="text-xs opacity-70">
-          {{ tipoPessoaLabel(extratoSelecionado()?.pessoaTipo) }} •
-          {{ tipoPlanoLabel(extratoSelecionado()?.planoTipo) }}
-        </p>
-      </div>
-      <button class="btn btn-ghost btn-xs" (click)="fecharExtrato()">Fechar</button>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
-        <div class="text-xs uppercase opacity-60">Valor devido</div>
-        <div class="text-lg font-semibold">
-          {{ formatCurrency(extratoSelecionado()?.valorDevido || 0) }}
-        </div>
-      </div>
-      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
-        <div class="text-xs uppercase opacity-60">Valor pago</div>
-        <div class="text-lg font-semibold text-success">
-          {{ formatCurrency(extratoSelecionado()?.valorPago || 0) }}
-        </div>
-      </div>
-      <div class="bg-base-300 rounded-lg border border-base-100 p-3">
-        <div class="text-xs uppercase opacity-60">Saldo</div>
-        <div [class]="saldoExtratoClass()" class="text-lg font-semibold">
-          {{ formatCurrency(saldoExtrato()) }}
-        </div>
-      </div>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button (click)="fecharExtrato()">close</button>
-  </form>
-</dialog>

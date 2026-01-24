@@ -82,18 +82,18 @@
       </select>
     </label>
 
-    <label class="form-control w-full max-w-[180px]">
-      <div class="label">
-        <span class="label-text text-xs opacity-70">Terminal/Operador</span>
-      </div>
-      <select
-        class="select select-bordered select-sm"
-        [value]="filtros().terminal"
-        (change)="patchFiltro({ terminal: $any($event.target).value })"
-      >
-        <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option>
-      </select>
-    </label>
+    <!-- <label class="form-control w-full max-w-[180px]"> -->
+    <!--   <div class="label"> -->
+    <!--     <span class="label-text text-xs opacity-70">Terminal/Operador</span> -->
+    <!--   </div> -->
+    <!--   <select -->
+    <!--     class="select select-bordered select-sm" -->
+    <!--     [value]="filtros().terminal" -->
+    <!--     (change)="patchFiltro({ terminal: $any($event.target).value })" -->
+    <!--   > -->
+    <!--     <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option> -->
+    <!--   </select> -->
+    <!-- </label> -->
 
     <label class="form-control w-full max-w-sm">
       <div class="label">
@@ -129,8 +129,8 @@
     </div>
     <div class="bg-base-200 rounded-lg border border-base-100 p-4">
       <div class="text-xs uppercase opacity-60">Saldo atual</div>
-      <div class="text-xl font-semibold mt-1">{{ formatCurrency(pessoaSelecionada()?.saldoAtual || 0) }}</div>
-      <div class="text-xs opacity-60">Carteira ativa</div>
+      <div class="text-xl font-semibold mt-1">{{ saldoValor() }}</div>
+      <div class="text-xs opacity-60">{{ saldoDescricao() }}</div>
     </div>
     <div class="bg-base-200 rounded-lg border border-base-100 p-4">
       <div class="text-xs uppercase opacity-60">Consumo no mês</div>
@@ -159,7 +159,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of movimentacoesFiltradas(); trackBy: trackById">
+        <tr *ngFor="let item of movimentacoes(); trackBy: trackById">
           <td>{{ formatDateTime(item.dataHora) }}</td>
           <td>
             <div class="text-sm">{{ item.origem }}</div>
@@ -175,7 +175,7 @@
             <button class="btn btn-ghost btn-xs" (click)="abrirDetalhes(item)">Ver detalhes</button>
           </td>
         </tr>
-        <tr *ngIf="!loading() && movimentacoesFiltradas().length === 0">
+        <tr *ngIf="!loading() && movimentacoes().length === 0">
           <td colspan="6" class="text-center opacity-70 py-6">Nenhuma movimentação encontrada.</td>
         </tr>
       </tbody>
@@ -195,7 +195,7 @@
     </div>
     <div class="bg-base-200 rounded-lg border border-base-100 p-4">
       <div class="text-xs uppercase opacity-60">Saldo atual</div>
-      <div class="text-2xl font-semibold mt-1">{{ formatCurrency(pessoaSelecionada()?.saldoAtual || 0) }}</div>
+      <div class="text-2xl font-semibold mt-1">{{ saldoValor() }}</div>
       <p class="text-xs opacity-60">Plano {{ planoLabel(pessoaSelecionada()?.plano) }}</p>
     </div>
     <div class="bg-base-200 rounded-lg border border-base-100 p-4">

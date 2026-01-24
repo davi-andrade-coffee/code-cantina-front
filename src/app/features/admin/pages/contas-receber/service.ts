@@ -10,7 +10,6 @@ export class ContasReceberService {
       id: '1',
       pessoaNome: 'Mariana Albuquerque',
       pessoaTipo: 'ALUNO',
-      planoTipo: 'CONVENIO',
       responsavel: 'Carlos Albuquerque',
       documento: '123.456.789-00',
       registro: 'ALU-0231',
@@ -24,7 +23,6 @@ export class ContasReceberService {
       id: '2',
       pessoaNome: 'Paulo Henrique',
       pessoaTipo: 'PROFESSOR',
-      planoTipo: 'CONVENIO',
       responsavel: '—',
       documento: '987.654.321-00',
       registro: 'PRO-1802',
@@ -38,7 +36,6 @@ export class ContasReceberService {
       id: '3',
       pessoaNome: 'Beatriz Campos',
       pessoaTipo: 'ALUNO',
-      planoTipo: 'PRE_PAGO',
       responsavel: 'Rita Campos',
       documento: '234.567.890-11',
       registro: 'ALU-0844',
@@ -52,7 +49,6 @@ export class ContasReceberService {
       id: '4',
       pessoaNome: 'Henrique Lopes',
       pessoaTipo: 'OUTRO',
-      planoTipo: 'CONVENIO',
       responsavel: '—',
       documento: '345.678.901-22',
       registro: 'OUT-0342',
@@ -66,7 +62,6 @@ export class ContasReceberService {
       id: '5',
       pessoaNome: 'Camila Nogueira',
       pessoaTipo: 'ALUNO',
-      planoTipo: 'CONVENIO',
       responsavel: 'Eduardo Nogueira',
       documento: '456.789.012-33',
       registro: 'ALU-1129',
@@ -80,7 +75,6 @@ export class ContasReceberService {
       id: '6',
       pessoaNome: 'Sofia Carvalho',
       pessoaTipo: 'PROFESSOR',
-      planoTipo: 'PRE_PAGO',
       responsavel: '—',
       documento: '567.890.123-44',
       registro: 'PRO-0723',
@@ -94,7 +88,6 @@ export class ContasReceberService {
       id: '7',
       pessoaNome: 'Rafael Dias',
       pessoaTipo: 'OUTRO',
-      planoTipo: 'CONVENIO',
       responsavel: '—',
       documento: '678.901.234-55',
       registro: 'OUT-0788',
@@ -108,7 +101,6 @@ export class ContasReceberService {
       id: '8',
       pessoaNome: 'Luciana Moraes',
       pessoaTipo: 'ALUNO',
-      planoTipo: 'CONVENIO',
       responsavel: 'Gustavo Moraes',
       documento: '789.012.345-66',
       registro: 'ALU-0491',
@@ -122,7 +114,6 @@ export class ContasReceberService {
       id: '9',
       pessoaNome: 'Gabriel Santos',
       pessoaTipo: 'PROFESSOR',
-      planoTipo: 'CONVENIO',
       responsavel: '—',
       documento: '890.123.456-77',
       registro: 'PRO-2220',
@@ -136,7 +127,6 @@ export class ContasReceberService {
       id: '10',
       pessoaNome: 'Natalia Freitas',
       pessoaTipo: 'ALUNO',
-      planoTipo: 'PRE_PAGO',
       responsavel: 'Marcos Freitas',
       documento: '901.234.567-88',
       registro: 'ALU-0670',
@@ -150,7 +140,6 @@ export class ContasReceberService {
       id: '11',
       pessoaNome: 'João Batista',
       pessoaTipo: 'OUTRO',
-      planoTipo: 'CONVENIO',
       responsavel: '—',
       documento: '018.234.567-99',
       registro: 'OUT-0991',
@@ -162,8 +151,26 @@ export class ContasReceberService {
     },
   ]);
 
-  list(): Observable<Recebivel[]> {
-    return of(this.recebiveis());
+  list(filtro: {
+    competencia: string;
+    status: 'TODOS' | Recebivel['status'];
+    tipoPessoa: 'TODOS' | Recebivel['pessoaTipo'];
+    termo: string;
+  }): Observable<Recebivel[]> {
+    const termoLower = filtro.termo.trim().toLowerCase();
+    const filtradas = this.recebiveis().filter((item) => {
+      const mesmaCompetencia = item.competencia === filtro.competencia;
+      const statusOk = filtro.status === 'TODOS' || item.status === filtro.status;
+      const pessoaOk = filtro.tipoPessoa === 'TODOS' || item.pessoaTipo === filtro.tipoPessoa;
+      const termoOk =
+        termoLower.length === 0 ||
+        item.pessoaNome.toLowerCase().includes(termoLower) ||
+        item.documento.toLowerCase().includes(termoLower) ||
+        item.registro.toLowerCase().includes(termoLower);
+      const inadimplenteOk = item.status !== 'QUITADO';
+      return mesmaCompetencia && statusOk && pessoaOk && termoOk && inadimplenteOk;
+    });
+    return of(filtradas);
   }
 
   enviarCobranca(id: string, data: string): Observable<void> {
@@ -178,19 +185,6 @@ export class ContasReceberService {
       lista.map((item) =>
         item.id === id ? { ...item, valorPago: item.valorDevido, status: 'QUITADO' } : item
       )
-    );
-    return of(void 0);
-  }
-
-  atualizarMock(): Observable<void> {
-    this.recebiveis.update((lista) =>
-      lista.map((item, index) => ({
-        ...item,
-        valorPago:
-          item.status === 'QUITADO'
-            ? item.valorDevido
-            : Math.min(item.valorDevido, item.valorPago + (index % 4) * 25),
-      }))
     );
     return of(void 0);
   }

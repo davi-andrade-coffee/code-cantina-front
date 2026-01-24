@@ -1,0 +1,309 @@
+<div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+  <div>
+    <h1 class="text-lg font-semibold">Relatório de Vendas</h1>
+    <p class="text-sm opacity-70">Visão gerencial de vendas por transação.</p>
+  </div>
+</div>
+
+<div role="tablist" class="tabs tabs-lifted mb-4">
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'listagem'"
+    (click)="abaAtiva.set('listagem')"
+  >
+    Listagem
+  </button>
+  <button
+    role="tab"
+    class="tab"
+    [class.tab-active]="abaAtiva() === 'insights'"
+    (click)="abaAtiva.set('insights')"
+  >
+    Insights
+  </button>
+</div>
+
+<section
+  *ngIf="abaAtiva() === 'listagem'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4"
+>
+  <div class="flex flex-wrap items-end gap-3">
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data início *</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataInicio"
+        (input)="patchFiltro({ dataInicio: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Data fim *</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        type="date"
+        [value]="filtros().dataFim"
+        (input)="patchFiltro({ dataFim: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Terminal</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().terminal"
+        (change)="patchFiltro({ terminal: $any($event.target).value })"
+      >
+        <option *ngFor="let item of terminais" [value]="item.value">{{ item.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[160px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Operador</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().operador"
+        (change)="patchFiltro({ operador: $any($event.target).value })"
+      >
+        <option *ngFor="let item of operadores" [value]="item.value">{{ item.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[180px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Forma de pagamento</span>
+      </div>
+      <select
+        class="select select-bordered select-sm"
+        [value]="filtros().formaPagamento"
+        (change)="patchFiltro({ formaPagamento: $any($event.target).value })"
+      >
+        <option *ngFor="let item of formasPagamento" [value]="item.value">{{ item.label }}</option>
+      </select>
+    </label>
+
+    <label class="form-control w-full max-w-[220px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Produto</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Produto"
+        [value]="filtros().produto"
+        (input)="patchFiltro({ produto: $any($event.target).value })"
+      />
+    </label>
+
+    <label class="form-control w-full max-w-[220px]">
+      <div class="label">
+        <span class="label-text text-xs opacity-70">Cliente</span>
+      </div>
+      <input
+        class="input input-bordered input-sm"
+        placeholder="Nome ou registro"
+        [value]="filtros().cliente"
+        (input)="patchFiltro({ cliente: $any($event.target).value })"
+        (keyup.enter)="buscar()"
+      />
+    </label>
+
+    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+      <span *ngIf="!loading()">Buscar</span>
+      <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="alert alert-error">
+    <span class="text-sm">{{ errorMsg() }}</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm">
+      <thead>
+        <tr>
+          <th>Data/hora</th>
+          <th>Terminal / Operador</th>
+          <th>Cliente</th>
+          <th class="text-right">Total</th>
+          <th>Forma pagamento</th>
+          <th class="text-center">Nº itens</th>
+          <th>Caixa</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let venda of vendasFiltradas(); trackBy: trackById">
+          <tr>
+            <td>{{ formatDateTime(venda.dataHora) }}</td>
+            <td>
+              <div class="text-sm font-semibold">{{ venda.terminal }}</div>
+              <div class="text-xs opacity-60">{{ venda.operador }}</div>
+            </td>
+            <td>
+              <div class="text-sm">{{ venda.cliente || '—' }}</div>
+              <div class="text-xs opacity-60">{{ venda.registroCliente || 'Sem registro' }}</div>
+            </td>
+            <td class="text-right">{{ formatCurrency(venda.total) }}</td>
+            <td>
+              <span class="badge badge-outline badge-sm">
+                {{ pagamentoLabel(venda.formaPagamento) }}
+              </span>
+            </td>
+            <td class="text-center">{{ venda.itens.length }}</td>
+            <td class="text-xs opacity-70">{{ venda.caixaId }}</td>
+            <td class="text-right">
+              <button class="btn btn-ghost btn-xs" (click)="toggleItens(venda.id)">
+                {{ expandido(venda.id) ? 'Ocultar' : 'Expandir' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="expandido(venda.id)">
+            <td colspan="9" class="bg-base-200">
+              <div class="max-w-3xl bg-base-100 border border-base-300 rounded-lg p-4 shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                  <div>
+                    <div class="text-sm font-semibold">Comprovante de venda</div>
+                    <div class="text-xs opacity-60">
+                      Cupom #{{ venda.id }} • {{ formatDateTime(venda.dataHora) }}
+                    </div>
+                  </div>
+                  <div class="text-right text-xs opacity-70">
+                    <div>Pagamento: {{ pagamentoLabel(venda.formaPagamento) }}</div>
+                    <div>{{ venda.terminal }} • {{ venda.operador }}</div>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="table table-xs">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th class="text-center">Qtd</th>
+                        <th class="text-right">Vlr</th>
+                        <th class="text-right">Tot</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of venda.itens">
+                        <td>{{ item.produto }}</td>
+                        <td class="text-center">{{ item.quantidade }}</td>
+                        <td class="text-right">{{ formatCurrency(item.valorUnitario) }}</td>
+                        <td class="text-right">{{ formatCurrency(item.total) }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="3" class="text-right text-xs opacity-70">Subtotal</td>
+                        <td class="text-right text-xs opacity-70">{{ formatCurrency(subtotal(venda)) }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="3" class="text-right font-semibold">Total</td>
+                        <td class="text-right font-semibold">{{ formatCurrency(venda.total) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="!loading() && vendasFiltradas().length === 0">
+          <td colspan="9" class="text-center opacity-70 py-6">Nenhuma venda encontrada.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section
+  *ngIf="abaAtiva() === 'insights'"
+  class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4"
+>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Total vendido</div>
+      <div class="text-2xl font-semibold mt-1">{{ formatCurrency(totalVendido()) }}</div>
+      <p class="text-xs opacity-60">Período selecionado</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Nº vendas</div>
+      <div class="text-2xl font-semibold mt-1">{{ vendasFiltradas().length }}</div>
+      <p class="text-xs opacity-60">Inclui estornadas</p>
+    </div>
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-xs uppercase opacity-60">Ticket médio</div>
+      <div class="text-2xl font-semibold mt-1">{{ formatCurrency(ticketMedio()) }}</div>
+      <p class="text-xs opacity-60">Baseado nas vendas filtradas</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Vendas por dia</div>
+      <div class="flex items-end gap-3 h-36">
+        <div *ngFor="let item of vendasPorDia()" class="flex-1">
+          <div
+            class="bg-primary/70 rounded-t-md"
+            [style.height.%]="item.percentual"
+            [title]="item.label + ': ' + formatCurrency(item.valor)"
+          ></div>
+          <div class="text-[10px] opacity-60 text-center mt-1">{{ item.label }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Top produtos</div>
+      <ul class="space-y-2">
+        <li *ngFor="let item of topProdutos()" class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold">{{ item.produto }}</div>
+            <div class="text-xs opacity-60">{{ item.quantidade }} itens</div>
+          </div>
+          <div class="text-sm text-warning font-semibold">{{ formatCurrency(item.total) }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Vendas por terminal</div>
+      <ul class="space-y-2">
+        <li *ngFor="let item of vendasPorTerminal()" class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold">{{ item.terminal }}</div>
+            <div class="text-xs opacity-60">{{ item.quantidade }} vendas</div>
+          </div>
+          <div class="text-sm text-warning font-semibold">{{ formatCurrency(item.total) }}</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-base-200 rounded-lg border border-base-100 p-4">
+      <div class="text-sm font-semibold mb-2">Split por forma de pagamento</div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div
+          *ngFor="let item of distribuicaoPagamento()"
+          class="bg-base-300 rounded-lg border border-base-100 p-3"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold">{{ item.label }}</span>
+            <span class="text-xs opacity-60">{{ item.quantidade }} vendas</span>
+          </div>
+          <div class="h-2 rounded-full bg-base-100">
+            <div class="h-2 rounded-full bg-success" [style.width.%]="item.percentual"></div>
+          </div>
+          <div class="text-xs opacity-60 mt-1">{{ item.percentual | number: '1.0-0' }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
