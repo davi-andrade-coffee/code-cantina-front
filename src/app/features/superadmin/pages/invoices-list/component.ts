@@ -3,16 +3,15 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Invoice, InvoiceFilters, InvoiceInsights } from '../../models/invoice.model';
+import { Invoice, InvoiceFilters } from '../../models/invoice.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
-import { KpiCardComponent } from '../../components/kpi-card.component';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, KpiCardComponent, PaginationComponent, StatusBadgeComponent, TableCardComponent],
+  imports: [CommonModule, PaginationComponent, StatusBadgeComponent, TableCardComponent],
   templateUrl: './page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,11 +19,9 @@ export class InvoicesListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly activeTab = signal<'LISTA' | 'INSIGHTS'>('LISTA');
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
   readonly invoices = signal<Invoice[]>([]);
-  readonly insights = signal<InvoiceInsights | null>(null);
 
   readonly filtros = signal<InvoiceFilters>({
     competencia: '',
@@ -48,7 +45,6 @@ export class InvoicesListPage {
 
   constructor() {
     this.buscar();
-    this.carregarInsights();
   }
 
   buscar(): void {
@@ -70,16 +66,6 @@ export class InvoicesListPage {
       });
   }
 
-  carregarInsights(): void {
-    this.facade
-      .getInvoiceInsights()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (insights) => this.insights.set(insights),
-        error: () => this.errorMsg.set('Falha ao carregar indicadores financeiros.'),
-      });
-  }
-
   patchFiltro(patch: Partial<InvoiceFilters>): void {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
@@ -93,10 +79,4 @@ export class InvoicesListPage {
     this.paginaAtual.set(1);
   }
 
-  formatPercent(value?: number | null): string {
-    if (value === null || value === undefined) {
-      return '—';
-    }
-    return `${value.toFixed(1)}%`;
-  }
 }
