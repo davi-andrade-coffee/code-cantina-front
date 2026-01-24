@@ -79,6 +79,7 @@
           <tr>
             <th>Loja</th>
             <th>Admin</th>
+            <th>Mensalidade</th>
             <th>Status</th>
             <th>Criada em</th>
             <th>Ações</th>
@@ -93,6 +94,7 @@
             <td class="text-sm">
               {{ adminNome(store.adminId) }}
             </td>
+            <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
             <td>
               <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
             </td>
@@ -106,7 +108,7 @@
           </tr>
 
           <tr *ngIf="!loading() && paginaStores().length === 0">
-            <td colspan="5" class="text-center opacity-70 py-6">
+            <td colspan="6" class="text-center opacity-70 py-6">
               Nenhuma loja encontrada para os filtros selecionados.
             </td>
           </tr>

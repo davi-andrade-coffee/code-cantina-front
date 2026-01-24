@@ -5,6 +5,7 @@ export interface Store {
   adminId: string;
   nome: string;
   codigo: string;
+  mensalidade: number;
   status: StoreStatus;
   criadoEm: string;
   ultimoAcesso?: string;
