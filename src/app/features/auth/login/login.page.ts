@@ -36,7 +36,11 @@ export class LoginPage {
       const { email, password } = this.form.getRawValue();
       const user = await this.auth.login({ email: email!, password: password! });
 
-      this.redirectByRole(user.role);
+      if (password == '123456') {
+        this.router.navigateByUrl('/auth/trocar-senha')
+      } else {
+        this.redirectByRole(user.role);
+      }
     } catch (e: any) {
       this.error.set(e?.message || 'Falha no login.');
     } finally {

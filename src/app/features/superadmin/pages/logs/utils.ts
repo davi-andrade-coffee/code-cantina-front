@@ -11,19 +11,19 @@ export const CATEGORIA_LABELS: Record<LogCategoria, string> = {
 };
 
 export const CATEGORIA_BADGES: Record<LogCategoria, string> = {
-  CADASTRO_LOJA: 'badge badge-secondary badge-sm',
-  CADASTRO_ADMIN: 'badge badge-secondary badge-sm',
-  BLOQUEIO_LOJA: 'badge badge-error badge-sm',
-  DESBLOQUEIO_LOJA: 'badge badge-success badge-sm',
-  BLOQUEIO_ADMIN: 'badge badge-error badge-sm',
-  DESBLOQUEIO_ADMIN: 'badge badge-success badge-sm',
-  PAGAMENTO_BOLETO: 'badge badge-primary badge-sm',
+  CADASTRO_LOJA: 'badge badge-secondary badge-sm whitespace-nowrap',
+  CADASTRO_ADMIN: 'badge badge-secondary badge-sm whitespace-nowrap',
+  BLOQUEIO_LOJA: 'badge badge-error badge-sm whitespace-nowrap',
+  DESBLOQUEIO_LOJA: 'badge badge-success badge-sm whitespace-nowrap',
+  BLOQUEIO_ADMIN: 'badge badge-error badge-sm whitespace-nowrap',
+  DESBLOQUEIO_ADMIN: 'badge badge-success badge-sm whitespace-nowrap',
+  PAGAMENTO_BOLETO: 'badge badge-primary badge-sm whitespace-nowrap',
 };
 
 export const ORIGEM_BADGES: Record<string, string> = {
-  'Painel Superadmin': 'badge badge-outline badge-sm',
-  Financeiro: 'badge badge-outline badge-sm',
-  Sistema: 'badge badge-outline badge-sm',
+  'Painel Superadmin': 'badge badge-outline badge-sm whitespace-nowrap',
+  Financeiro: 'badge badge-outline badge-sm whitespace-nowrap',
+  Sistema: 'badge badge-outline badge-sm whitespace-nowrap',
 };
 
 export const formatDateTime = (data: string): string =>
