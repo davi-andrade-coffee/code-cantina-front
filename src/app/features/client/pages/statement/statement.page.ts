@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ClientTableComponent } from '../../components/client-table.component';
-import { DependentSelectorComponent } from '../../components/dependent-selector.component';
 import { StatementDetailModalComponent } from '../../components/statement-detail-modal.component';
 import { SummaryCardComponent } from '../../components/summary-card.component';
 import { StatementEntry } from '../../models/statement.model';
@@ -13,9 +11,7 @@ import { ClientFacade } from '../../services/client.facade';
   imports: [
     CommonModule,
     FormsModule,
-    DependentSelectorComponent,
     SummaryCardComponent,
-    ClientTableComponent,
     StatementDetailModalComponent,
   ],
   template: `
@@ -24,89 +20,109 @@ import { ClientFacade } from '../../services/client.facade';
         <h2 class="text-xl font-semibold">Extrato</h2>
         <p class="text-sm opacity-70">Movimentações e compras filtradas por período.</p>
       </div>
-      <client-dependent-selector
-        [people]="people()"
-        [selectedId]="selectedPerson()?.id || null"
-        (selectionChange)="onSelectPerson($event)"
-      />
     </div>
 
-    <div class="grid md:grid-cols-4 gap-3 mb-6">
-      <label class="form-control">
-        <div class="label"><span class="label-text">Data início</span></div>
-        <input type="date" class="input input-bordered input-sm" [(ngModel)]="startDate" />
-      </label>
-      <label class="form-control">
-        <div class="label"><span class="label-text">Data fim</span></div>
-        <input type="date" class="input input-bordered input-sm" [(ngModel)]="endDate" />
-      </label>
-      <label class="form-control">
-        <div class="label"><span class="label-text">Tipo</span></div>
-        <select class="select select-bordered select-sm" [(ngModel)]="typeFilter">
-          <option value="">Todos</option>
-          <option value="COMPRA">Compras</option>
-          <option value="RECARGA">Recargas</option>
-          <option value="AJUSTE">Ajustes</option>
-        </select>
-      </label>
-      <label class="form-control">
-        <div class="label"><span class="label-text">Texto</span></div>
-        <input
-          type="text"
-          class="input input-bordered input-sm"
-          placeholder="Produto ou observação"
-          [(ngModel)]="textFilter"
-        />
-      </label>
-    </div>
+    <section class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4 mb-6">
+      <div class="flex flex-wrap items-end gap-3">
+        <label class="form-control w-full max-w-[160px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Data início</span></div>
+          <input type="date" class="input input-bordered input-sm" [(ngModel)]="startDateInput" />
+        </label>
+        <label class="form-control w-full max-w-[160px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Data fim</span></div>
+          <input type="date" class="input input-bordered input-sm" [(ngModel)]="endDateInput" />
+        </label>
+        <label class="form-control w-full max-w-[180px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Tipo</span></div>
+          <select class="select select-bordered select-sm" [(ngModel)]="typeFilterInput">
+            <option value="">Todos</option>
+            <option value="COMPRA">Compras</option>
+            <option value="RECARGA">Recargas</option>
+            <option value="AJUSTE">Ajustes</option>
+          </select>
+        </label>
+        <label class="form-control w-full max-w-sm">
+          <div class="label"><span class="label-text text-xs opacity-70">Texto</span></div>
+          <input
+            type="text"
+            class="input input-bordered input-sm"
+            placeholder="Produto ou observação"
+            [(ngModel)]="textFilterInput"
+          />
+        </label>
+        <button class="btn btn-primary btn-sm mt-6" (click)="applyFilters()">Buscar</button>
+      </div>
 
-    <div class="grid lg:grid-cols-3 gap-4 mb-6">
-      <client-summary-card
-        title="Cliente + Plano"
-        [value]="summary()?.clientName || '—'"
-        [subtitle]="summary()?.planLabel || ''"
-      ></client-summary-card>
+      <div class="grid lg:grid-cols-3 gap-4">
+        <client-summary-card
+          title="Cliente + Plano"
+          [value]="summary()?.clientName || '—'"
+          [subtitle]="summary()?.planLabel || ''"
+        ></client-summary-card>
 
-      <client-summary-card
-        *ngIf="summary()?.balance !== undefined"
-        title="Saldo atual"
-        [value]="balanceValue"
-        subtitle="Saldo disponível"
-      ></client-summary-card>
+        <client-summary-card
+          *ngIf="summary()?.balance !== undefined"
+          title="Saldo atual"
+          [value]="balanceValue"
+          subtitle="Saldo disponível"
+        ></client-summary-card>
 
-      <client-summary-card
-        title="Consumo no período"
-        [value]="periodConsumption"
-        subtitle="Total no período filtrado"
-      ></client-summary-card>
-    </div>
+        <client-summary-card
+          title="Consumo no período"
+          [value]="periodConsumption"
+          subtitle="Total no período filtrado"
+        ></client-summary-card>
+      </div>
+    </section>
 
-    <client-table [empty]="filteredEntries.length === 0">
-      <thead>
-        <tr>
-          <th>Data/Hora</th>
-          <th>Origem</th>
-          <th>Descrição</th>
-          <th>Valor</th>
-          <th *ngIf="summary()?.balance !== undefined">Saldo após</th>
-          <th class="text-right">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let entry of filteredEntries">
-          <td>{{ entry.dateTime }}</td>
-          <td>{{ entry.origin }}</td>
-          <td>{{ entry.description }}</td>
-          <td>R$ {{ entry.amount | number: '1.2-2' }}</td>
-          <td *ngIf="summary()?.balance !== undefined">
-            {{ balanceAfterLabel(entry) }}
-          </td>
-          <td class="text-right">
-            <button class="btn btn-xs btn-ghost" (click)="openDetail(entry)">Ver detalhes</button>
-          </td>
-        </tr>
-      </tbody>
-    </client-table>
+    <section class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4">
+      <div class="overflow-x-auto">
+        <table class="table table-zebra table-sm">
+          <thead>
+            <tr>
+              <th class="text-center">Data/Hora</th>
+              <th class="text-center">Origem</th>
+              <th class="text-center">Descrição</th>
+              <th class="text-center">Valor</th>
+              <th class="text-center" *ngIf="summary()?.balance !== undefined">Saldo após</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of filteredEntries">
+              <td class="text-center">{{ entry.dateTime }}</td>
+              <td class="text-center">{{ entry.origin }}</td>
+              <td class="text-center">{{ entry.description }}</td>
+              <td class="text-center">R$ {{ entry.amount | number: '1.2-2' }}</td>
+              <td class="text-center" *ngIf="summary()?.balance !== undefined">
+                {{ balanceAfterLabel(entry) }}
+              </td>
+              <td class="text-center">
+                <button class="btn btn-xs btn-outline" (click)="openDetail(entry)">Ver detalhes</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredEntries.length === 0">
+              <td
+                [attr.colspan]="summary()?.balance !== undefined ? 6 : 5"
+                class="text-center opacity-70 py-6"
+              >
+                Nenhuma movimentação encontrada.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between text-sm opacity-70">
+        <span>Mostrando {{ filteredEntries.length }} registros</span>
+        <div class="join">
+          <button class="btn btn-xs join-item">«</button>
+          <button class="btn btn-xs join-item">1</button>
+          <button class="btn btn-xs join-item">2</button>
+          <button class="btn btn-xs join-item">»</button>
+        </div>
+      </div>
+    </section>
 
     <client-statement-detail-modal
       [open]="detailOpen"
@@ -116,10 +132,13 @@ import { ClientFacade } from '../../services/client.facade';
   `,
 })
 export class StatementPage {
-  readonly people = this.facade.peopleView;
-  readonly selectedPerson = this.facade.selectedPersonView;
   readonly summary = this.facade.statementSummaryView;
   readonly entries = this.facade.statementEntriesView;
+
+  startDateInput = '';
+  endDateInput = '';
+  typeFilterInput = '';
+  textFilterInput = '';
 
   startDate = '';
   endDate = '';
@@ -156,8 +175,11 @@ export class StatementPage {
     });
   }
 
-  onSelectPerson(personId: string): void {
-    this.facade.selectPerson(personId);
+  applyFilters(): void {
+    this.startDate = this.startDateInput;
+    this.endDate = this.endDateInput;
+    this.typeFilter = this.typeFilterInput;
+    this.textFilter = this.textFilterInput;
   }
 
   openDetail(entry: StatementEntry): void {

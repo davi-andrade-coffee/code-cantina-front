@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { DashboardSummary } from '../models/dashboard.model';
-import { Dependent } from '../models/dependent.model';
 import {
   FinanceHistoryItem,
   FinanceSummary,
@@ -16,11 +15,6 @@ interface PersonData {
   statementSummary: StatementSummary;
   statementEntries: StatementEntry[];
 }
-
-const PEOPLE: Dependent[] = [
-  { id: 'p1', name: 'Maria Silva', relation: 'Responsável' },
-  { id: 'p2', name: 'Lucas Silva', relation: 'Dependente' },
-];
 
 const buildData = (): Record<string, PersonData> => ({
   p1: {
@@ -117,104 +111,11 @@ const buildData = (): Record<string, PersonData> => ({
       },
     ],
   },
-  p2: {
-    dashboard: {
-      plan: { type: 'SALDO', status: 'ATIVO' },
-      balance: {
-        amount: 85.2,
-        lastTopup: {
-          date: '2024-09-04',
-          amount: 60,
-        },
-      },
-      consumption: {
-        total: 46.3,
-        purchases: 12,
-        averageTicket: 3.86,
-      },
-      pending: {
-        hasOverdue: false,
-        message: 'Nenhuma pendência no momento.',
-      },
-    },
-    financeSummary: {
-      planType: 'SALDO',
-      balance: 85.2,
-    },
-    financeHistory: [
-      {
-        id: 'tx-1',
-        type: 'TRANSACTION',
-        date: '2024-09-04',
-        movement: 'RECARGA',
-        amount: 60,
-        status: 'CONCLUIDA',
-      },
-      {
-        id: 'tx-2',
-        type: 'TRANSACTION',
-        date: '2024-08-20',
-        movement: 'AJUSTE',
-        amount: -5,
-        status: 'CONCLUIDA',
-      },
-      {
-        id: 'tx-3',
-        type: 'TRANSACTION',
-        date: '2024-08-10',
-        movement: 'RECARGA',
-        amount: 50,
-        status: 'CONCLUIDA',
-      },
-    ],
-    statementSummary: {
-      clientName: 'Lucas Silva',
-      planLabel: 'Saldo pré-pago',
-      balance: 85.2,
-      periodConsumption: 46.3,
-    },
-    statementEntries: [
-      {
-        id: 'st-3',
-        dateTime: '2024-09-05 10:12',
-        origin: 'PDV Escola Centro',
-        description: 'Compra na cantina',
-        amount: -8.5,
-        balanceAfter: 85.2,
-        type: 'COMPRA',
-        detail: {
-          items: [{ name: 'Suco natural', quantity: 1, price: 8.5 }],
-          paymentMethod: 'Saldo',
-          operator: 'Carla Souza',
-          terminal: 'Terminal 01',
-        },
-      },
-      {
-        id: 'st-4',
-        dateTime: '2024-09-04 18:20',
-        origin: 'Recarga Online',
-        description: 'Recarga via Pix',
-        amount: 60,
-        balanceAfter: 93.7,
-        type: 'RECARGA',
-        detail: {
-          items: [{ name: 'Recarga Pix', quantity: 1, price: 60 }],
-          paymentMethod: 'Pix',
-          operator: 'Sistema',
-          terminal: 'Online',
-        },
-      },
-    ],
-  },
 });
 
 @Injectable({ providedIn: 'root' })
 export class ClientMockService {
   private data = buildData();
-
-  listPeople(): Promise<Dependent[]> {
-    return Promise.resolve(PEOPLE);
-  }
 
   getDashboard(personId: string): Promise<DashboardSummary> {
     return Promise.resolve(this.data[personId].dashboard);

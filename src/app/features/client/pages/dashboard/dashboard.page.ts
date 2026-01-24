@@ -1,24 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DependentSelectorComponent } from '../../components/dependent-selector.component';
 import { SummaryCardComponent } from '../../components/summary-card.component';
 import { ClientFacade } from '../../services/client.facade';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, RouterLink, DependentSelectorComponent, SummaryCardComponent],
+  imports: [CommonModule, RouterLink, SummaryCardComponent],
   template: `
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl font-semibold">Painel do Cliente</h2>
         <p class="text-sm opacity-70">Resumo do plano, pagamentos e consumo atual.</p>
       </div>
-      <client-dependent-selector
-        [people]="people()"
-        [selectedId]="selectedPerson()?.id || null"
-        (selectionChange)="onSelectPerson($event)"
-      />
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -76,8 +70,6 @@ import { ClientFacade } from '../../services/client.facade';
   `,
 })
 export class DashboardPage {
-  readonly people = this.facade.peopleView;
-  readonly selectedPerson = this.facade.selectedPersonView;
   readonly dashboard = this.facade.dashboardView;
 
   constructor(private facade: ClientFacade) {}
@@ -162,7 +154,4 @@ export class DashboardPage {
     return this.dashboard()?.pending.message ?? '';
   }
 
-  onSelectPerson(personId: string): void {
-    this.facade.selectPerson(personId);
-  }
 }
