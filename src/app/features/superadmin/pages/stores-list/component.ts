@@ -91,7 +91,7 @@ export class StoresListPage {
 
   carregarAdmins(): void {
     this.facade
-      .listAdmins({ termo: '', status: 'TODOS', somenteInadimplentes: false })
+      .listAdmins({ termo: '', status: 'TODOS' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (admins) => this.admins.set(admins),

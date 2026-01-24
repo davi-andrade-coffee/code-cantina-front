@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
 import { Admin, AdminBillingResumo, AdminFilters, AdminInsights } from '../models/admin.model';
-import { Store, StoreInsights } from '../models/store.model';
+import { Store, StoreInsights, StoreStatus } from '../models/store.model';
 
 const ADMIN_DATA: Admin[] = [
   {
@@ -70,6 +70,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Centro',
     codigo: 'ALF-CTR',
+    mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2023-10-20',
     ultimoAcesso: '2024-09-01',
@@ -79,6 +80,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Norte',
     codigo: 'ALF-NOR',
+    mensalidade: 120,
     status: 'BLOQUEADA',
     criadoEm: '2024-01-05',
     ultimoAcesso: '2024-08-18',
@@ -88,6 +90,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Sul',
     codigo: 'ALF-SUL',
+    mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2024-02-11',
   },
@@ -96,6 +99,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-002',
     nome: 'Beta Unidade 01',
     codigo: 'BET-01',
+    mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-02-20',
     ultimoAcesso: '2024-09-03',
@@ -105,6 +109,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-002',
     nome: 'Beta Unidade 02',
     codigo: 'BET-02',
+    mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-03-10',
   },
@@ -113,6 +118,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-002',
     nome: 'Beta Unidade 03',
     codigo: 'BET-03',
+    mensalidade: 150,
     status: 'BLOQUEADA',
     criadoEm: '2024-03-18',
   },
@@ -121,6 +127,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-002',
     nome: 'Beta Unidade 04',
     codigo: 'BET-04',
+    mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-04-02',
   },
@@ -129,6 +136,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-003',
     nome: 'Gama Campus',
     codigo: 'GAM-01',
+    mensalidade: 110,
     status: 'BLOQUEADA',
     criadoEm: '2023-07-01',
   },
@@ -137,6 +145,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-004',
     nome: 'Delta Kids',
     codigo: 'DEL-01',
+    mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-05-15',
   },
@@ -145,6 +154,7 @@ const STORE_DATA: Store[] = [
     adminId: 'adm-004',
     nome: 'Delta Ensino Médio',
     codigo: 'DEL-02',
+    mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-06-01',
   },
@@ -164,8 +174,7 @@ export class SuperAdminMockService {
             admin.email.toLowerCase().includes(termo) ||
             admin.documento.toLowerCase().includes(termo);
           const matchStatus = filters.status === 'TODOS' || admin.status === filters.status;
-          const matchInad = !filters.somenteInadimplentes || admin.inadimplente;
-          return matchTermo && matchStatus && matchInad;
+          return matchTermo && matchStatus;
         });
       })
     );
@@ -173,6 +182,32 @@ export class SuperAdminMockService {
 
   getAdminById(adminId: string): Observable<Admin | undefined> {
     return of(ADMIN_DATA.find((admin) => admin.id === adminId)).pipe(delay(200));
+  }
+
+  updateAdminStatus(adminId: string, status: Admin['status']): Observable<Admin | undefined> {
+    const admin = ADMIN_DATA.find((item) => item.id === adminId);
+    if (admin) {
+      admin.status = status;
+    }
+    return of(admin).pipe(delay(200));
+  }
+
+  updateStoreStatus(storeId: string, status: StoreStatus): Observable<Store | undefined> {
+    const store = STORE_DATA.find((item) => item.id === storeId);
+    if (store) {
+      store.status = status;
+    }
+    return of(store).pipe(delay(200));
+  }
+
+  updateStore(storeId: string, payload: { nome: string; codigo: string; mensalidade: number }): Observable<Store | undefined> {
+    const store = STORE_DATA.find((item) => item.id === storeId);
+    if (store) {
+      store.nome = payload.nome;
+      store.codigo = payload.codigo;
+      store.mensalidade = payload.mensalidade;
+    }
+    return of(store).pipe(delay(200));
   }
 
   getAdminInsights(): Observable<AdminInsights> {

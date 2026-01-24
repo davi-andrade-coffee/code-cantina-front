@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Admin, AdminBillingResumo } from '../../models/admin.model';
+import { Admin, AdminStatus } from '../../models/admin.model';
 import { Store } from '../../models/store.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
-import { BlockModalComponent } from '../../components/modals/block-modal.component';
 import { CreateStoreModalComponent } from '../../components/modals/create-store-modal.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
@@ -17,7 +16,6 @@ import { TableCardComponent } from '../../components/table-card.component';
   imports: [
     CommonModule,
     RouterLink,
-    BlockModalComponent,
     CreateStoreModalComponent,
     StatusBadgeComponent,
     TableCardComponent,
@@ -34,12 +32,9 @@ export class AdminDetailPage {
   readonly errorMsg = signal<string | null>(null);
   readonly admin = signal<Admin | null>(null);
   readonly stores = signal<Store[]>([]);
-  readonly billing = signal<AdminBillingResumo | null>(null);
-
-  readonly modalBloqueioAberto = signal(false);
   readonly modalLojaAberto = signal(false);
-
-  readonly lojasAtivas = computed(() => this.stores().filter((store) => store.status === 'ATIVA').length);
+  readonly modalLojaModo = signal<'CRIAR' | 'EDITAR'>('CRIAR');
+  readonly lojaSelecionada = signal<Store | null>(null);
 
   constructor() {
     this.carregarDetalhes();
@@ -73,37 +68,77 @@ export class AdminDetailPage {
         next: (stores) => this.stores.set(stores),
         error: () => this.errorMsg.set('Falha ao carregar lojas vinculadas.'),
       });
-
-    this.facade
-      .getAdminBillingResumo(adminId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (resumo) => this.billing.set(resumo),
-        error: () => this.errorMsg.set('Falha ao carregar resumo financeiro.'),
-      });
-  }
-
-  abrirBloqueio(): void {
-    this.modalBloqueioAberto.set(true);
-  }
-
-  fecharBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
-  }
-
-  confirmarBloqueio(): void {
-    this.modalBloqueioAberto.set(false);
   }
 
   abrirNovaLoja(): void {
+    this.modalLojaModo.set('CRIAR');
+    this.lojaSelecionada.set(null);
+    this.modalLojaAberto.set(true);
+  }
+
+  abrirEditarLoja(store: Store): void {
+    this.modalLojaModo.set('EDITAR');
+    this.lojaSelecionada.set(store);
     this.modalLojaAberto.set(true);
   }
 
   fecharNovaLoja(): void {
     this.modalLojaAberto.set(false);
+    this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(): void {
+  confirmarNovaLoja(payload?: { id?: string | null; nome: string; codigo: string; mensalidade: number }): void {
+    if (payload?.id) {
+      this.facade
+        .updateStore(payload.id, {
+          nome: payload.nome,
+          codigo: payload.codigo,
+          mensalidade: payload.mensalidade,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (updated) => {
+            if (!updated) return;
+            this.stores.update((lista) =>
+              lista.map((item) => (item.id === updated.id ? updated : item))
+            );
+          },
+          error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
+        });
+    }
     this.modalLojaAberto.set(false);
+    this.lojaSelecionada.set(null);
+  }
+
+  toggleStoreStatus(store: Store, ativo: boolean): void {
+    const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.facade
+      .updateStoreStatus(store.id, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          if (!updated) return;
+          this.stores.update((lista) =>
+            lista.map((item) => (item.id === updated.id ? updated : item))
+          );
+        },
+        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+      });
+  }
+
+  toggleAdminStatus(ativo: boolean): void {
+    const admin = this.admin();
+    if (!admin) return;
+    const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+    this.facade
+      .updateAdminStatus(admin.id, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          if (!updated) return;
+          this.admin.set(updated);
+        },
+        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
+      });
   }
 }

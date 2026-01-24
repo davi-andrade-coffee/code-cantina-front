@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import { AdminFilters } from '../models/admin.model';
+import { AdminFilters, AdminStatus } from '../models/admin.model';
+import { StoreStatus } from '../models/store.model';
 import { InvoiceFilters } from '../models/invoice.model';
 import { SuperAdminMockService } from './superadmin.mock.service';
 import { BillingMockService } from './billing.mock.service';
@@ -17,6 +18,18 @@ export class SuperAdminFacade {
 
   getAdminById(adminId: string) {
     return this.superadminSource.getAdminById(adminId);
+  }
+
+  updateAdminStatus(adminId: string, status: AdminStatus) {
+    return this.superadminSource.updateAdminStatus(adminId, status);
+  }
+
+  updateStoreStatus(storeId: string, status: StoreStatus) {
+    return this.superadminSource.updateStoreStatus(storeId, status);
+  }
+
+  updateStore(storeId: string, payload: { nome: string; codigo: string; mensalidade: number }) {
+    return this.superadminSource.updateStore(storeId, payload);
   }
 
   getAdminInsights(): ReturnType<SuperAdminMockService['getAdminInsights']> {
