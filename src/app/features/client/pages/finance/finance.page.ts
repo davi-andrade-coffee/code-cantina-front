@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ClientTableComponent } from '../../components/client-table.component';
 import { FinanceDetailModalComponent } from '../../components/finance-detail-modal.component';
 import { SummaryCardComponent } from '../../components/summary-card.component';
 import { FinanceHistoryItem, InvoiceHistoryItem, InvoiceStatus } from '../../models/finance.model';
@@ -13,7 +12,6 @@ import { ClientFacade } from '../../services/client.facade';
     CommonModule,
     FormsModule,
     SummaryCardComponent,
-    ClientTableComponent,
     FinanceDetailModalComponent,
   ],
   template: `
@@ -82,79 +80,89 @@ import { ClientFacade } from '../../services/client.facade';
       </client-summary-card>
     </div>
 
-    <div class="mb-4">
-      <h3 class="text-lg font-semibold mb-2">Histórico financeiro</h3>
-      <div class="grid md:grid-cols-3 gap-3 mb-4">
-        <label class="form-control">
-          <div class="label"><span class="label-text">Período</span></div>
-          <input type="date" class="input input-bordered input-sm" [(ngModel)]="startDate" />
+    <section class="bg-base-300 rounded-lg border border-base-100 p-4 space-y-4">
+      <div>
+        <h3 class="text-lg font-semibold">Histórico financeiro</h3>
+      </div>
+      <div class="flex flex-wrap items-end gap-3">
+        <label class="form-control w-full max-w-[160px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Período</span></div>
+          <input type="date" class="input input-bordered input-sm" [(ngModel)]="startDateInput" />
         </label>
-        <label class="form-control">
-          <div class="label"><span class="label-text">Até</span></div>
-          <input type="date" class="input input-bordered input-sm" [(ngModel)]="endDate" />
+        <label class="form-control w-full max-w-[160px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Até</span></div>
+          <input type="date" class="input input-bordered input-sm" [(ngModel)]="endDateInput" />
         </label>
-        <label class="form-control">
-          <div class="label"><span class="label-text">Status</span></div>
-          <select class="select select-bordered select-sm" [(ngModel)]="statusFilter">
+        <label class="form-control w-full max-w-[180px]">
+          <div class="label"><span class="label-text text-xs opacity-70">Status</span></div>
+          <select class="select select-bordered select-sm" [(ngModel)]="statusFilterInput">
             <option value="">Todos</option>
             <option value="EM_ABERTO">Em aberto</option>
             <option value="QUITADO">Quitado</option>
             <option value="VENCIDO">Vencido</option>
           </select>
         </label>
-        <label class="form-control" *ngIf="isWallet">
-          <div class="label"><span class="label-text">Tipo</span></div>
-          <select class="select select-bordered select-sm" [(ngModel)]="movementFilter">
+        <label class="form-control w-full max-w-[180px]" *ngIf="isWallet">
+          <div class="label"><span class="label-text text-xs opacity-70">Tipo</span></div>
+          <select class="select select-bordered select-sm" [(ngModel)]="movementFilterInput">
             <option value="">Todos</option>
             <option value="RECARGA">Recarga</option>
             <option value="ESTORNO">Estorno</option>
             <option value="AJUSTE">Ajuste</option>
           </select>
         </label>
+        <button class="btn btn-primary btn-sm mt-6" (click)="applyFilters()">Buscar</button>
       </div>
 
-      <client-table [empty]="filteredHistory.length === 0">
-        <thead>
-          <tr>
-            <th class="text-center">Competência/Data</th>
-            <th class="text-center">Valor</th>
-            <th class="text-center">Vencimento/Tipo</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Pago em</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of filteredHistory">
-            <td class="text-center">
-              <span *ngIf="item.type === 'INVOICE'">{{ item.competency }}</span>
-              <span *ngIf="item.type === 'TRANSACTION'">{{ item.date }}</span>
-            </td>
-            <td class="text-center">R$ {{ historyAmount(item) | number: '1.2-2' }}</td>
-            <td class="text-center">
-              <span *ngIf="item.type === 'INVOICE'">{{ item.dueDate }}</span>
-              <span *ngIf="item.type === 'TRANSACTION'">{{ item.movement }}</span>
-            </td>
-            <td class="text-center">
-              <span
-                class="badge badge-sm font-semibold"
-                [ngClass]="statusBadgeClass(statusKeyForItem(item))"
-              >
-                {{ statusLabelForItem(item) }}
-              </span>
-            </td>
-            <td class="text-center">
-              <span *ngIf="item.type === 'INVOICE'">{{ item.paidAt || '—' }}</span>
-              <span *ngIf="item.type === 'TRANSACTION'">—</span>
-            </td>
-            <td class="text-center">
-              <button class="btn btn-xs btn-outline" (click)="openDetail(item)">Detalhar</button>
-            </td>
-          </tr>
-        </tbody>
-      </client-table>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra table-sm">
+          <thead>
+            <tr>
+              <th class="text-center">Competência/Data</th>
+              <th class="text-center">Valor</th>
+              <th class="text-center">Vencimento/Tipo</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Pago em</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredHistory">
+              <td class="text-center">
+                <span *ngIf="item.type === 'INVOICE'">{{ item.competency }}</span>
+                <span *ngIf="item.type === 'TRANSACTION'">{{ item.date }}</span>
+              </td>
+              <td class="text-center">R$ {{ historyAmount(item) | number: '1.2-2' }}</td>
+              <td class="text-center">
+                <span *ngIf="item.type === 'INVOICE'">{{ item.dueDate }}</span>
+                <span *ngIf="item.type === 'TRANSACTION'">{{ item.movement }}</span>
+              </td>
+              <td class="text-center">
+                <span
+                  class="badge badge-sm font-semibold"
+                  [ngClass]="statusBadgeClass(statusKeyForItem(item))"
+                >
+                  {{ statusLabelForItem(item) }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span *ngIf="item.type === 'INVOICE'">{{ item.paidAt || '—' }}</span>
+                <span *ngIf="item.type === 'TRANSACTION'">—</span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-xs btn-outline" (click)="openDetail(item)">Detalhar</button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredHistory.length === 0">
+              <td colspan="6" class="text-center opacity-70 py-6">
+                Nenhum registro encontrado.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div class="flex items-center justify-between mt-4 text-sm opacity-70">
+      <div class="flex items-center justify-between text-sm opacity-70">
         <span>Mostrando {{ filteredHistory.length }} registros</span>
         <div class="join">
           <button class="btn btn-xs join-item">«</button>
@@ -163,7 +171,7 @@ import { ClientFacade } from '../../services/client.facade';
           <button class="btn btn-xs join-item">»</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <client-finance-detail-modal
       [open]="detailOpen"
@@ -179,6 +187,11 @@ export class FinancePage {
 
   topupAmount = 50;
   topupMethod: 'PIX' | 'BOLETO' | 'COBRANCA' = 'PIX';
+  startDateInput = '';
+  endDateInput = '';
+  statusFilterInput = '';
+  movementFilterInput = '';
+
   startDate = '';
   endDate = '';
   statusFilter = '';
@@ -237,6 +250,13 @@ export class FinancePage {
   submitTopup(): void {
     if (!this.topupAmount || this.topupAmount <= 0) return;
     this.facade.createTopup(this.topupAmount);
+  }
+
+  applyFilters(): void {
+    this.startDate = this.startDateInput;
+    this.endDate = this.endDateInput;
+    this.statusFilter = this.statusFilterInput;
+    this.movementFilter = this.movementFilterInput;
   }
 
   openDetail(item: FinanceHistoryItem): void {
