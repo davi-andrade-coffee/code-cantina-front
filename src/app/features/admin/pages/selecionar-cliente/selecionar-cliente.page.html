@@ -12,120 +12,68 @@
 
           <div class="flex gap-2">
             <button class="btn btn-sm btn-outline" (click)="logout()">Sair</button>
-            <button class="btn btn-sm btn-ghost" (click)="clearSelection()">Limpar seleção</button>
           </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-[2fr_1fr]">
-          <div class="space-y-4">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label class="input input-bordered flex items-center gap-2 flex-1">
-                <input
-                  type="text"
-                  class="grow"
-                  placeholder="Buscar por nome, cidade ou CNPJ"
-                  [value]="searchTerm()"
-                  (input)="searchTerm.set($any($event.target).value)"
-                />
-                <span class="text-xs opacity-60">⌕</span>
-              </label>
+        <div class="space-y-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label class="input input-bordered flex items-center gap-2 flex-1">
+              <input
+                type="text"
+                class="grow"
+                placeholder="Buscar por nome, cidade ou CNPJ"
+                [value]="searchTerm()"
+                (input)="searchTerm.set($any($event.target).value)"
+              />
+              <span class="text-xs opacity-60">⌕</span>
+            </label>
 
-              <select
-                class="select select-bordered w-full sm:w-48"
-                [value]="statusFilter()"
-                (change)="statusFilter.set($any($event.target).value)"
-              >
-                <option value="TODOS">Todos</option>
-                <option value="ATIVOS">Ativos</option>
-                <option value="INATIVOS">Inativos</option>
-              </select>
-            </div>
-
-            <div class="grid gap-3">
-              <div
-                *ngFor="let client of filteredClients()"
-                class="border rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                [class.border-primary]="selectedClient()?.id === client.id"
-                [class.bg-base-200]="selectedClient()?.id === client.id"
-              >
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h2 class="text-base font-semibold">{{ client.nome }}</h2>
-                    <span
-                      class="badge badge-sm"
-                      [class.badge-success]="client.status === 'ATIVO'"
-                      [class.badge-ghost]="client.status === 'INATIVO'"
-                    >
-                      {{ client.status }}
-                    </span>
-                  </div>
-                  <div class="text-sm opacity-70">{{ client.nomeFantasia }}</div>
-                  <div class="text-xs opacity-60">{{ client.cidade }} · {{ client.cnpj }}</div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                  <div class="text-right">
-                    <div class="text-xs uppercase opacity-60">Plano</div>
-                    <div class="text-sm font-medium">{{ client.plano }}</div>
-                  </div>
-
-                  <button class="btn btn-sm btn-primary" (click)="selectClient(client)">
-                    Selecionar
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="filteredClients().length === 0" class="text-sm opacity-70 text-center py-6">
-                Nenhum cliente encontrado com os filtros informados.
-              </div>
-            </div>
+            <select
+              class="select select-bordered w-full sm:w-48"
+              [value]="statusFilter()"
+              (change)="statusFilter.set($any($event.target).value)"
+            >
+              <option value="TODOS">Todos</option>
+              <option value="ATIVOS">Ativos</option>
+              <option value="INATIVOS">Inativos</option>
+            </select>
           </div>
 
-          <aside class="space-y-4">
-            <div class="bg-base-200 border border-base-300 rounded-lg p-4">
-              <div class="text-xs uppercase opacity-60 mb-2">Resumo</div>
-              <div class="flex items-center justify-between text-sm">
-                <span>Total de clientes</span>
-                <span class="font-semibold">{{ resumo().total }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span>Ativos</span>
-                <span class="font-semibold text-success">{{ resumo().ativos }}</span>
-              </div>
-              <div class="flex items-center justify-between text-sm">
-                <span>Inativos</span>
-                <span class="font-semibold text-warning">{{ resumo().inativos }}</span>
-              </div>
-            </div>
-
-            <div class="bg-base-200 border border-base-300 rounded-lg p-4 space-y-2">
-              <div class="text-xs uppercase opacity-60">Cliente selecionado</div>
-              <ng-container *ngIf="selectedClient(); else emptySelection">
-                <div class="text-base font-semibold">{{ selectedClient()?.nome }}</div>
-                <div class="text-sm opacity-70">{{ selectedClient()?.nomeFantasia }}</div>
-                <div class="text-xs opacity-60">{{ selectedClient()?.cidade }}</div>
-                <div class="text-xs opacity-60">{{ selectedClient()?.cnpj }}</div>
-                <div class="text-xs opacity-60">
-                  Responsável: {{ selectedClient()?.responsavel }}
-                </div>
-                <div class="text-xs opacity-60">
-                  Última atualização: {{ selectedClient()?.ultimaAtualizacao }}
-                </div>
-              </ng-container>
-              <ng-template #emptySelection>
-                <div class="text-sm opacity-70">Nenhum cliente selecionado.</div>
-              </ng-template>
-            </div>
-
-            <button
-              class="btn btn-primary w-full"
-              [disabled]="!selectedClient()"
-              (click)="confirmSelection()"
+          <div class="grid gap-3">
+            <div
+              *ngFor="let client of filteredClients()"
+              class="border rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
-              Acessar painel do cliente
-            </button>
-            <a class="btn btn-ghost w-full" routerLink="/auth/login">Voltar ao login</a>
-          </aside>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base font-semibold">{{ client.nome }}</h2>
+                  <span
+                    class="badge badge-sm"
+                    [class.badge-success]="client.status === 'ATIVO'"
+                    [class.badge-ghost]="client.status === 'INATIVO'"
+                  >
+                    {{ client.status }}
+                  </span>
+                </div>
+                <div class="text-sm opacity-70">{{ client.nomeFantasia }}</div>
+                <div class="text-xs opacity-60">{{ client.cidade }} · {{ client.cnpj }}</div>
+              </div>
+
+              <div class="flex flex-col items-start gap-1 sm:items-end">
+                <div class="text-xs opacity-60">Responsável: {{ client.responsavel }}</div>
+                <div class="text-xs opacity-60">
+                  Última atualização: {{ client.ultimaAtualizacao }}
+                </div>
+                <button class="btn btn-sm btn-primary mt-2" (click)="selectClient(client)">
+                  Selecionar
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="filteredClients().length === 0" class="text-sm opacity-70 text-center py-6">
+              Nenhum cliente encontrado com os filtros informados.
+            </div>
+          </div>
         </div>
       </div>
     </div>

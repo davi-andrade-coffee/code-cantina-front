@@ -8,7 +8,6 @@ export interface AdminClient {
   nomeFantasia: string;
   cnpj: string;
   cidade: string;
-  plano: string;
   status: AdminClientStatus;
   ultimaAtualizacao: string;
   responsavel: string;
@@ -25,7 +24,6 @@ export class AdminClientService {
       nomeFantasia: 'Cantina Horizonte',
       cnpj: '12.345.678/0001-90',
       cidade: 'Fortaleza, CE',
-      plano: 'Premium',
       status: 'ATIVO',
       ultimaAtualizacao: 'Hoje às 09:12',
       responsavel: 'Ana Paula Ribeiro',
@@ -36,7 +34,6 @@ export class AdminClientService {
       nomeFantasia: 'Cantina Nova Era',
       cnpj: '45.987.654/0001-10',
       cidade: 'Recife, PE',
-      plano: 'Essencial',
       status: 'ATIVO',
       ultimaAtualizacao: 'Ontem às 17:40',
       responsavel: 'Bruno Castro',
@@ -47,7 +44,6 @@ export class AdminClientService {
       nomeFantasia: 'Caminhos Food',
       cnpj: '98.765.432/0001-55',
       cidade: 'Natal, RN',
-      plano: 'Enterprise',
       status: 'INATIVO',
       ultimaAtualizacao: '15/05/2024',
       responsavel: 'Camila Tavares',
@@ -58,7 +54,6 @@ export class AdminClientService {
       nomeFantasia: 'Cantina Viver Bem',
       cnpj: '23.456.789/0001-01',
       cidade: 'João Pessoa, PB',
-      plano: 'Premium',
       status: 'ATIVO',
       ultimaAtualizacao: 'Hoje às 08:03',
       responsavel: 'Diego Fernandes',

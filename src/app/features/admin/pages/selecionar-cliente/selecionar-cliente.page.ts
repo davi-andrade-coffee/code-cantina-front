@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AdminClient, AdminClientService } from '../../../../core/admin/admin-client.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 
@@ -8,15 +8,13 @@ type StatusFilter = 'TODOS' | 'ATIVOS' | 'INATIVOS';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './selecionar-cliente.page.html',
 })
 export class SelecionarClientePage {
-  private readonly allClients = this.clientService.listClients();
-
   searchTerm = signal('');
   statusFilter = signal<StatusFilter>('TODOS');
-  selectedClient = signal<AdminClient | null>(this.clientService.getSelectedClient());
+  private readonly allClients = this.clientService.listClients();
 
   filteredClients = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -39,16 +37,6 @@ export class SelecionarClientePage {
     });
   });
 
-  resumo = computed(() => {
-    const ativos = this.allClients.filter((client) => client.status === 'ATIVO').length;
-    const inativos = this.allClients.length - ativos;
-    return {
-      total: this.allClients.length,
-      ativos,
-      inativos,
-    };
-  });
-
   constructor(
     private readonly clientService: AdminClientService,
     private readonly auth: AuthService,
@@ -56,20 +44,8 @@ export class SelecionarClientePage {
   ) {}
 
   selectClient(client: AdminClient) {
-    this.selectedClient.set(client);
-  }
-
-  confirmSelection() {
-    const client = this.selectedClient();
-    if (!client) return;
-
     this.clientService.setSelectedClient(client);
     this.router.navigateByUrl('/admin');
-  }
-
-  clearSelection() {
-    this.selectedClient.set(null);
-    this.clientService.clearSelectedClient();
   }
 
   logout() {
