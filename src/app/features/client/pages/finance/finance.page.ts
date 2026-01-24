@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClientTableComponent } from '../../components/client-table.component';
-import { DependentSelectorComponent } from '../../components/dependent-selector.component';
 import { SummaryCardComponent } from '../../components/summary-card.component';
 import { FinanceHistoryItem } from '../../models/finance.model';
 import { ClientFacade } from '../../services/client.facade';
@@ -12,7 +11,6 @@ import { ClientFacade } from '../../services/client.facade';
   imports: [
     CommonModule,
     FormsModule,
-    DependentSelectorComponent,
     SummaryCardComponent,
     ClientTableComponent,
   ],
@@ -22,11 +20,6 @@ import { ClientFacade } from '../../services/client.facade';
         <h2 class="text-xl font-semibold">Financeiro</h2>
         <p class="text-sm opacity-70">Recargas, faturas e histórico financeiro.</p>
       </div>
-      <client-dependent-selector
-        [people]="people()"
-        [selectedId]="selectedPerson()?.id || null"
-        (selectionChange)="onSelectPerson($event)"
-      />
     </div>
 
     <div class="grid gap-4 mb-8">
@@ -161,8 +154,6 @@ import { ClientFacade } from '../../services/client.facade';
   `,
 })
 export class FinancePage {
-  readonly people = this.facade.peopleView;
-  readonly selectedPerson = this.facade.selectedPersonView;
   readonly financeSummary = this.facade.financeSummaryView;
   readonly financeHistory = this.facade.financeHistoryView;
   readonly actionState = this.facade.actionState;
@@ -232,10 +223,6 @@ export class FinancePage {
       }
       return true;
     });
-  }
-
-  onSelectPerson(personId: string): void {
-    this.facade.selectPerson(personId);
   }
 
   submitTopup(): void {

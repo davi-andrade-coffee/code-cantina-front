@@ -1,6 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { DashboardSummary } from '../models/dashboard.model';
-import { Dependent } from '../models/dependent.model';
 import { FinanceHistoryItem, FinanceSummary } from '../models/finance.model';
 import { StatementEntry, StatementSummary } from '../models/statement.model';
 import { ClientMockService } from './client.mock.service';
@@ -12,12 +11,11 @@ export interface OperationState {
   message?: string;
 }
 
-const STORAGE_KEY_PERSON = 'client.selectedPerson';
+const DEFAULT_PERSON_ID = 'p1';
 
 @Injectable({ providedIn: 'root' })
 export class ClientFacade {
-  private readonly people = signal<Dependent[]>([]);
-  private readonly selectedPersonId = signal<string | null>(null);
+  private readonly personId = signal<string>(DEFAULT_PERSON_ID);
   private readonly dashboard = signal<DashboardSummary | null>(null);
   private readonly financeSummary = signal<FinanceSummary | null>(null);
   private readonly financeHistory = signal<FinanceHistoryItem[]>([]);
@@ -27,10 +25,6 @@ export class ClientFacade {
   readonly loadingState = signal<OperationState>({ status: 'idle' });
   readonly actionState = signal<OperationState>({ status: 'idle' });
 
-  readonly peopleView = this.people.asReadonly();
-  readonly selectedPersonView = computed(() =>
-    this.people().find(person => person.id === this.selectedPersonId()) ?? null
-  );
   readonly dashboardView = this.dashboard.asReadonly();
   readonly financeSummaryView = this.financeSummary.asReadonly();
   readonly financeHistoryView = this.financeHistory.asReadonly();
@@ -42,20 +36,8 @@ export class ClientFacade {
   async init(): Promise<void> {
     if (this.loadingState().status === 'loading') return;
     this.loadingState.set({ status: 'loading' });
-    const people = await this.dataSource.listPeople();
-    this.people.set(people);
-    const stored = localStorage.getItem(STORAGE_KEY_PERSON);
-    const defaultPerson = people.find(person => person.id === stored) ?? people[0] ?? null;
-    if (defaultPerson) {
-      await this.selectPerson(defaultPerson.id);
-    }
+    await this.refreshData(this.personId());
     this.loadingState.set({ status: 'success' });
-  }
-
-  async selectPerson(personId: string): Promise<void> {
-    this.selectedPersonId.set(personId);
-    localStorage.setItem(STORAGE_KEY_PERSON, personId);
-    await this.refreshData(personId);
   }
 
   async refreshData(personId: string): Promise<void> {
@@ -75,7 +57,7 @@ export class ClientFacade {
   }
 
   async createTopup(amount: number): Promise<void> {
-    const personId = this.selectedPersonId();
+    const personId = this.personId();
     if (!personId) return;
     this.actionState.set({ status: 'loading' });
     await this.dataSource.createTopup(personId, amount);
@@ -84,7 +66,7 @@ export class ClientFacade {
   }
 
   async markInvoiceAsPaid(invoiceId: string): Promise<void> {
-    const personId = this.selectedPersonId();
+    const personId = this.personId();
     if (!personId) return;
     this.actionState.set({ status: 'loading' });
     await this.dataSource.markInvoiceAsPaid(personId, invoiceId);

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClientTableComponent } from '../../components/client-table.component';
-import { DependentSelectorComponent } from '../../components/dependent-selector.component';
 import { StatementDetailModalComponent } from '../../components/statement-detail-modal.component';
 import { SummaryCardComponent } from '../../components/summary-card.component';
 import { StatementEntry } from '../../models/statement.model';
@@ -13,7 +12,6 @@ import { ClientFacade } from '../../services/client.facade';
   imports: [
     CommonModule,
     FormsModule,
-    DependentSelectorComponent,
     SummaryCardComponent,
     ClientTableComponent,
     StatementDetailModalComponent,
@@ -24,11 +22,6 @@ import { ClientFacade } from '../../services/client.facade';
         <h2 class="text-xl font-semibold">Extrato</h2>
         <p class="text-sm opacity-70">Movimentações e compras filtradas por período.</p>
       </div>
-      <client-dependent-selector
-        [people]="people()"
-        [selectedId]="selectedPerson()?.id || null"
-        (selectionChange)="onSelectPerson($event)"
-      />
     </div>
 
     <div class="grid md:grid-cols-4 gap-3 mb-6">
@@ -116,8 +109,6 @@ import { ClientFacade } from '../../services/client.facade';
   `,
 })
 export class StatementPage {
-  readonly people = this.facade.peopleView;
-  readonly selectedPerson = this.facade.selectedPersonView;
   readonly summary = this.facade.statementSummaryView;
   readonly entries = this.facade.statementEntriesView;
 
@@ -154,10 +145,6 @@ export class StatementPage {
       }
       return true;
     });
-  }
-
-  onSelectPerson(personId: string): void {
-    this.facade.selectPerson(personId);
   }
 
   openDetail(entry: StatementEntry): void {
