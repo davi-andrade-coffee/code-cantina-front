@@ -1,0 +1,87 @@
+<div class="min-h-screen flex items-center justify-center bg-base-200 px-6">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body gap-4">
+      <div>
+        <h2 class="card-title">Trocar senha</h2>
+        <p class="text-sm opacity-70">
+          Atualize a senha temporária por uma nova senha segura.
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
+        <div class="form-control w-full">
+          <input
+            type="password"
+            placeholder="Senha temporária"
+            class="input input-bordered w-full"
+            [class.input-error]="form.get('senhaTemporaria')?.invalid && (form.get('senhaTemporaria')?.dirty || form.get('senhaTemporaria')?.touched)"
+            formControlName="senhaTemporaria"
+          />
+          <div
+            *ngIf="form.get('senhaTemporaria')?.invalid && (form.get('senhaTemporaria')?.dirty || form.get('senhaTemporaria')?.touched)"
+            class="text-error text-xs mt-1 ml-1"
+          >
+            <span *ngIf="form.get('senhaTemporaria')?.hasError('required')">
+              Informe a senha temporária.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control w-full">
+          <input
+            type="password"
+            placeholder="Nova senha"
+            class="input input-bordered w-full"
+            [class.input-error]="form.get('senha')?.invalid && (form.get('senha')?.dirty || form.get('senha')?.touched)"
+            formControlName="senha"
+          />
+          <div
+            *ngIf="form.get('senha')?.invalid && (form.get('senha')?.dirty || form.get('senha')?.touched)"
+            class="text-error text-xs mt-1 ml-1"
+          >
+            <span *ngIf="form.get('senha')?.hasError('required')">A nova senha é obrigatória.</span>
+            <span *ngIf="form.get('senha')?.hasError('pattern')">
+              Use no mínimo 6 caracteres com letras maiúsculas e minúsculas.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-control w-full">
+          <input
+            type="password"
+            placeholder="Confirmar nova senha"
+            class="input input-bordered w-full"
+            [class.input-error]="(form.get('confirmarSenha')?.invalid && (form.get('confirmarSenha')?.dirty || form.get('confirmarSenha')?.touched)) || form.hasError('mismatch')"
+            formControlName="confirmarSenha"
+          />
+          <div
+            *ngIf="(form.get('confirmarSenha')?.dirty || form.get('confirmarSenha')?.touched) && (form.get('confirmarSenha')?.invalid || form.hasError('mismatch'))"
+            class="text-error text-xs mt-1 ml-1"
+          >
+            <span *ngIf="form.get('confirmarSenha')?.hasError('required')">
+              Confirme a nova senha.
+            </span>
+            <span *ngIf="form.hasError('mismatch')">
+              As senhas não conferem.
+            </span>
+          </div>
+        </div>
+
+        <div class="text-xs opacity-70">
+          Requisitos: mínimo de 6 caracteres, com letras maiúsculas e minúsculas.
+        </div>
+
+        <div *ngIf="alert()" class="alert alert-success">
+          <span>{{ alert()?.message }}</span>
+        </div>
+
+        <button class="btn btn-primary w-full" type="submit" [disabled]="form.invalid || loading()">
+          <span *ngIf="!loading()">Atualizar senha</span>
+          <span *ngIf="loading()" class="loading loading-spinner loading-sm"></span>
+        </button>
+
+        <a class="btn btn-ghost w-full" routerLink="/auth/login">Voltar ao login</a>
+      </form>
+    </div>
+  </div>
+</div>

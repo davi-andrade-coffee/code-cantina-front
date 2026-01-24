@@ -1,0 +1,43 @@
+<div class="min-h-screen flex items-center justify-center bg-base-200 px-6">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body gap-4">
+      <div>
+        <h2 class="card-title">Recuperar senha</h2>
+        <p class="text-sm opacity-70">
+          Informe o e-mail cadastrado para receber o link de recuperação.
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
+        <div class="form-control w-full">
+          <input
+            type="email"
+            placeholder="E-mail"
+            class="input input-bordered w-full"
+            [class.input-error]="form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)"
+            formControlName="email"
+            autocomplete="username"
+          />
+          <div
+            *ngIf="form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)"
+            class="text-error text-xs mt-1 ml-1"
+          >
+            <span *ngIf="form.get('email')?.hasError('required')">O e-mail é obrigatório.</span>
+            <span *ngIf="form.get('email')?.hasError('email')">Formato de e-mail inválido.</span>
+          </div>
+        </div>
+
+        <div *ngIf="alert()" class="alert" [class.alert-success]="alert()?.type === 'success'" [class.alert-error]="alert()?.type === 'error'">
+          <span>{{ alert()?.message }}</span>
+        </div>
+
+        <button class="btn btn-primary w-full" type="submit" [disabled]="form.invalid || loading()">
+          <span *ngIf="!loading()">Enviar link</span>
+          <span *ngIf="loading()" class="loading loading-spinner loading-sm"></span>
+        </button>
+
+        <a class="btn btn-ghost w-full" routerLink="/auth/login">Voltar ao login</a>
+      </form>
+    </div>
+  </div>
+</div>
