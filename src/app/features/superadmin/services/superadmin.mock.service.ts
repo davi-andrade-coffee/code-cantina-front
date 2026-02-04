@@ -9,58 +9,46 @@ const ADMIN_DATA: Admin[] = [
   {
     id: 'adm-001',
     nome: 'Cantina Alfa',
-    razaoSocial: 'Cantina Alfa LTDA',
     email: 'alfa@cantina.com',
-    documento: '12.345.678/0001-90',
+    telefone: '(11) 99999-1001',
     lojasTotal: 4,
     lojasAtivas: 3,
     status: 'ATIVO',
     ultimoPagamento: '08/2024',
-    plano: 'Base + por loja',
     inadimplente: false,
-    criadoEm: '2023-10-12',
   },
   {
     id: 'adm-002',
     nome: 'Grupo Beta',
-    razaoSocial: 'Grupo Beta Serviços',
     email: 'financeiro@betagroup.com',
-    documento: '45.221.879/0001-12',
+    telefone: '(11) 98888-2202',
     lojasTotal: 8,
     lojasAtivas: 6,
     status: 'ATIVO',
     ultimoPagamento: '08/2024',
-    plano: 'Base + por loja',
     inadimplente: true,
-    criadoEm: '2024-02-03',
   },
   {
     id: 'adm-003',
     nome: 'Rede Gama',
-    razaoSocial: 'Rede Gama Alimentos',
     email: 'contato@gama.com',
-    documento: '11.775.990/0001-41',
+    telefone: '(11) 97777-3303',
     lojasTotal: 3,
     lojasAtivas: 1,
     status: 'BLOQUEADO',
     ultimoPagamento: '06/2024',
-    plano: 'Base + por loja',
     inadimplente: true,
-    criadoEm: '2023-06-22',
   },
   {
     id: 'adm-004',
     nome: 'Cantina Delta',
-    razaoSocial: 'Delta Cantinas ME',
     email: 'delta@cantinas.com',
-    documento: '83.449.220/0001-03',
+    telefone: '(11) 96666-4404',
     lojasTotal: 2,
     lojasAtivas: 2,
     status: 'ATIVO',
     ultimoPagamento: '08/2024',
-    plano: 'Base + por loja',
     inadimplente: false,
-    criadoEm: '2024-05-10',
   },
 ];
 
@@ -69,7 +57,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-100',
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Centro',
-    codigo: 'ALF-CTR',
+    cnpj: '12.345.678/0001-90',
     mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2023-10-20',
@@ -79,7 +67,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-101',
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Norte',
-    codigo: 'ALF-NOR',
+    cnpj: '12.345.678/0002-71',
     mensalidade: 120,
     status: 'BLOQUEADA',
     criadoEm: '2024-01-05',
@@ -89,7 +77,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-102',
     adminId: 'adm-001',
     nome: 'Cantina Alfa - Sul',
-    codigo: 'ALF-SUL',
+    cnpj: '12.345.678/0003-52',
     mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2024-02-11',
@@ -98,7 +86,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-200',
     adminId: 'adm-002',
     nome: 'Beta Unidade 01',
-    codigo: 'BET-01',
+    cnpj: '45.221.879/0001-12',
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-02-20',
@@ -108,7 +96,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-201',
     adminId: 'adm-002',
     nome: 'Beta Unidade 02',
-    codigo: 'BET-02',
+    cnpj: '45.221.879/0002-03',
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-03-10',
@@ -117,7 +105,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-202',
     adminId: 'adm-002',
     nome: 'Beta Unidade 03',
-    codigo: 'BET-03',
+    cnpj: '45.221.879/0003-94',
     mensalidade: 150,
     status: 'BLOQUEADA',
     criadoEm: '2024-03-18',
@@ -126,7 +114,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-203',
     adminId: 'adm-002',
     nome: 'Beta Unidade 04',
-    codigo: 'BET-04',
+    cnpj: '45.221.879/0004-75',
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-04-02',
@@ -135,7 +123,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-300',
     adminId: 'adm-003',
     nome: 'Gama Campus',
-    codigo: 'GAM-01',
+    cnpj: '11.775.990/0001-41',
     mensalidade: 110,
     status: 'BLOQUEADA',
     criadoEm: '2023-07-01',
@@ -144,7 +132,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-400',
     adminId: 'adm-004',
     nome: 'Delta Kids',
-    codigo: 'DEL-01',
+    cnpj: '83.449.220/0001-03',
     mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-05-15',
@@ -153,7 +141,7 @@ const STORE_DATA: Store[] = [
     id: 'sto-401',
     adminId: 'adm-004',
     nome: 'Delta Ensino Médio',
-    codigo: 'DEL-02',
+    cnpj: '83.449.220/0002-84',
     mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-06-01',
@@ -172,7 +160,7 @@ export class SuperAdminMockService {
             !termo ||
             admin.nome.toLowerCase().includes(termo) ||
             admin.email.toLowerCase().includes(termo) ||
-            admin.documento.toLowerCase().includes(termo);
+            admin.telefone.toLowerCase().includes(termo);
           const matchStatus = filters.status === 'TODOS' || admin.status === filters.status;
           return matchTermo && matchStatus;
         });
@@ -200,11 +188,11 @@ export class SuperAdminMockService {
     return of(store).pipe(delay(200));
   }
 
-  updateStore(storeId: string, payload: { nome: string; codigo: string; mensalidade: number }): Observable<Store | undefined> {
+  updateStore(storeId: string, payload: { nome: string; cnpj: string; mensalidade: number }): Observable<Store | undefined> {
     const store = STORE_DATA.find((item) => item.id === storeId);
     if (store) {
       store.nome = payload.nome;
-      store.codigo = payload.codigo;
+      store.cnpj = payload.cnpj;
       store.mensalidade = payload.mensalidade;
     }
     return of(store).pipe(delay(200));
@@ -246,7 +234,7 @@ export class SuperAdminMockService {
           const matchTermo =
             !termo ||
             store.nome.toLowerCase().includes(termo) ||
-            store.codigo.toLowerCase().includes(termo);
+            store.cnpj.toLowerCase().includes(termo);
           const matchStatus = !filters?.status || filters.status === 'TODOS' || store.status === filters.status;
           const matchAdmin = !filters?.adminId || store.adminId === filters.adminId;
           return matchTermo && matchStatus && matchAdmin;

@@ -94,8 +94,17 @@ export class AdminsListPage {
     this.modalCadastroAberto.set(false);
   }
 
-  confirmarCadastro(): void {
-    this.modalCadastroAberto.set(false);
+  confirmarCadastro(payload: { nome: string; email: string; telefone: string }): void {
+    this.facade
+      .createAdmin(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.modalCadastroAberto.set(false);
+          this.buscar();
+        },
+        error: () => this.errorMsg.set('Não foi possível cadastrar o Admin.'),
+      });
   }
 
   toggleAdminStatus(admin: Admin, ativo: boolean): void {

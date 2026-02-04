@@ -15,25 +15,21 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-base font-semibold">{{ admin()?.nome || '—' }}</h2>
-        <p class="text-sm opacity-70">{{ admin()?.razaoSocial }}</p>
+        <p class="text-sm opacity-70">{{ admin()?.email || '—' }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <superadmin-status-badge [status]="admin()?.status || '—'" kind="admin"></superadmin-status-badge>
       </div>
     </div>
 
-    <div class="grid gap-3 md:grid-cols-3 mt-4 text-sm">
+    <div class="grid gap-3 md:grid-cols-2 mt-4 text-sm">
       <div>
-        <div class="text-xs opacity-70">Contato</div>
+        <div class="text-xs opacity-70">Telefone</div>
+        <div class="font-medium">{{ admin()?.telefone || '—' }}</div>
+      </div>
+      <div>
+        <div class="text-xs opacity-70">E-mail</div>
         <div class="font-medium">{{ admin()?.email || '—' }}</div>
-      </div>
-      <div>
-        <div class="text-xs opacity-70">Documento</div>
-        <div class="font-medium">{{ admin()?.documento || '—' }}</div>
-      </div>
-      <div>
-        <div class="text-xs opacity-70">Plano</div>
-        <div class="font-medium">{{ admin()?.plano || '—' }}</div>
       </div>
     </div>
 
@@ -68,7 +64,7 @@
       <thead>
         <tr>
           <th>Loja</th>
-          <th>Código</th>
+          <th>CNPJ</th>
           <th>Mensalidade</th>
           <th>Status</th>
           <th>Criada em</th>
@@ -80,7 +76,7 @@
       <tbody>
         <tr *ngFor="let store of stores()">
           <td class="font-medium">{{ store.nome }}</td>
-          <td class="text-sm">{{ store.codigo }}</td>
+          <td class="text-sm">{{ store.cnpj }}</td>
           <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
           <td>
             <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>

@@ -27,15 +27,15 @@ import { FormsModule } from '@angular/forms';
           </label>
           <label class="form-control">
             <div class="label">
-              <span class="label-text text-xs opacity-70">Documento (CPF/CNPJ)</span>
+              <span class="label-text text-xs opacity-70">Telefone de contato</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="documento" placeholder="00.000.000/0000-00" />
+            <input class="input input-bordered" [(ngModel)]="telefone" placeholder="(00) 00000-0000" />
           </label>
         </div>
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ nome, email, documento })">
+          <button class="btn btn-primary" (click)="confirm.emit({ nome, email, telefone })">
             Salvar cadastro
           </button>
         </div>
@@ -46,16 +46,16 @@ import { FormsModule } from '@angular/forms';
 export class CreateAdminModalComponent {
   @Input() open = false;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ nome: string; email: string; documento: string }>();
+  @Output() confirm = new EventEmitter<{ nome: string; email: string; telefone: string }>();
 
   nome = '';
   email = '';
-  documento = '';
+  telefone = '';
 
   onClose(): void {
     this.nome = '';
     this.email = '';
-    this.documento = '';
+    this.telefone = '';
     this.close.emit();
   }
 }

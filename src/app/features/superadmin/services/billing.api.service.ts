@@ -17,7 +17,12 @@ interface BillingItem {
     id: string;
     name: string;
     document: string;
-    adminId: string;
+    admin: {
+      id: string;
+      name: string;
+      email: string;
+      phone?: string | null;
+    };
   };
 }
 
@@ -56,8 +61,8 @@ export class BillingApiService {
   private mapBillingItem(item: BillingItem): Invoice {
     return {
       id: item.id,
-      adminId: item.store.adminId,
-      adminNome: item.store.name,
+      adminId: item.store.admin.id,
+      adminNome: item.store.admin.name,
       competencia: this.formatCompetencia(item.referenceMonth),
       lojasAtivas: 1,
       valor: item.amount,

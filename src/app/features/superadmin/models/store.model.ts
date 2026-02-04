@@ -4,7 +4,7 @@ export interface Store {
   id: string;
   adminId: string;
   nome: string;
-  codigo: string;
+  cnpj: string;
   mensalidade: number;
   status: StoreStatus;
   criadoEm: string;

@@ -23,9 +23,9 @@ import { FormsModule } from '@angular/forms';
           </label>
           <label class="form-control">
             <div class="label">
-              <span class="label-text text-xs opacity-70">Código/identificador</span>
+              <span class="label-text text-xs opacity-70">CNPJ (identificador único)</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="codigo" placeholder="EX: UNI-001" />
+            <input class="input input-bordered" [(ngModel)]="cnpj" placeholder="00.000.000/0000-00" />
           </label>
           <label class="form-control">
             <div class="label">
@@ -44,7 +44,7 @@ import { FormsModule } from '@angular/forms';
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ id: storeId, nome, codigo, mensalidade })">
+          <button class="btn btn-primary" (click)="confirm.emit({ id: storeId, nome, cnpj, mensalidade })">
             {{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}
           </button>
         </div>
@@ -56,25 +56,25 @@ export class CreateStoreModalComponent implements OnChanges {
   @Input() open = false;
   @Input() mode: 'CRIAR' | 'EDITAR' = 'CRIAR';
   @Input() storeId?: string | null;
-  @Input() store?: { nome: string; codigo: string; mensalidade: number } | null;
+  @Input() store?: { nome: string; cnpj: string; mensalidade: number } | null;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ id?: string | null; nome: string; codigo: string; mensalidade: number }>();
+  @Output() confirm = new EventEmitter<{ id?: string | null; nome: string; cnpj: string; mensalidade: number }>();
 
   nome = '';
-  codigo = '';
+  cnpj = '';
   mensalidade = 0;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['store'] || changes['open']) {
       this.nome = this.store?.nome ?? '';
-      this.codigo = this.store?.codigo ?? '';
+      this.cnpj = this.store?.cnpj ?? '';
       this.mensalidade = this.store?.mensalidade ?? 0;
     }
   }
 
   onClose(): void {
     this.nome = '';
-    this.codigo = '';
+    this.cnpj = '';
     this.mensalidade = 0;
     this.close.emit();
   }

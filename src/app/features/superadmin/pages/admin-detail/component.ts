@@ -87,12 +87,13 @@ export class AdminDetailPage {
     this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(payload?: { id?: string | null; nome: string; codigo: string; mensalidade: number }): void {
+  confirmarNovaLoja(payload?: { id?: string | null; nome: string; cnpj: string; mensalidade: number }): void {
+    const adminId = this.admin()?.id;
     if (payload?.id) {
       this.facade
         .updateStore(payload.id, {
           nome: payload.nome,
-          codigo: payload.codigo,
+          cnpj: payload.cnpj,
           mensalidade: payload.mensalidade,
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -104,7 +105,7 @@ export class AdminDetailPage {
                   ? {
                       ...item,
                       nome: payload.nome,
-                      codigo: payload.codigo,
+                      cnpj: payload.cnpj,
                       mensalidade: payload.mensalidade,
                     }
                   : item
@@ -112,6 +113,19 @@ export class AdminDetailPage {
             );
           },
           error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
+        });
+    } else if (payload && adminId) {
+      this.facade
+        .createStore({
+          adminId,
+          nome: payload.nome,
+          cnpj: payload.cnpj,
+          mensalidade: payload.mensalidade,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => this.carregarDetalhes(),
+          error: () => this.errorMsg.set('Não foi possível cadastrar a loja.'),
         });
     }
     this.modalLojaAberto.set(false);

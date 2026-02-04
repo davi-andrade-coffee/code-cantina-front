@@ -11,6 +11,7 @@ interface AdminListItem {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   isActive: boolean;
   defaulting: boolean;
   lastPayment: string | null;
@@ -39,6 +40,7 @@ interface AdminDetailResponse {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   isActive: boolean;
   userIsActive: boolean;
   defaulting: boolean;
@@ -123,11 +125,28 @@ export class SuperAdminApiService {
 
   updateStore(
     storeId: string,
-    payload: { nome: string; codigo: string; mensalidade: number }
+    payload: { nome: string; cnpj: string; mensalidade: number }
   ): Observable<void> {
     return this.http.put<void>(`${API_BASE_URL}/superadmin/shops/${storeId}`, {
       name: payload.nome,
-      cnpj: payload.codigo,
+      cnpj: payload.cnpj,
+      monthlyValue: payload.mensalidade,
+    });
+  }
+
+  createAdmin(payload: { nome: string; email: string; telefone: string }): Observable<{ adminId: string }> {
+    return this.http.post<{ adminId: string }>(`${API_BASE_URL}/superadmin/admins`, {
+      name: payload.nome,
+      email: payload.email,
+      phone: payload.telefone,
+    });
+  }
+
+  createStore(payload: { adminId: string; nome: string; cnpj: string; mensalidade: number }): Observable<{ shopId: string }> {
+    return this.http.post<{ shopId: string }>(`${API_BASE_URL}/superadmin/shops`, {
+      adminId: payload.adminId,
+      name: payload.nome,
+      cnpj: payload.cnpj,
       monthlyValue: payload.mensalidade,
     });
   }
@@ -136,16 +155,13 @@ export class SuperAdminApiService {
     return {
       id: item.id,
       nome: item.name,
-      razaoSocial: item.name,
       email: item.email,
-      documento: '—',
+      telefone: item.phone ?? '',
       lojasTotal: item.storesTotal,
       lojasAtivas: item.storesActive,
       status: item.isActive ? 'ATIVO' : 'BLOQUEADO',
       ultimoPagamento: item.lastPayment ?? '—',
-      plano: '—',
       inadimplente: item.defaulting,
-      criadoEm: '—',
     };
   }
 
@@ -153,16 +169,13 @@ export class SuperAdminApiService {
     return {
       id: item.id,
       nome: item.name,
-      razaoSocial: item.name,
       email: item.email,
-      documento: '—',
+      telefone: item.phone ?? '',
       lojasTotal: item.stores.length,
       lojasAtivas: item.stores.filter((store) => store.status === 'ACTIVE').length,
       status: item.isActive ? 'ATIVO' : 'BLOQUEADO',
       ultimoPagamento: item.lastPayment ?? '—',
-      plano: '—',
       inadimplente: item.defaulting,
-      criadoEm: '—',
     };
   }
 
@@ -171,7 +184,7 @@ export class SuperAdminApiService {
       id: store.id,
       adminId,
       nome: store.name,
-      codigo: store.cnpj,
+      cnpj: store.cnpj,
       mensalidade: store.monthlyValue,
       status: this.mapStoreStatus(store.status),
       criadoEm: '—',
@@ -184,7 +197,7 @@ export class SuperAdminApiService {
       id: item.id,
       adminId: item.admin.id,
       nome: item.name,
-      codigo: item.cnpj,
+      cnpj: item.cnpj,
       mensalidade: item.monthlyValue,
       status: this.mapStoreStatus(item.status),
       criadoEm: item.lastPayment ?? '—',

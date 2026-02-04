@@ -72,12 +72,12 @@ export class SuperadminLogsService {
 
   private mapAuditLog(item: AuditLogItem): LogRegistro {
     const metadata = item.metadata ?? {};
-    const operator = (metadata['operator'] as string) ?? 'Sistema';
-    const origin = (metadata['origin'] as string) ?? 'API';
-    const reference = (metadata['reference'] as string) ?? item.entityId;
-    const terminal = (metadata['terminal'] as string) ?? '—';
-    const ip = (metadata['ip'] as string) ?? '—';
-    const description = (metadata['description'] as string) ?? this.describeEvent(item);
+    const operator = (metadata['operator'] as string) ?? '';
+    const origin = (metadata['origin'] as string) ?? '';
+    const reference = (metadata['reference'] as string) ?? '';
+    const terminal = (metadata['terminal'] as string) ?? '';
+    const ip = (metadata['ip'] as string) ?? '';
+    const description = (metadata['description'] as string) ?? '';
 
     return {
       id: item.id,
@@ -110,10 +110,6 @@ export class SuperadminLogsService {
     }
 
     return 'CADASTRO_ADMIN';
-  }
-
-  private describeEvent(item: AuditLogItem): string {
-    return `Evento ${item.eventType} em ${item.entityType} (${item.entityId}).`;
   }
 
   private filterLogs(items: LogRegistro[], filtro: LogFiltro): LogRegistro[] {
