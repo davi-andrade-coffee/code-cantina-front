@@ -8,7 +8,7 @@ export interface Store {
   mensalidade: number;
   status: StoreStatus;
   criadoEm: string;
-  ultimoAcesso?: string;
+  vencimento?: string;
 }
 
 export interface StoreInsights {

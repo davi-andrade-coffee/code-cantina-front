@@ -31,7 +31,7 @@ export class SuperAdminFacade {
     return this.superadminSource.updateStoreStatus(storeId, status);
   }
 
-  updateStore(storeId: string, payload: { nome: string; cnpj: string; mensalidade: number }) {
+  updateStore(storeId: string, payload: { nome: string; cnpj: string; mensalidade: number; vencimento: string }) {
     return this.superadminSource.updateStore(storeId, payload);
   }
 
@@ -39,7 +39,7 @@ export class SuperAdminFacade {
     return this.superadminSource.createAdmin(payload);
   }
 
-  createStore(payload: { adminId: string; nome: string; cnpj: string; mensalidade: number }) {
+  createStore(payload: { adminId: string; nome: string; cnpj: string; mensalidade: number; vencimento: string }) {
     return this.superadminSource.createStore(payload);
   }
 

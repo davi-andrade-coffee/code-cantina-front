@@ -20,12 +20,18 @@ import { FormsModule } from '@angular/forms';
               <span class="label-text text-xs opacity-70">Nome da loja</span>
             </div>
             <input class="input input-bordered" [(ngModel)]="nome" placeholder="Ex.: Unidade Centro" />
+            <div class="label" *ngIf="showError('nome')">
+              <span class="label-text-alt text-error">Informe o nome da loja.</span>
+            </div>
           </label>
           <label class="form-control">
             <div class="label">
               <span class="label-text text-xs opacity-70">CNPJ (identificador único)</span>
             </div>
             <input class="input input-bordered" [(ngModel)]="cnpj" placeholder="00.000.000/0000-00" />
+            <div class="label" *ngIf="showError('cnpj')">
+              <span class="label-text-alt text-error">Informe um CNPJ válido.</span>
+            </div>
           </label>
           <label class="form-control">
             <div class="label">
@@ -39,12 +45,24 @@ import { FormsModule } from '@angular/forms';
               [(ngModel)]="mensalidade"
               placeholder="Ex.: 120,00"
             />
+            <div class="label" *ngIf="showError('mensalidade')">
+              <span class="label-text-alt text-error">Informe um valor maior que zero.</span>
+            </div>
+          </label>
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text text-xs opacity-70">Vencimento da fatura</span>
+            </div>
+            <input class="input input-bordered" type="date" [(ngModel)]="vencimento" />
+            <div class="label" *ngIf="showError('vencimento')">
+              <span class="label-text-alt text-error">Selecione a data de vencimento.</span>
+            </div>
           </label>
         </div>
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ id: storeId, nome, cnpj, mensalidade })">
+          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
             {{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}
           </button>
         </div>
@@ -58,17 +76,27 @@ export class CreateStoreModalComponent implements OnChanges {
   @Input() storeId?: string | null;
   @Input() store?: { nome: string; cnpj: string; mensalidade: number } | null;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ id?: string | null; nome: string; cnpj: string; mensalidade: number }>();
+  @Output() confirm = new EventEmitter<{
+    id?: string | null;
+    nome: string;
+    cnpj: string;
+    mensalidade: number;
+    vencimento: string;
+  }>();
 
   nome = '';
   cnpj = '';
   mensalidade = 0;
+  vencimento = '';
+  submitted = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['store'] || changes['open']) {
       this.nome = this.store?.nome ?? '';
       this.cnpj = this.store?.cnpj ?? '';
       this.mensalidade = this.store?.mensalidade ?? 0;
+      this.vencimento = this.store?.vencimento ?? '';
+      this.submitted = false;
     }
   }
 
@@ -76,6 +104,49 @@ export class CreateStoreModalComponent implements OnChanges {
     this.nome = '';
     this.cnpj = '';
     this.mensalidade = 0;
+    this.vencimento = '';
+    this.submitted = false;
     this.close.emit();
+  }
+
+  onConfirm(): void {
+    this.submitted = true;
+    if (!this.formValid()) return;
+    this.confirm.emit({
+      id: this.storeId,
+      nome: this.nome.trim(),
+      cnpj: this.cnpj.trim(),
+      mensalidade: Number(this.mensalidade),
+      vencimento: this.vencimento,
+    });
+  }
+
+  formValid(): boolean {
+    return this.isNameValid() && this.isCnpjValid() && this.isMensalidadeValid() && this.isVencimentoValid();
+  }
+
+  showError(field: 'nome' | 'cnpj' | 'mensalidade' | 'vencimento'): boolean {
+    if (!this.submitted) return false;
+    if (field === 'nome') return !this.isNameValid();
+    if (field === 'cnpj') return !this.isCnpjValid();
+    if (field === 'mensalidade') return !this.isMensalidadeValid();
+    return !this.isVencimentoValid();
+  }
+
+  private isNameValid(): boolean {
+    return this.nome.trim().length > 1;
+  }
+
+  private isCnpjValid(): boolean {
+    const digits = this.cnpj.replace(/\D/g, '');
+    return digits.length === 14;
+  }
+
+  private isMensalidadeValid(): boolean {
+    return Number(this.mensalidade) > 0;
+  }
+
+  private isVencimentoValid(): boolean {
+    return !!this.vencimento;
   }
 }

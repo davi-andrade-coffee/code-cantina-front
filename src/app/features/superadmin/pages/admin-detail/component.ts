@@ -87,7 +87,13 @@ export class AdminDetailPage {
     this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(payload?: { id?: string | null; nome: string; cnpj: string; mensalidade: number }): void {
+  confirmarNovaLoja(payload?: {
+    id?: string | null;
+    nome: string;
+    cnpj: string;
+    mensalidade: number;
+    vencimento: string;
+  }): void {
     const adminId = this.admin()?.id;
     if (payload?.id) {
       this.facade
@@ -95,6 +101,7 @@ export class AdminDetailPage {
           nome: payload.nome,
           cnpj: payload.cnpj,
           mensalidade: payload.mensalidade,
+          vencimento: payload.vencimento,
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
@@ -107,6 +114,7 @@ export class AdminDetailPage {
                       nome: payload.nome,
                       cnpj: payload.cnpj,
                       mensalidade: payload.mensalidade,
+                      vencimento: payload.vencimento,
                     }
                   : item
               )
@@ -121,6 +129,7 @@ export class AdminDetailPage {
           nome: payload.nome,
           cnpj: payload.cnpj,
           mensalidade: payload.mensalidade,
+          vencimento: payload.vencimento,
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({

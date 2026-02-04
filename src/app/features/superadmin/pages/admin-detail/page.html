@@ -68,7 +68,7 @@
           <th>Mensalidade</th>
           <th>Status</th>
           <th>Criada em</th>
-          <th>Último acesso</th>
+          <th>Vencimento</th>
           <th>Ações</th>
           <th>Bloqueio</th>
         </tr>
@@ -82,7 +82,7 @@
             <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
           </td>
           <td class="text-sm">{{ store.criadoEm }}</td>
-          <td class="text-sm">{{ store.ultimoAcesso || '—' }}</td>
+          <td class="text-sm">{{ store.vencimento || '—' }}</td>
           <td>
             <div class="flex flex-wrap gap-2">
               <button class="btn btn-ghost btn-xs" (click)="abrirEditarLoja(store)">Editar</button>
