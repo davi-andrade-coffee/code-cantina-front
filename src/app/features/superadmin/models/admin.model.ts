@@ -1,38 +1,66 @@
-export type AdminStatus = 'ATIVO' | 'BLOQUEADO';
+import { Store } from './store.model'
 
-export interface Admin {
-  id: string;
-  nome: string;
-  razaoSocial: string;
-  email: string;
-  documento: string;
-  lojasTotal: number;
-  lojasAtivas: number;
-  status: AdminStatus;
-  ultimoPagamento: string;
-  plano: string;
-  inadimplente: boolean;
-  criadoEm: string;
-}
+// export interface AdminInsights {
+//   total: number;
+//   ativos: number;
+//   bloqueados: number;
+//   receitaEstimadaMes: number;
+//   inadimplentes: number;
+//   inadimplenciaPercentual: number;
+//   novosPorMes: Array<{ mes: string; total: number }>;
+// }
 
-export interface AdminInsights {
-  total: number;
-  ativos: number;
-  bloqueados: number;
-  receitaEstimadaMes: number;
-  inadimplentes: number;
-  inadimplenciaPercentual: number;
-  novosPorMes: Array<{ mes: string; total: number }>;
+// export interface AdminBillingResumo {
+//   lojasAtivasMes: number;
+//   valorCalculado: number;
+//   statusFaturaMes: string;
+//   competencia: string;
+// }
+
+export enum AdminStatus {
+  ACTIVE = 'active',
+  DEACTIVATED = 'deactivated', 
+  ALL = 'all'
 }
 
 export interface AdminFilters {
-  termo: string;
-  status: AdminStatus | 'TODOS';
+  searchTerm: string;
+  status: AdminStatus;
+  page: number;     
+  pageSize: number;  
 }
 
-export interface AdminBillingResumo {
-  lojasAtivasMes: number;
-  valorCalculado: number;
-  statusFaturaMes: string;
-  competencia: string;
+export interface Admin {
+  id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  defaulting: boolean;
+  lastPayment?: Date;
+  storesTotal: number;
+  storesActive: number;
+}
+
+export interface AdminCreate {
+  name: string,
+  email: string
+}
+
+export interface AdminListPageResult {
+  items: Admin[];
+  total: number;     
+  page: number;
+  pageSize: number;
+}
+
+
+export interface AdminDetail {
+  id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  userIsActive: boolean;
+  defaulting: boolean; // inadiaplcentes ou n~ao
+  lastPayment: Date;
+  stores: Store[]
 }

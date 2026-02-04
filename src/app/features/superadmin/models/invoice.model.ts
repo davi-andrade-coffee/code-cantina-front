@@ -27,14 +27,18 @@ export interface InvoiceFilters {
   somenteVencidas: boolean;
 }
 
-export interface BillingOverview {
-  receitaMes: number;
-  receitaAno: number;
-  adminsAtivos: number;
-  lojasAtivas: number;
-  taxaInadimplencia: number;
-  receitaMensal: Array<{ mes: string; valor: number }>;
-  novosAdminsMensal: Array<{ mes: string; total: number }>;
-  lojasAtivasMensal: Array<{ mes: string; total: number }>;
-  inadimplenciaMensal: Array<{ mes: string; valor: number }>;
+export enum BillingStatus {
+  PENDING,
+  PAID,
+  OVERDUE
 }
+
+export interface BillingOverview {
+  id: string;
+  status: BillingStatus;
+  referenceMonth: string;
+  dueDate: Date;
+  paidAt: Date;
+  amount: number;
+}
+

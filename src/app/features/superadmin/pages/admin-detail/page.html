@@ -14,27 +14,24 @@
   <div class="rounded-xl border border-base-100 bg-base-200 p-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2 class="text-base font-semibold">{{ admin()?.nome || '—' }}</h2>
-        <p class="text-sm opacity-70">{{ admin()?.razaoSocial }}</p>
+        <h2 class="text-base font-semibold">{{ admin()?.name || '—' }}</h2>
+        <!-- <p class="text-sm opacity-70">{{ admin()?.razaoSocial }}</p> -->
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <superadmin-status-badge [status]="admin()?.status || '—'" kind="admin"></superadmin-status-badge>
-      </div>
+      <!-- <div class="flex flex-wrap items-center gap-2"> -->
+      <!--   <superadmin-status-badge [status]="admin()?.isActive || '—'" kind="admin"></superadmin-status-badge> -->
+      <!-- </div> -->
     </div>
 
     <div class="grid gap-3 md:grid-cols-3 mt-4 text-sm">
+      <!-- <div> -->
+      <!--   <div class="text-xs opacity-70">Nome</div> -->
+      <!--   <div class="font-medium">{{ admin()?.name || '—' }}</div> -->
+      <!-- </div> -->
       <div>
         <div class="text-xs opacity-70">Contato</div>
         <div class="font-medium">{{ admin()?.email || '—' }}</div>
       </div>
-      <div>
-        <div class="text-xs opacity-70">Documento</div>
-        <div class="font-medium">{{ admin()?.documento || '—' }}</div>
-      </div>
-      <div>
-        <div class="text-xs opacity-70">Plano</div>
-        <div class="font-medium">{{ admin()?.plano || '—' }}</div>
-      </div>
+
     </div>
 
     <div class="divider my-4"></div>
@@ -50,7 +47,7 @@
         <input
           type="checkbox"
           class="toggle toggle-success"
-          [checked]="admin()?.status === 'ATIVO'"
+          [checked]="admin()?.isActive"
           (change)="toggleAdminStatus($any($event.target).checked)"
         />
       </div>
@@ -78,48 +75,48 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let store of stores()">
-          <td class="font-medium">{{ store.nome }}</td>
-          <td class="text-sm">{{ store.codigo }}</td>
-          <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td>
-          <td>
-            <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
-          </td>
-          <td class="text-sm">{{ store.criadoEm }}</td>
-          <td class="text-sm">{{ store.ultimoAcesso || '—' }}</td>
-          <td>
-            <div class="flex flex-wrap gap-2">
-              <button class="btn btn-ghost btn-xs" (click)="abrirEditarLoja(store)">Editar</button>
-            </div>
-          </td>
-          <td>
-            <label class="label cursor-pointer justify-start gap-2">
-              <input
-                type="checkbox"
-                class="toggle toggle-xs"
-                [checked]="store.status === 'ATIVA'"
-                (change)="toggleStoreStatus(store, $any($event.target).checked)"
-              />
-              <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
-            </label>
-          </td>
-        </tr>
+        <!-- <tr *ngFor="let store of stores()"> -->
+        <!--   <td class="font-medium">{{ store.nome }}</td> -->
+        <!--   <td class="text-sm">{{ store.codigo }}</td> -->
+        <!--   <td class="text-sm">R$ {{ store.mensalidade | number: '1.2-2' }}</td> -->
+        <!--   <td> -->
+        <!--     <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge> -->
+        <!--   </td> -->
+        <!--   <td class="text-sm">{{ store.criadoEm }}</td> -->
+        <!--   <td class="text-sm">{{ store.ultimoAcesso || '—' }}</td> -->
+        <!--   <td> -->
+        <!--     <div class="flex flex-wrap gap-2"> -->
+        <!--       <button class="btn btn-ghost btn-xs" (click)="abrirEditarLoja(store)">Editar</button> -->
+        <!--     </div> -->
+        <!--   </td> -->
+        <!--   <td> -->
+        <!--     <label class="label cursor-pointer justify-start gap-2"> -->
+        <!--       <input -->
+        <!--         type="checkbox" -->
+        <!--         class="toggle toggle-xs" -->
+        <!--         [checked]="store.status === 'ATIVA'" -->
+        <!--         (change)="toggleStoreStatus(store, $any($event.target).checked)" -->
+        <!--       /> -->
+        <!--       <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span> -->
+        <!--     </label> -->
+        <!--   </td> -->
+        <!-- </tr> -->
 
-        <tr *ngIf="!loading() && stores().length === 0">
-          <td colspan="8" class="text-center opacity-70 py-6">
-            Nenhuma loja cadastrada para este Admin.
-          </td>
-        </tr>
+        <!-- <tr *ngIf="!loading() && stores().length === 0"> -->
+        <!--   <td colspan="8" class="text-center opacity-70 py-6"> -->
+        <!--     Nenhuma loja cadastrada para este Admin. -->
+        <!--   </td> -->
+        <!-- </tr> -->
       </tbody>
     </table>
   </div>
 </superadmin-table-card>
 
-<superadmin-create-store-modal
-  [open]="modalLojaAberto()"
-  [mode]="modalLojaModo()"
-  [storeId]="lojaSelecionada()?.id"
-  [store]="lojaSelecionada()"
-  (close)="fecharNovaLoja()"
-  (confirm)="confirmarNovaLoja($event)"
-></superadmin-create-store-modal>
+<!-- <superadmin-create-store-modal -->
+<!--   [open]="modalLojaAberto()" -->
+<!--   [mode]="modalLojaModo()" -->
+<!--   [storeId]="lojaSelecionada()?.id" -->
+<!--   [store]="lojaSelecionada()" -->
+<!--   (close)="fecharNovaLoja()" -->
+<!--   (confirm)="confirmarNovaLoja($event)" -->
+<!-- ></superadmin-create-store-modal> -->

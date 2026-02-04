@@ -1,0 +1,33 @@
+<router-outlet></router-outlet>
+
+<!-- MODAL: Sessão expirada -->
+<div class="modal" [class.modal-open]="sessionExpiredOpen()">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Sessão expirada</h3>
+    <p class="py-4">
+      Sua sessão expirou. Para continuar, faça login novamente.
+    </p>
+    <div class="modal-action">
+      <button class="btn btn-primary" (click)="onSessionExpiredConfirm()">
+        Ir para login
+      </button>
+    </div>
+  </div>
+
+  <!-- clique fora para fechar? recomendo NÃO fechar nesse caso -->
+  <!-- <div class="modal-backdrop" (click)="sessionExpiredOpen.set(false)"></div> -->
+</div>
+
+<!-- MODAL: Acesso não autorizado -->
+<div class="modal" [class.modal-open]="forbiddenOpen()">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Acesso não autorizado</h3>
+    <p class="py-4">
+      Você não tem permissão para executar esta operação.
+    </p>
+    <div class="modal-action">
+      <button class="btn" (click)="onForbiddenClose()">Fechar</button>
+    </div>
+  </div>
+</div>
+

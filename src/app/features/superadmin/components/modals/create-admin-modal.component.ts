@@ -17,25 +17,36 @@ import { FormsModule } from '@angular/forms';
             <div class="label">
               <span class="label-text text-xs opacity-70">Nome/Razão social</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="nome" placeholder="Ex.: Cantina Nova" />
+            <input
+              class="input input-bordered"
+              [ngClass]="{ 'input-error': submitted && isNameInvalid() }"
+              [(ngModel)]="name"
+              placeholder="Ex.: Cantina Nova"
+            />
+            <div class="text-xs text-red-500 mt-1" *ngIf="submitted && isNameInvalid()">
+              O nome deve ter pelo menos 4 caracteres.
+            </div>
           </label>
+
           <label class="form-control">
             <div class="label">
               <span class="label-text text-xs opacity-70">E-mail de acesso</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="email" placeholder="admin@cliente.com" />
-          </label>
-          <label class="form-control">
-            <div class="label">
-              <span class="label-text text-xs opacity-70">Documento (CPF/CNPJ)</span>
+            <input
+              class="input input-bordered"
+              [ngClass]="{ 'input-error': submitted && isEmailInvalid() }"
+              [(ngModel)]="email"
+              placeholder="admin@cliente.com"
+            />
+            <div class="text-xs text-red-500 mt-1" *ngIf="submitted && isEmailInvalid()">
+              E-mail inválido.
             </div>
-            <input class="input input-bordered" [(ngModel)]="documento" placeholder="00.000.000/0000-00" />
           </label>
         </div>
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ nome, email, documento })">
+          <button class="btn btn-primary" [disabled]="hasErrors()" (click)="onSend()">
             Salvar cadastro
           </button>
         </div>
@@ -46,16 +57,43 @@ import { FormsModule } from '@angular/forms';
 export class CreateAdminModalComponent {
   @Input() open = false;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ nome: string; email: string; documento: string }>();
+  @Output() confirm = new EventEmitter<{ name: string; email: string }>();
 
-  nome = '';
+  name = '';
   email = '';
-  documento = '';
+  submitted = false;
+
+  isNameInvalid(): boolean {
+    return !this.name || this.name.trim().length < 4;
+  }
+
+  isEmailInvalid(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return !this.email || !emailRegex.test(this.email);
+  }
+
+  hasErrors(): boolean {
+    return this.isNameInvalid() || this.isEmailInvalid();
+  }
 
   onClose(): void {
-    this.nome = '';
+    this.name = '';
     this.email = '';
-    this.documento = '';
+    this.submitted = false;
     this.close.emit();
   }
+
+  onSend(): void {
+    this.submitted = true;
+
+    if (this.hasErrors()) return;
+
+    this.confirm.emit({
+      name: this.name.trim(),
+      email: this.email.trim(),
+    });
+
+    this.onClose();
+  }
 }
+

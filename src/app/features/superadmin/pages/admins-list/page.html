@@ -5,7 +5,7 @@
       <p class="text-xs opacity-70">Controle de acesso e cobrança por cliente.</p>
     </div>
     <div class="flex items-center gap-2">
-      <button class="btn btn-primary btn-sm" (click)="abrirCadastro()">Novo Admin</button>
+      <button class="btn btn-primary btn-sm" (click)="openRegistration()">Novo Admin</button>
     </div>
   </div>
 
@@ -17,8 +17,8 @@
       <input
         class="input input-bordered input-sm"
         placeholder="Nome, e-mail, documento"
-        [value]="filtros().termo"
-        (input)="patchFiltro({ termo: $any($event.target).value })"
+        [value]="filters().searchTerm"
+        (input)="patchFilter({ searchTerm: $any($event.target).value })"
       />
     </label>
 
@@ -28,74 +28,72 @@
       </div>
       <select
         class="select select-bordered select-sm"
-        [value]="filtros().status"
-        (change)="patchFiltro({ status: $any($event.target).value })"
+        [value]="filters().status"
+        (change)="patchFilter({ status: $any($event.target).value })"
       >
-        <option value="TODOS">Todos</option>
-        <option value="ATIVO">Ativo</option>
-        <option value="BLOQUEADO">Bloqueado</option>
+        <option value="all">Todos</option>
+        <option value="active">Ativo</option>
+        <option value="deactivated">Bloqueado</option>
       </select>
     </label>
 
-    <button class="btn btn-primary btn-sm mt-6" (click)="buscar()" [disabled]="loading()">
+    <button class="btn btn-primary btn-sm mt-6" (click)="search()" [disabled]="loading()">
       <span *ngIf="!loading()">Buscar</span>
       <span *ngIf="loading()" class="loading loading-spinner loading-xs"></span>
     </button>
   </div>
 
-  <div *ngIf="errorMsg()" class="alert alert-error mb-4">
-    <span class="text-sm">{{ errorMsg() }}</span>
-  </div>
-
   <div class="overflow-x-auto">
     <table class="table table-zebra table-sm">
       <thead>
-        <tr>
-          <th>Admin</th>
-          <th>Documento</th>
+        <tr class="text-center">
+          <th>Nome</th>
+          <th>Email</th>
           <th>Lojas</th>
-          <th>Status</th>
+          <th>Inadimplência</th>
           <th>Último pagamento</th>
           <th>Ações</th>
           <th>Bloqueio</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let admin of paginaAdmins()">
+        <tr class="text-center" *ngFor="let admin of adminsList()">
           <td>
-            <div class="font-semibold">{{ admin.nome }}</div>
-            <div class="text-xs opacity-70">{{ admin.email }}</div>
+            <div class="font-semibold">{{ admin.name }}</div>
+            <!-- <div class="text-xs opacity-70">{{ admin.email }}</div> -->
           </td>
-          <td class="text-sm">{{ admin.documento }}</td>
+          <td class="text-sm">{{ admin.email }}</td>
           <td>
-            <div class="text-sm">{{ admin.lojasAtivas }} ativas / {{ admin.lojasTotal }} total</div>
+            <div class="text-sm">{{ admin.storesActive }} ativas / {{ admin.storesTotal }} total</div>
           </td>
+          
           <td>
-            <superadmin-status-badge [status]="admin.status" kind="admin"></superadmin-status-badge>
-            <div *ngIf="admin.inadimplente" class="text-xs text-error mt-1">Inadimplente</div>
+            <span *ngIf="admin.defaulting" class="badge badge-success badge-sm">Inadiplemente</span>
+            <span *ngIf="!admin.defaulting" class="text-sm">---</span>
           </td>
-          <td class="text-sm">{{ admin.ultimoPagamento }}</td>
-          <td>
-            <div class="flex flex-wrap gap-2">
+          
+          <td class="text-sm">{{ admin.lastPayment || '---' }}</td>
+          <td class="text-center align-middle">
+            <div class="flex flex-wrap gap-2 justify-center items-center">
               <a class="btn btn-ghost btn-xs" [routerLink]="['/superadmin/admins', admin.id]">
                 Detalhes
               </a>
             </div>
           </td>
-          <td>
-            <label class="label cursor-pointer justify-start gap-2">
+          <td class="text-center align-middle">
+            <label class="label cursor-pointer justify-start gap-2 justify-center items-center">
               <input
                 type="checkbox"
                 class="toggle toggle-xs"
-                [checked]="admin.status === 'ATIVO'"
+                [checked]="admin.isActive"
                 (change)="toggleAdminStatus(admin, $any($event.target).checked)"
               />
-              <span class="text-xs opacity-70">{{ admin.status === 'ATIVO' ? 'Ativo' : 'Bloqueado' }}</span>
+              <span class="text-xs opacity-70">{{ admin.isActive ? 'Ativo' : 'Bloqueado' }}</span>
             </label>
           </td>
         </tr>
 
-        <tr *ngIf="!loading() && paginaAdmins().length === 0">
+        <tr *ngIf="!loading() && adminsList().length === 0">
           <td colspan="7" class="text-center opacity-70 py-6">
             Nenhum Admin encontrado para os filtros selecionados.
           </td>
@@ -105,19 +103,68 @@
   </div>
 
   <superadmin-pagination
-    [page]="paginaAtual()"
-    [totalPages]="totalPaginas()"
-    [totalItems]="admins().length"
-    [pageItems]="paginaAdmins().length"
-    [pageSize]="itensPorPagina()"
-    [pageSizes]="tamanhosPagina"
-    (pageChange)="alterarPagina($event)"
-    (pageSizeChange)="setItensPorPagina($event)"
+    [page]="filters().page"
+    [totalPages]="totalPages()"
+    [totalItems]="totalNumberAdmins()"
+    [pageItems]="adminsList().length"
+    [pageSize]="filters().pageSize"
+    [pageSizes]="optionsSizePagination"
+    (pageChange)="patchFilter({ page: $event })"
+    (pageSizeChange)="patchFilter({ pageSize: $event })"
   ></superadmin-pagination>
 </section>
 
 <superadmin-create-admin-modal
-  [open]="modalCadastroAberto()"
-  (close)="fecharCadastro()"
-  (confirm)="confirmarCadastro()"
+  [open]="modalOpenRegistration()"
+  (close)="closeRegistration()"
+  (confirm)="confirmRegistration($event)"
 ></superadmin-create-admin-modal>
+
+
+<div class="toast toast-top toast-end z-50" *ngIf="error().message">
+  <div
+    class="
+      flex items-start gap-3
+      max-w-md
+      rounded-lg
+      border border-error/30
+      bg-error/70
+      px-4 py-3
+      shadow-md
+    "
+  >
+    <!-- Ícone -->
+    <svg
+      class="mt-0.5 h-5 w-5 text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 9v3.75m0 3.75h.007M12 3.75c-4.556 0-8.25 3.694-8.25 8.25s3.694 8.25 8.25 8.25 8.25-3.694 8.25-8.25-3.694-8.25-8.25-8.25z"
+      />
+    </svg>
+
+    <!-- Texto -->
+    <div class="flex-1">
+      <p class="text-base font-medium text-white">
+        {{ error().title }}
+      </p>
+      <p class="text-sm text-white/80 mt-0.5">
+        {{ error().message }}
+      </p>
+    </div>
+
+    <!-- Botão fechar -->
+    <button
+      class="btn btn-ghost btn-xs text-white"
+      (click)="clearError()"
+    >
+      ✕
+    </button>
+  </div>
+</div>
+

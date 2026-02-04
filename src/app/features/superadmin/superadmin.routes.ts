@@ -19,26 +19,26 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/admin-detail/component').then((m) => m.AdminDetailPage),
       },
-      {
-        path: 'stores',
-        loadComponent: () =>
-          import('./pages/stores-list/component').then((m) => m.StoresListPage),
-      },
-      {
-        path: 'billing/invoices',
-        loadComponent: () =>
-          import('./pages/invoices-list/component').then((m) => m.InvoicesListPage),
-      },
-      {
-        path: 'billing/overview',
-        loadComponent: () =>
-          import('./pages/billing-overview/component').then((m) => m.BillingOverviewPage),
-      },
-      {
-        path: 'logs',
-        loadComponent: () =>
-          import('./pages/logs/component').then((m) => m.SuperadminLogsPage),
-      },
+      // {
+      //   path: 'stores',
+      //   loadComponent: () =>
+      //     import('./pages/stores-list/component').then((m) => m.StoresListPage),
+      // },
+      // {
+      //   path: 'billing/invoices',
+      //   loadComponent: () =>
+      //     import('./pages/invoices-list/component').then((m) => m.InvoicesListPage),
+      // },
+      // {
+      //   path: 'billing/overview',
+      //   loadComponent: () =>
+      //     import('./pages/billing-overview/component').then((m) => m.BillingOverviewPage),
+      // },
+      // {
+      //   path: 'logs',
+      //   loadComponent: () =>
+      //     import('./pages/logs/component').then((m) => m.SuperadminLogsPage),
+      // },
     ],
   },
 ];

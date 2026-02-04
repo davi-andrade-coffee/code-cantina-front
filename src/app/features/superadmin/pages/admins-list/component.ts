@@ -4,11 +4,10 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Admin, AdminFilters, AdminStatus } from '../../models/admin.model';
-import { SuperAdminFacade } from '../../services/superadmin.facade';
+import { Admin, AdminFilters, AdminStatus } from '../../models/admin.model'
+import { SuperAdminFacade, BusinessError } from '../../services/superadmin.facade';
 import { CreateAdminModalComponent } from '../../components/modals/create-admin-modal.component';
 import { PaginationComponent } from '../../components/pagination.component';
-import { StatusBadgeComponent } from '../../components/status-badge.component';
 
 @Component({
   standalone: true,
@@ -17,7 +16,6 @@ import { StatusBadgeComponent } from '../../components/status-badge.component';
     RouterLink,
     CreateAdminModalComponent,
     PaginationComponent,
-    StatusBadgeComponent,
   ],
   templateUrl: './page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,90 +25,109 @@ export class AdminsListPage {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
-  readonly errorMsg = signal<string | null>(null);
-  readonly admins = signal<Admin[]>([]);
+  readonly error = signal<{ title: string, message: string }>({ title: '', message: '' });
+  adminsList = signal<Admin[]>([]);
 
-  readonly filtros = signal<AdminFilters>({
-    termo: '',
-    status: 'TODOS',
+  readonly filters = signal<AdminFilters>({
+    searchTerm: '',
+    status: AdminStatus.ALL,
+    page: 1,
+    pageSize: 8,  
   });
 
-  readonly tamanhosPagina = [6, 8, 12, 16];
-  readonly paginaAtual = signal(1);
-  readonly itensPorPagina = signal(8);
-
-  readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.admins().length / this.itensPorPagina()))
+  readonly optionsSizePagination = [6, 8, 12, 16];
+  readonly totalNumberAdmins = signal(10); // @ todo vem da api
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalNumberAdmins() / this.filters().pageSize))
   );
 
-  readonly paginaAdmins = computed(() => {
-    const inicio = (this.paginaAtual() - 1) * this.itensPorPagina();
-    return this.admins().slice(inicio, inicio + this.itensPorPagina());
-  });
+  readonly modalOpenRegistration = signal(false);
 
-  readonly modalCadastroAberto = signal(false);
-
-  constructor() {
-    this.buscar();
+  constructor() {  
+    this.search();
   }
 
-  buscar(): void {
+  search(): void {
     this.loading.set(true);
-    this.errorMsg.set(null);
+    this.clearError();
 
     this.facade
-      .listAdmins(this.filtros())
+      .listAdmins(this.filters())
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (admins) => {
-          this.admins.set(admins);
-          this.paginaAtual.set(1);
+        next: (res) => {
+          this.adminsList.set(res.items);
+          this.totalNumberAdmins.set(res.total)
+          this.patchFilter({ page: res.page });
         },
-        error: () => this.errorMsg.set('Não foi possível carregar os Admins.'),
+        error: (err: BusinessError) => {
+          this.mapError(err)
+        }
       });
   }
 
-  patchFiltro(patch: Partial<AdminFilters>): void {
-    this.filtros.update((atual) => ({ ...atual, ...patch }));
+  patchFilter(patch: Partial<AdminFilters>): void {
+    this.filters.update((current) => ({ ...current, ...patch }));
   }
 
-  alterarPagina(pagina: number): void {
-    this.paginaAtual.set(pagina);
+  mapError(err: BusinessError) {
+    if (err.code === 'INVALID_FILTER') {
+      this.error.set({ title: 'Erro ao salvar o dado.', message: err.message });
+    } else {
+      this.error.set({ title: 'Erro ao carregar dados.', message: err.message });
+    }
   }
 
-  setItensPorPagina(valor: number): void {
-    this.itensPorPagina.set(valor);
-    this.paginaAtual.set(1);
+  clearError(): void {
+    this.error.set({ title: '', message: '' });
+  }
+  
+  openRegistration(): void {
+    this.modalOpenRegistration.set(true);
   }
 
-  abrirCadastro(): void {
-    this.modalCadastroAberto.set(true);
+  closeRegistration(): void {
+    this.modalOpenRegistration.set(false);
   }
 
-  fecharCadastro(): void {
-    this.modalCadastroAberto.set(false);
-  }
-
-  confirmarCadastro(): void {
-    this.modalCadastroAberto.set(false);
-  }
-
-  toggleAdminStatus(admin: Admin, ativo: boolean): void {
-    const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+  confirmRegistration(payload: { name: string; email: string; }): void {
+    // @todo loading o modal para criar
     this.facade
-      .updateAdminStatus(admin.id, status)
+      .createAdmin(payload)
+      .pipe(
+        finalize(() => this.modalOpenRegistration.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: () => {
+          this.search();
+        },
+        error: (err: BusinessError) => {
+          this.mapError(err)
+        }
+      });
+    
+  }
+
+  toggleAdminStatus(admin: Admin, checked: boolean): void {
+    this.facade
+      .updateAdminStatus(admin.id, checked)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           if (!updated) return;
-          this.admins.update((lista) =>
-            lista.map((item) => (item.id === updated.id ? updated : item))
+          this.adminsList.update((lista) =>
+            lista.map((item) => {
+              if (item.id === admin.id) item.isActive = checked
+              return item
+            })
           );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
-      });
+        error: (err: BusinessError) => {
+          this.mapError(err)
+        }
+   });
   }
 }

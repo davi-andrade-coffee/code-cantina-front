@@ -13,7 +13,6 @@ export class AuthApiError extends Error {
   }
 }
 
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly user$ = new BehaviorSubject<AuthUser | null>(this.storage.getUser());
@@ -48,21 +47,9 @@ export class AuthService {
 
   async login(input: LoginRequest): Promise<AuthUser> {
     try {
-      // const res = await firstValueFrom(
-      //   this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
-      // );
-    const res = {
-      token: 'Bearer token',
-      user: {
-        id: 'uuid',
-        email: input.email,
-        role: 
-         ( input.email.includes('superadmin') ? 'SUPERADMIN' :
-            input.email.includes('admin') ? 'ADMIN' :
-              input.email.includes('cliente') ? 'CLIENTE' :
-                'COLABORADOR') as Role
-      }
-    }
+      const res = await firstValueFrom(
+        this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
+      );
 
       this.storage.setToken(res.token);
       this.storage.setUser(res.user);

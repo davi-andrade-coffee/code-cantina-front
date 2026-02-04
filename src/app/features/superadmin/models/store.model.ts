@@ -1,14 +1,28 @@
-export type StoreStatus = 'ATIVA' | 'BLOQUEADA' | 'CANCELADA';
+import { BillingOverview } from './invoice.model';
+
+
+export enum StoreStatus {
+  ACTIVE,
+  BLOCKED,
+  OVERDUE,
+}
+
+export enum StoreBlockReason {
+  NONE,
+  ADMIN,
+  MANUAL,
+  OVERDUE,
+}
 
 export interface Store {
   id: string;
-  adminId: string;
-  nome: string;
-  codigo: string;
-  mensalidade: number;
+  name: string;
+  cnpj: string;
+  monthlyValue: number;
   status: StoreStatus;
-  criadoEm: string;
-  ultimoAcesso?: string;
+  blockedReason: StoreBlockReason;
+  lastPaymentAt: Date;
+  latestBilling?: BillingOverview
 }
 
 export interface StoreInsights {

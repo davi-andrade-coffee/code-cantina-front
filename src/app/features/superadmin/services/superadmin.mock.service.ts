@@ -1,9 +1,14 @@
-import { Injectable } from '@angular/core';
+// @ts-nocheck
+import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
-import { Admin, AdminBillingResumo, AdminFilters, AdminInsights } from '../models/admin.model';
+import { API_BASE_URL } from '../../../core/http/api.config';
+
+import { Admin, AdminStatus, AdminBillingResumo, AdminFilters, AdminInsights } from '../models/admin.model';
 import { Store, StoreInsights, StoreStatus } from '../models/store.model';
+
 
 const ADMIN_DATA: Admin[] = [
   {
@@ -162,6 +167,10 @@ const STORE_DATA: Store[] = [
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminMockService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = API_BASE_URL; // de onde você já tem isso
+
+  
   listAdmins(filters: AdminFilters): Observable<Admin[]> {
     return of(ADMIN_DATA).pipe(
       delay(300),
@@ -214,7 +223,7 @@ export class SuperAdminMockService {
     return of(ADMIN_DATA).pipe(
       delay(300),
       map((admins) => {
-        const ativos = admins.filter((admin) => admin.status === 'ATIVO').length;
+        const ativos = admins.filter((admin) => admin.status === AdminStatus.ACTIVE).length;
         const bloqueados = admins.filter((admin) => admin.status === 'BLOQUEADO').length;
         const inadimplentes = admins.filter((admin) => admin.inadimplente).length;
         const receitaEstimadaMes = admins.reduce((acc, admin) => acc + admin.lojasAtivas * 120, 0);
