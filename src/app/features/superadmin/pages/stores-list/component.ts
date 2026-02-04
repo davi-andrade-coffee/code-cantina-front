@@ -102,10 +102,9 @@ export class StoresListPage {
       .updateStoreStatus(store.id, status)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (updated) => {
-          if (!updated) return;
+        next: () => {
           this.stores.update((lista) =>
-            lista.map((item) => (item.id === updated.id ? updated : item))
+            lista.map((item) => (item.id === store.id ? { ...item, status } : item))
           );
         },
         error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),

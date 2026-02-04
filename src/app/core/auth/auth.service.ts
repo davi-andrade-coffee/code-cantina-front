@@ -48,23 +48,12 @@ export class AuthService {
 
   async login(input: LoginRequest): Promise<AuthUser> {
     try {
-      // const res = await firstValueFrom(
-      //   this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
-      // );
-    const res = {
-      token: 'Bearer token',
-      user: {
-        id: 'uuid',
-        email: input.email,
-        role: 
-         ( input.email.includes('superadmin') ? 'SUPERADMIN' :
-            input.email.includes('admin') ? 'ADMIN' :
-              input.email.includes('cliente') ? 'CLIENTE' :
-                'COLABORADOR') as Role
-      }
-    }
+      const res = await firstValueFrom(
+        this.http.post<LoginResponse>(`${API_BASE_URL}/auth/login`, input)
+      );
+      const token = res.token.startsWith('Bearer ') ? res.token.replace('Bearer ', '') : res.token;
 
-      this.storage.setToken(res.token);
+      this.storage.setToken(token);
       this.storage.setUser(res.user);
       this.user$.next(res.user);
 
@@ -100,4 +89,3 @@ export class AuthService {
   }
   
 }
-

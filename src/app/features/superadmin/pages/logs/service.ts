@@ -1,169 +1,133 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { LogFiltro, LogRegistro } from './models';
+import { API_BASE_URL } from '../../../../core/http/api.config';
+import { LogCategoria, LogFiltro, LogRegistro } from './models';
+
+interface AuditLogItem {
+  id: string;
+  entityType: 'ADMIN' | 'SHOP' | 'BILLING' | 'WEBHOOK' | string;
+  entityId: string;
+  eventType: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+interface AuditLogResponse {
+  page: number;
+  limit: number;
+  total: number;
+  items: AuditLogItem[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class SuperadminLogsService {
-  private readonly logs = signal<LogRegistro[]>([
-    {
-      id: 'SA-LOG-2041',
-      dataHora: '2024-09-12T18:10:00',
-      categoria: 'CADASTRO_LOJA',
-      operador: 'Beatriz Lima',
-      terminal: 'Superadmin-01',
-      descricao: 'Nova loja cadastrada: Cantina Jardim Europa.',
-      referencia: 'LOJA #2031',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.10',
-    },
-    {
-      id: 'SA-LOG-2040',
-      dataHora: '2024-09-12T17:42:00',
-      categoria: 'CADASTRO_ADMIN',
-      operador: 'Beatriz Lima',
-      terminal: 'Superadmin-01',
-      descricao: 'Admin cadastrado para loja Cantina Central: Lucas Dantas.',
-      referencia: 'ADMIN #884',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.10',
-    },
-    {
-      id: 'SA-LOG-2039',
-      dataHora: '2024-09-12T17:10:00',
-      categoria: 'BLOQUEIO_LOJA',
-      operador: 'Time Compliance',
-      terminal: 'Superadmin-02',
-      descricao: 'Loja Cantina Norte bloqueada por pendência documental.',
-      referencia: 'LOJA #1788',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.21',
-    },
-    {
-      id: 'SA-LOG-2038',
-      dataHora: '2024-09-12T16:55:00',
-      categoria: 'DESBLOQUEIO_LOJA',
-      operador: 'Time Compliance',
-      terminal: 'Superadmin-02',
-      descricao: 'Loja Cantina Norte desbloqueada após revisão documental.',
-      referencia: 'LOJA #1788',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.21',
-    },
-    {
-      id: 'SA-LOG-2037',
-      dataHora: '2024-09-12T16:32:00',
-      categoria: 'BLOQUEIO_ADMIN',
-      operador: 'Beatriz Lima',
-      terminal: 'Superadmin-01',
-      descricao: 'Admin bloqueado por tentativa de acesso indevido.',
-      referencia: 'ADMIN #771',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.10',
-    },
-    {
-      id: 'SA-LOG-2036',
-      dataHora: '2024-09-12T16:05:00',
-      categoria: 'DESBLOQUEIO_ADMIN',
-      operador: 'Equipe Suporte',
-      terminal: 'Superadmin-03',
-      descricao: 'Admin desbloqueado após validação de identidade.',
-      referencia: 'ADMIN #771',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.33',
-    },
-    {
-      id: 'SA-LOG-2035',
-      dataHora: '2024-09-12T15:40:00',
-      categoria: 'PAGAMENTO_BOLETO',
-      operador: 'Financeiro',
-      terminal: 'Finance-01',
-      descricao: 'Pagamento de boleto recebido. Competência 09/2024.',
-      referencia: 'BOLETO #5589',
-      origem: 'Financeiro',
-      ip: '10.2.0.55',
-    },
-    {
-      id: 'SA-LOG-2034',
-      dataHora: '2024-09-11T18:18:00',
-      categoria: 'CADASTRO_LOJA',
-      operador: 'Fernanda Moreira',
-      terminal: 'Superadmin-04',
-      descricao: 'Nova loja cadastrada: Cantina Santa Maria.',
-      referencia: 'LOJA #2029',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.44',
-    },
-    {
-      id: 'SA-LOG-2033',
-      dataHora: '2024-09-11T17:55:00',
-      categoria: 'CADASTRO_ADMIN',
-      operador: 'Fernanda Moreira',
-      terminal: 'Superadmin-04',
-      descricao: 'Admin cadastrado para Cantina Santa Maria: Elisa Costa.',
-      referencia: 'ADMIN #882',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.44',
-    },
-    {
-      id: 'SA-LOG-2032',
-      dataHora: '2024-09-11T16:20:00',
-      categoria: 'BLOQUEIO_LOJA',
-      operador: 'Time Compliance',
-      terminal: 'Superadmin-02',
-      descricao: 'Loja Cantina Estação bloqueada por divergência financeira.',
-      referencia: 'LOJA #1660',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.21',
-    },
-    {
-      id: 'SA-LOG-2031',
-      dataHora: '2024-09-11T15:45:00',
-      categoria: 'PAGAMENTO_BOLETO',
-      operador: 'Financeiro',
-      terminal: 'Finance-01',
-      descricao: 'Pagamento de boleto confirmado para Cantina Central.',
-      referencia: 'BOLETO #5581',
-      origem: 'Financeiro',
-      ip: '10.2.0.55',
-    },
-    {
-      id: 'SA-LOG-2030',
-      dataHora: '2024-09-11T14:10:00',
-      categoria: 'DESBLOQUEIO_LOJA',
-      operador: 'Equipe Suporte',
-      terminal: 'Superadmin-03',
-      descricao: 'Loja Cantina Estação desbloqueada após ajuste financeiro.',
-      referencia: 'LOJA #1660',
-      origem: 'Painel Superadmin',
-      ip: '10.2.0.33',
-    },
-  ]);
+  constructor(private http: HttpClient) {}
 
   listLogs(filtro: LogFiltro): Observable<LogRegistro[]> {
+    let params = new HttpParams().set('page', '1').set('limit', '100');
+
+    if (filtro.dataInicio) params = params.set('dateFrom', filtro.dataInicio);
+    if (filtro.dataFim) params = params.set('dateTo', filtro.dataFim);
+
+    if (filtro.categoria !== 'TODOS') {
+      const mapping = this.mapCategoriaToApi(filtro.categoria);
+      if (mapping.entityType) params = params.set('entityType', mapping.entityType);
+      if (mapping.eventType) params = params.set('eventType', mapping.eventType);
+    }
+
+    return this.http
+      .get<AuditLogResponse>(`${API_BASE_URL}/superadmin/audit-logs`, { params })
+      .pipe(
+        map((res) => res.items.map((item) => this.mapAuditLog(item))),
+        map((items) => this.filterLogs(items, filtro))
+      );
+  }
+
+  private mapCategoriaToApi(categoria: LogCategoria): {
+    entityType?: string;
+    eventType?: string;
+  } {
+    switch (categoria) {
+      case 'CADASTRO_LOJA':
+        return { entityType: 'SHOP', eventType: 'CREATE' };
+      case 'CADASTRO_ADMIN':
+        return { entityType: 'ADMIN', eventType: 'CREATE' };
+      case 'BLOQUEIO_LOJA':
+        return { entityType: 'SHOP', eventType: 'BLOCK' };
+      case 'DESBLOQUEIO_LOJA':
+        return { entityType: 'SHOP', eventType: 'UNBLOCK' };
+      case 'BLOQUEIO_ADMIN':
+        return { entityType: 'ADMIN', eventType: 'BLOCK' };
+      case 'DESBLOQUEIO_ADMIN':
+        return { entityType: 'ADMIN', eventType: 'UNBLOCK' };
+      case 'PAGAMENTO_BOLETO':
+        return { entityType: 'BILLING', eventType: 'PAID' };
+      default:
+        return {};
+    }
+  }
+
+  private mapAuditLog(item: AuditLogItem): LogRegistro {
+    const metadata = item.metadata ?? {};
+    const operator = (metadata['operator'] as string) ?? 'Sistema';
+    const origin = (metadata['origin'] as string) ?? 'API';
+    const reference = (metadata['reference'] as string) ?? item.entityId;
+    const terminal = (metadata['terminal'] as string) ?? '—';
+    const ip = (metadata['ip'] as string) ?? '—';
+    const description = (metadata['description'] as string) ?? this.describeEvent(item);
+
+    return {
+      id: item.id,
+      dataHora: item.createdAt,
+      categoria: this.mapCategoriaFromApi(item),
+      operador: operator,
+      terminal,
+      descricao: description,
+      referencia: reference,
+      origem: origin,
+      ip,
+    };
+  }
+
+  private mapCategoriaFromApi(item: AuditLogItem): LogCategoria {
+    if (item.entityType === 'ADMIN') {
+      if (item.eventType === 'BLOCK') return 'BLOQUEIO_ADMIN';
+      if (item.eventType === 'UNBLOCK') return 'DESBLOQUEIO_ADMIN';
+      return 'CADASTRO_ADMIN';
+    }
+
+    if (item.entityType === 'SHOP') {
+      if (item.eventType === 'BLOCK') return 'BLOQUEIO_LOJA';
+      if (item.eventType === 'UNBLOCK') return 'DESBLOQUEIO_LOJA';
+      return 'CADASTRO_LOJA';
+    }
+
+    if (item.entityType === 'BILLING') {
+      return 'PAGAMENTO_BOLETO';
+    }
+
+    return 'CADASTRO_ADMIN';
+  }
+
+  private describeEvent(item: AuditLogItem): string {
+    return `Evento ${item.eventType} em ${item.entityType} (${item.entityId}).`;
+  }
+
+  private filterLogs(items: LogRegistro[], filtro: LogFiltro): LogRegistro[] {
     const termo = filtro.termo.trim().toLowerCase();
-    const dataInicio = filtro.dataInicio ? new Date(`${filtro.dataInicio}T00:00:00`) : null;
-    const dataFim = filtro.dataFim ? new Date(`${filtro.dataFim}T23:59:59`) : null;
+    if (!termo) return items;
 
-    const filtrados = this.logs()
-      .filter((item) => {
-        const dataItem = new Date(item.dataHora);
-        const dentroInicio = dataInicio ? dataItem >= dataInicio : true;
-        const dentroFim = dataFim ? dataItem <= dataFim : true;
-        const categoriaOk = filtro.categoria === 'TODOS' || item.categoria === filtro.categoria;
-        const termoOk =
-          termo.length === 0 ||
-          item.descricao.toLowerCase().includes(termo) ||
-          item.referencia.toLowerCase().includes(termo) ||
-          item.operador.toLowerCase().includes(termo) ||
-          item.terminal.toLowerCase().includes(termo) ||
-          item.origem.toLowerCase().includes(termo) ||
-          item.ip.toLowerCase().includes(termo);
-
-        return dentroInicio && dentroFim && categoriaOk && termoOk;
-      })
-      .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime());
-
-    return of(filtrados);
+    return items.filter(
+      (item) =>
+        item.descricao.toLowerCase().includes(termo) ||
+        item.referencia.toLowerCase().includes(termo) ||
+        item.operador.toLowerCase().includes(termo) ||
+        item.terminal.toLowerCase().includes(termo) ||
+        item.origem.toLowerCase().includes(termo) ||
+        item.ip.toLowerCase().includes(termo)
+    );
   }
 }

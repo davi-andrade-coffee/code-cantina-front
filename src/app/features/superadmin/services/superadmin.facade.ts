@@ -5,12 +5,15 @@ import { StoreStatus } from '../models/store.model';
 import { InvoiceFilters } from '../models/invoice.model';
 import { SuperAdminMockService } from './superadmin.mock.service';
 import { BillingMockService } from './billing.mock.service';
+import { SuperAdminApiService } from './superadmin.api.service';
+import { BillingApiService } from './billing.api.service';
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminFacade {
-  private readonly superadminSource = inject(SuperAdminMockService);
-  private readonly billingSource = inject(BillingMockService);
-  // Troque o provider acima por um serviço HTTP real quando integrar com API.
+  private readonly superadminSource = inject(SuperAdminApiService);
+  private readonly superadminMock = inject(SuperAdminMockService);
+  private readonly billingSource = inject(BillingApiService);
+  private readonly billingMock = inject(BillingMockService);
 
   listAdmins(filters: AdminFilters) {
     return this.superadminSource.listAdmins(filters);
@@ -33,7 +36,7 @@ export class SuperAdminFacade {
   }
 
   getAdminInsights(): ReturnType<SuperAdminMockService['getAdminInsights']> {
-    return this.superadminSource.getAdminInsights();
+    return this.superadminMock.getAdminInsights();
   }
 
   listStores(filters?: { termo?: string; status?: string; adminId?: string }) {
@@ -45,11 +48,11 @@ export class SuperAdminFacade {
   }
 
   getStoreInsights() {
-    return this.superadminSource.getStoreInsights();
+    return this.superadminMock.getStoreInsights();
   }
 
   getAdminBillingResumo(adminId: string): ReturnType<SuperAdminMockService['getAdminBillingResumo']> {
-    return this.superadminSource.getAdminBillingResumo(adminId);
+    return this.superadminMock.getAdminBillingResumo(adminId);
   }
 
   listInvoices(filters: InvoiceFilters) {
@@ -57,10 +60,10 @@ export class SuperAdminFacade {
   }
 
   getInvoiceInsights(): ReturnType<BillingMockService['getInvoiceInsights']> {
-    return this.billingSource.getInvoiceInsights();
+    return this.billingMock.getInvoiceInsights();
   }
 
   getBillingOverview(): ReturnType<BillingMockService['getBillingOverview']> {
-    return this.billingSource.getBillingOverview();
+    return this.billingMock.getBillingOverview();
   }
 }
