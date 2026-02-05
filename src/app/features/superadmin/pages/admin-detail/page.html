@@ -51,8 +51,8 @@
           type="checkbox"
           class="toggle toggle-success"
           [checked]="admin()?.status === 'ATIVO'"
+          (change)="onAdminStatusChange($event)"
           [disabled]="admin() ? pendingAdminStatusById()[admin()!.id] : false"
-          (change)="toggleAdminStatus($any($event.target).checked)"
         />
       </div>
     </div>
@@ -99,8 +99,8 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
+                (change)="onStoreStatusChange(store, $event)"
                 [disabled]="pendingStoreStatusById()[store.id]"
-                (change)="toggleStoreStatus(store, $any($event.target).checked)"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
               <span

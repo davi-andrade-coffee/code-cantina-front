@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { CreateAdminRequest } from '../../models/admin.model';
 import { digitsOnly, formatPhone } from '../../utils/form-formatters';
 
 @Component({
@@ -64,7 +65,7 @@ export class CreateAdminModalComponent {
   @Input() open = false;
   @Input() submitting = false;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ nome: string; email: string; telefone: string }>();
+  @Output() confirm = new EventEmitter<CreateAdminRequest>();
 
   nome = '';
   email = '';

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Admin, AdminFilters, AdminStatus } from '../../models/admin.model';
+import { Admin, AdminFilters, AdminStatus, CreateAdminRequest } from '../../models/admin.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateAdminModalComponent } from '../../components/modals/create-admin-modal.component';
 import { PaginationComponent } from '../../components/pagination.component';
@@ -81,6 +81,21 @@ export class AdminsListPage {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
 
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ termo: target?.value ?? '' });
+  }
+
+  onStatusChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ status: (target?.value as AdminFilters['status']) ?? 'TODOS' });
+  }
+
+  onAdminStatusChange(admin: Admin, event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.toggleAdminStatus(admin, target?.checked ?? false);
+  }
+
   alterarPagina(pagina: number): void {
     this.paginaAtual.set(pagina);
   }
@@ -98,7 +113,7 @@ export class AdminsListPage {
     this.modalCadastroAberto.set(false);
   }
 
-  confirmarCadastro(payload: { nome: string; email: string; telefone: string }): void {
+  confirmarCadastro(payload: CreateAdminRequest): void {
     this.submitting.set(true);
     this.facade
       .createAdmin(payload)

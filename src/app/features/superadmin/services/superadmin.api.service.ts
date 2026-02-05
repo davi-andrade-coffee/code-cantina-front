@@ -4,8 +4,19 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { API_BASE_URL } from '../../../core/http/api.config';
-import { Admin, AdminFilters, AdminStatus } from '../models/admin.model';
-import { Store, StoreStatus } from '../models/store.model';
+import {
+  AdminEntity,
+  AdminFilters,
+  AdminStatus,
+  CreateAdminRequest,
+} from '../models/admin.model';
+import {
+  CreateStoreRequest,
+  StoreEntity,
+  StoreFilters,
+  StoreStatus,
+  UpdateStoreRequest,
+} from '../models/store.model';
 
 interface AdminListItem {
   id: string;
@@ -79,7 +90,7 @@ interface ShopListResponse {
 export class SuperAdminApiService {
   constructor(private http: HttpClient) {}
 
-  listAdmins(filters: AdminFilters): Observable<Admin[]> {
+  listAdmins(filters: AdminFilters): Observable<AdminEntity[]> {
     let params = new HttpParams().set('page', '1').set('limit', '100');
     if (filters.termo) params = params.set('search', filters.termo);
     if (filters.status === 'ATIVO') params = params.set('isActive', 'true');
@@ -90,19 +101,19 @@ export class SuperAdminApiService {
       .pipe(map((res) => res.items.map((item) => this.mapAdminListItem(item))));
   }
 
-  getAdminById(adminId: string): Observable<Admin | undefined> {
+  getAdminById(adminId: string): Observable<AdminEntity | undefined> {
     return this.http
       .get<AdminDetailResponse>(`${API_BASE_URL}/superadmin/admins/${adminId}`)
       .pipe(map((res) => this.mapAdminDetail(res)));
   }
 
-  listAdminStores(adminId: string): Observable<Store[]> {
+  listAdminStores(adminId: string): Observable<StoreEntity[]> {
     return this.http
       .get<AdminDetailResponse>(`${API_BASE_URL}/superadmin/admins/${adminId}`)
       .pipe(map((res) => res.stores.map((store) => this.mapAdminStore(store, adminId))));
   }
 
-  listStores(filters?: { termo?: string; status?: string; adminId?: string }): Observable<Store[]> {
+  listStores(filters?: StoreFilters): Observable<StoreEntity[]> {
     let params = new HttpParams().set('page', '1').set('limit', '100');
     if (filters?.termo) params = params.set('search', filters.termo);
     if (filters?.adminId) params = params.set('adminId', filters.adminId);
@@ -129,41 +140,59 @@ export class SuperAdminApiService {
 
   updateStore(
     storeId: string,
-    payload: { nome: string; cnpj: string; mensalidade: number; vencimento: number }
+    payload: UpdateStoreRequest
   ): Observable<void> {
-    return this.http.put<void>(`${API_BASE_URL}/superadmin/shops/${storeId}`, {
-      name: payload.nome,
-      cnpj: payload.cnpj,
-      monthlyValue: payload.mensalidade,
-      billingDueDay: payload.vencimento,
-    });
+    return this.http.put<void>(`${API_BASE_URL}/superadmin/shops/${storeId}`, this.mapUpdateStoreRequest(payload));
   }
 
-  createAdmin(payload: { nome: string; email: string; telefone: string }): Observable<{ adminId: string }> {
-    return this.http.post<{ adminId: string }>(`${API_BASE_URL}/superadmin/admins`, {
+  createAdmin(payload: CreateAdminRequest): Observable<{ adminId: string }> {
+    return this.http.post<{ adminId: string }>(`${API_BASE_URL}/superadmin/admins`, this.mapCreateAdminRequest(payload));
+  }
+
+  createStore(payload: CreateStoreRequest): Observable<{ shopId: string }> {
+    return this.http.post<{ shopId: string }>(`${API_BASE_URL}/superadmin/shops`, this.mapCreateStoreRequest(payload));
+  }
+
+
+  private mapCreateAdminRequest(payload: CreateAdminRequest): { name: string; email: string; phone: string } {
+    return {
       name: payload.nome,
       email: payload.email,
       phone: payload.telefone,
-    });
+    };
   }
 
-  createStore(payload: {
+  private mapCreateStoreRequest(payload: CreateStoreRequest): {
     adminId: string;
-    nome: string;
+    name: string;
     cnpj: string;
-    mensalidade: number;
-    vencimento: number;
-  }): Observable<{ shopId: string }> {
-    return this.http.post<{ shopId: string }>(`${API_BASE_URL}/superadmin/shops`, {
+    monthlyValue: number;
+    billingDueDay: number;
+  } {
+    return {
       adminId: payload.adminId,
       name: payload.nome,
       cnpj: payload.cnpj,
       monthlyValue: payload.mensalidade,
       billingDueDay: payload.vencimento,
-    });
+    };
   }
 
-  private mapAdminListItem(item: AdminListItem): Admin {
+  private mapUpdateStoreRequest(payload: UpdateStoreRequest): {
+    name: string;
+    cnpj: string;
+    monthlyValue: number;
+    billingDueDay: number;
+  } {
+    return {
+      name: payload.nome,
+      cnpj: payload.cnpj,
+      monthlyValue: payload.mensalidade,
+      billingDueDay: payload.vencimento,
+    };
+  }
+
+  private mapAdminListItem(item: AdminListItem): AdminEntity {
     return {
       id: item.id,
       nome: item.name,
@@ -177,7 +206,7 @@ export class SuperAdminApiService {
     };
   }
 
-  private mapAdminDetail(item: AdminDetailResponse): Admin {
+  private mapAdminDetail(item: AdminDetailResponse): AdminEntity {
     return {
       id: item.id,
       nome: item.name,
@@ -191,7 +220,7 @@ export class SuperAdminApiService {
     };
   }
 
-  private mapAdminStore(store: AdminStoreItem, adminId: string): Store {
+  private mapAdminStore(store: AdminStoreItem, adminId: string): StoreEntity {
     return {
       id: store.id,
       adminId,
@@ -204,7 +233,7 @@ export class SuperAdminApiService {
     };
   }
 
-  private mapShopListItem(item: ShopListItem): Store {
+  private mapShopListItem(item: ShopListItem): StoreEntity {
     return {
       id: item.id,
       adminId: item.admin.id,

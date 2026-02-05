@@ -1,15 +1,14 @@
-export type StoreStatus = 'ATIVA' | 'BLOQUEADA' | 'CANCELADA';
+export type {
+  CreateStoreRequest,
+  StoreEntity,
+  StoreFilters,
+  StoreStatus,
+  UpdateStoreRequest,
+} from './store.entity';
 
-export interface Store {
-  id: string;
-  adminId: string;
-  nome: string;
-  cnpj: string;
-  mensalidade: number;
-  status: StoreStatus;
-  criadoEm: string;
-  vencimento: number;
-}
+import type { StoreEntity } from './store.entity';
+
+export type Store = StoreEntity;
 
 export interface StoreInsights {
   totalAtivas: number;

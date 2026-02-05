@@ -1,16 +1,13 @@
-export type AdminStatus = 'ATIVO' | 'BLOQUEADO';
+export type {
+  AdminEntity,
+  AdminFilters,
+  AdminStatus,
+  CreateAdminRequest,
+} from './admin.entity';
 
-export interface Admin {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  lojasTotal: number;
-  lojasAtivas: number;
-  status: AdminStatus;
-  ultimoPagamento: string;
-  inadimplente: boolean;
-}
+import type { AdminEntity } from './admin.entity';
+
+export type Admin = AdminEntity;
 
 export interface AdminInsights {
   total: number;
@@ -20,11 +17,6 @@ export interface AdminInsights {
   inadimplentes: number;
   inadimplenciaPercentual: number;
   novosPorMes: Array<{ mes: string; total: number }>;
-}
-
-export interface AdminFilters {
-  termo: string;
-  status: AdminStatus | 'TODOS';
 }
 
 export interface AdminBillingResumo {

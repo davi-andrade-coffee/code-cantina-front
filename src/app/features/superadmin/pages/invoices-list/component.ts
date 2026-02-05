@@ -77,6 +77,27 @@ export class InvoicesListPage {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
 
+
+  onCompetenciaInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ competencia: target?.value ?? '' });
+  }
+
+  onStatusChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ status: (target?.value as InvoiceFilters['status']) ?? 'TODOS' });
+  }
+
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ termo: target?.value ?? '' });
+  }
+
+  onOverdueFilterChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ somenteVencidas: target?.value === 'SIM' });
+  }
+
   alterarPagina(pagina: number): void {
     this.paginaAtual.set(pagina);
   }

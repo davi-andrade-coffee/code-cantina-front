@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { Admin } from '../../models/admin.model';
-import { Store } from '../../models/store.model';
+import { Store, StoreFilters } from '../../models/store.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
@@ -28,7 +28,7 @@ export class StoresListPage {
   readonly admins = signal<Admin[]>([]);
   readonly pendingStoreStatusById = signal<Record<string, boolean>>({});
 
-  readonly filtros = signal({
+  readonly filtros = signal<{ termo: string; status: string; adminId: string }>({
     termo: '',
     status: 'TODOS',
     adminId: 'TODOS',
@@ -63,7 +63,7 @@ export class StoresListPage {
         termo: filtros.termo,
         status: filtros.status,
         adminId: filtros.adminId === 'TODOS' ? undefined : filtros.adminId,
-      })
+      } as StoreFilters)
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
@@ -88,6 +88,27 @@ export class StoresListPage {
 
   patchFiltro(patch: Partial<{ termo: string; status: string; adminId: string }>): void {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
+  }
+
+
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ termo: target?.value ?? '' });
+  }
+
+  onStatusChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ status: target?.value ?? 'TODOS' });
+  }
+
+  onAdminChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ adminId: target?.value ?? 'TODOS' });
+  }
+
+  onStoreStatusChange(store: Store, event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.toggleStoreStatus(store, target?.checked ?? false);
   }
 
   alterarPagina(pagina: number): void {

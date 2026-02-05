@@ -15,7 +15,7 @@
         class="input input-bordered input-sm"
         type="date"
         [value]="filtros().dataInicio"
-        (input)="patchFiltro({ dataInicio: $any($event.target).value })"
+        (input)="onStartDateInput($event)"
       />
     </label>
 
@@ -27,7 +27,7 @@
         class="input input-bordered input-sm"
         type="date"
         [value]="filtros().dataFim"
-        (input)="patchFiltro({ dataFim: $any($event.target).value })"
+        (input)="onEndDateInput($event)"
       />
     </label>
 
@@ -38,7 +38,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().categoria"
-        (change)="patchFiltro({ categoria: $any($event.target).value })"
+        (change)="onCategoryChange($event)"
       >
         <option *ngFor="let item of categorias" [value]="item.value">
           {{ item.label }}
@@ -54,7 +54,7 @@
         class="input input-bordered input-sm"
         placeholder="Descrição, referência, IP"
         [value]="filtros().termo"
-        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (input)="onSearchInput($event)"
         (keyup.enter)="buscar()"
       />
     </label>
@@ -126,7 +126,7 @@
       <select
         class="select select-bordered select-xs"
         [value]="itensPorPagina()"
-        (change)="setItensPorPagina($any($event.target).value)"
+        (change)="onPageSizeChange($event)"
       >
         <option *ngFor="let size of tamanhosPagina" [value]="size">{{ size }} / pág.</option>
       </select>

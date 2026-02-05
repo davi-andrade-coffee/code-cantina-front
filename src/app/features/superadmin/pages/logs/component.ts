@@ -78,6 +78,32 @@ export class SuperadminLogsPage {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
 
+
+  onStartDateInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ dataInicio: target?.value ?? '' });
+  }
+
+  onEndDateInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ dataFim: target?.value ?? '' });
+  }
+
+  onCategoryChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.patchFiltro({ categoria: (target?.value as LogFiltro['categoria']) ?? 'TODOS' });
+  }
+
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.patchFiltro({ termo: target?.value ?? '' });
+  }
+
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.setItensPorPagina(Number(target?.value ?? this.itensPorPagina()));
+  }
+
   voltarPagina(): void {
     this.paginaAtual.update((pagina) => Math.max(1, pagina - 1));
   }
@@ -86,7 +112,7 @@ export class SuperadminLogsPage {
     this.paginaAtual.update((pagina) => Math.min(this.totalPaginas(), pagina + 1));
   }
 
-  setItensPorPagina(valor: string | number): void {
+  setItensPorPagina(valor: number): void {
     const novo = Number(valor);
     this.itensPorPagina.set(novo);
     this.paginaAtual.set(1);
