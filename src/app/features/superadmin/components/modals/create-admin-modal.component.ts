@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { digitsOnly, formatPhone } from '../../utils/form-formatters';
+
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule],
@@ -35,7 +37,12 @@ import { FormsModule } from '@angular/forms';
             <div class="label">
               <span class="label-text text-xs opacity-70">Telefone de contato</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="telefone" placeholder="(00) 00000-0000" />
+            <input
+              class="input input-bordered"
+              [ngModel]="telefone"
+              (ngModelChange)="onTelefoneChange($event)"
+              placeholder="(00) 00000-0000"
+            />
             <div class="label" *ngIf="showError('telefone')">
               <span class="label-text-alt text-error">Informe um telefone válido.</span>
             </div>
@@ -76,8 +83,12 @@ export class CreateAdminModalComponent {
     this.confirm.emit({
       nome: this.nome.trim(),
       email: this.email.trim(),
-      telefone: this.telefone.trim(),
+      telefone: digitsOnly(this.telefone),
     });
+  }
+
+  onTelefoneChange(value: string): void {
+    this.telefone = formatPhone(value);
   }
 
   formValid(): boolean {
@@ -101,7 +112,7 @@ export class CreateAdminModalComponent {
   }
 
   private isPhoneValid(): boolean {
-    const digits = this.telefone.replace(/\D/g, '');
+    const digits = digitsOnly(this.telefone);
     return digits.length >= 10;
   }
 }
