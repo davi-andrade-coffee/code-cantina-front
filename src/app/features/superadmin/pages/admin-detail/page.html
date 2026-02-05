@@ -43,10 +43,15 @@
 
       <div class="flex items-center gap-3">
         <span class="text-xs opacity-70">Status</span>
+        <span
+          *ngIf="admin() && pendingAdminStatusById()[admin()!.id]"
+          class="loading loading-spinner loading-xs"
+        ></span>
         <input
           type="checkbox"
           class="toggle toggle-success"
           [checked]="admin()?.status === 'ATIVO'"
+          [disabled]="admin() ? pendingAdminStatusById()[admin()!.id] : false"
           (change)="toggleAdminStatus($any($event.target).checked)"
         />
       </div>
@@ -94,9 +99,14 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
+                [disabled]="pendingStoreStatusById()[store.id]"
                 (change)="toggleStoreStatus(store, $any($event.target).checked)"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
+              <span
+                *ngIf="pendingStoreStatusById()[store.id]"
+                class="loading loading-spinner loading-xs"
+              ></span>
             </label>
           </td>
         </tr>
@@ -116,6 +126,7 @@
   [mode]="modalLojaModo()"
   [storeId]="lojaSelecionada()?.id"
   [store]="lojaSelecionada()"
+  [submitting]="submitting()"
   (close)="fecharNovaLoja()"
   (confirm)="confirmarNovaLoja($event)"
 ></superadmin-create-store-modal>

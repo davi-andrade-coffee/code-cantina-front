@@ -31,6 +31,8 @@ export class AdminsListPage {
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
   readonly admins = signal<Admin[]>([]);
+  readonly submitting = signal(false);
+  readonly pendingAdminStatusById = signal<Record<string, boolean>>({});
 
   readonly filtros = signal<AdminFilters>({
     termo: '',
@@ -97,9 +99,13 @@ export class AdminsListPage {
   }
 
   confirmarCadastro(payload: { nome: string; email: string; telefone: string }): void {
+    this.submitting.set(true);
     this.facade
       .createAdmin(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.submitting.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.modalCadastroAberto.set(false);
@@ -112,9 +118,14 @@ export class AdminsListPage {
 
   toggleAdminStatus(admin: Admin, ativo: boolean): void {
     const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+    this.setPendingAdminStatus(admin.id, true);
+
     this.facade
       .updateAdminStatus(admin.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingAdminStatus(admin.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.admins.update((lista) =>
@@ -126,5 +137,16 @@ export class AdminsListPage {
         },
         error: () => this.notificationService.error('Failed to update admin status.'),
       });
+  }
+
+  private setPendingAdminStatus(adminId: string, pending: boolean): void {
+    this.pendingAdminStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [adminId]: true };
+      }
+
+      const { [adminId]: _, ...rest } = state;
+      return rest;
+    });
   }
 }

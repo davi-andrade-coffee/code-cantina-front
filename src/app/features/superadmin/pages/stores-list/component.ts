@@ -26,6 +26,7 @@ export class StoresListPage {
   readonly errorMsg = signal<string | null>(null);
   readonly stores = signal<Store[]>([]);
   readonly admins = signal<Admin[]>([]);
+  readonly pendingStoreStatusById = signal<Record<string, boolean>>({});
 
   readonly filtros = signal({
     termo: '',
@@ -100,9 +101,14 @@ export class StoresListPage {
 
   toggleStoreStatus(store: Store, ativo: boolean): void {
     const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.setPendingStoreStatus(store.id, true);
+
     this.facade
       .updateStoreStatus(store.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingStoreStatus(store.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.stores.update((lista) =>
@@ -114,6 +120,18 @@ export class StoresListPage {
         },
         error: () => this.notificationService.error('Failed to update store status.'),
       });
+  }
+
+
+  private setPendingStoreStatus(storeId: string, pending: boolean): void {
+    this.pendingStoreStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [storeId]: true };
+      }
+
+      const { [storeId]: _, ...rest } = state;
+      return rest;
+    });
   }
 
   adminNome(adminId: string): string {

@@ -34,6 +34,9 @@ export class AdminDetailPage {
   readonly errorMsg = signal<string | null>(null);
   readonly admin = signal<Admin | null>(null);
   readonly stores = signal<Store[]>([]);
+  readonly submitting = signal(false);
+  readonly pendingAdminStatusById = signal<Record<string, boolean>>({});
+  readonly pendingStoreStatusById = signal<Record<string, boolean>>({});
   readonly modalLojaAberto = signal(false);
   readonly modalLojaModo = signal<'CRIAR' | 'EDITAR'>('CRIAR');
   readonly lojaSelecionada = signal<Store | null>(null);
@@ -97,7 +100,13 @@ export class AdminDetailPage {
     vencimento: number;
   }): void {
     const adminId = this.admin()?.id;
-    if (payload?.id) {
+    if (!payload) {
+      return;
+    }
+
+    this.submitting.set(true);
+
+    if (payload.id) {
       this.facade
         .updateStore(payload.id, {
           nome: payload.nome,
@@ -105,7 +114,10 @@ export class AdminDetailPage {
           mensalidade: payload.mensalidade,
           vencimento: payload.vencimento,
         })
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(
+          finalize(() => this.submitting.set(false)),
+          takeUntilDestroyed(this.destroyRef)
+        )
         .subscribe({
           next: () => {
             this.stores.update((lista) =>
@@ -122,6 +134,8 @@ export class AdminDetailPage {
               )
             );
             this.notificationService.success('Store updated successfully.');
+            this.modalLojaAberto.set(false);
+            this.lojaSelecionada.set(null);
           },
           error: () => this.notificationService.error('Failed to update store.'),
         });
@@ -143,15 +157,44 @@ export class AdminDetailPage {
           error: () => this.notificationService.error('Failed to create store.'),
         });
     }
-    this.modalLojaAberto.set(false);
-    this.lojaSelecionada.set(null);
+
+    if (!adminId) {
+      this.submitting.set(false);
+      return;
+    }
+
+    this.facade
+      .createStore({
+        adminId,
+        nome: payload.nome,
+        cnpj: payload.cnpj,
+        mensalidade: payload.mensalidade,
+        vencimento: payload.vencimento,
+      })
+      .pipe(
+        finalize(() => this.submitting.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: () => {
+          this.modalLojaAberto.set(false);
+          this.lojaSelecionada.set(null);
+          this.carregarDetalhes();
+        },
+        error: () => this.errorMsg.set('Não foi possível cadastrar a loja.'),
+      });
   }
 
   toggleStoreStatus(store: Store, ativo: boolean): void {
     const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.setPendingStoreStatus(store.id, true);
+
     this.facade
       .updateStoreStatus(store.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingStoreStatus(store.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.stores.update((lista) =>
@@ -169,9 +212,14 @@ export class AdminDetailPage {
     const admin = this.admin();
     if (!admin) return;
     const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+    this.setPendingAdminStatus(admin.id, true);
+
     this.facade
       .updateAdminStatus(admin.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingAdminStatus(admin.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.admin.set({ ...admin, status });
@@ -181,5 +229,27 @@ export class AdminDetailPage {
         },
         error: () => this.notificationService.error('Failed to update admin status.'),
       });
+  }
+
+  private setPendingAdminStatus(adminId: string, pending: boolean): void {
+    this.pendingAdminStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [adminId]: true };
+      }
+
+      const { [adminId]: _, ...rest } = state;
+      return rest;
+    });
+  }
+
+  private setPendingStoreStatus(storeId: string, pending: boolean): void {
+    this.pendingStoreStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [storeId]: true };
+      }
+
+      const { [storeId]: _, ...rest } = state;
+      return rest;
+    });
   }
 }

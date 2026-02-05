@@ -61,9 +61,10 @@ import { FormsModule } from '@angular/forms';
         </div>
 
         <div class="modal-action">
-          <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
-            {{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}
+          <button class="btn btn-ghost" [disabled]="submitting" (click)="onClose()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="submitting || !formValid()" (click)="onConfirm()">
+            <span *ngIf="!submitting">{{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}</span>
+            <span *ngIf="submitting" class="loading loading-spinner loading-xs"></span>
           </button>
         </div>
       </div>
@@ -72,6 +73,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class CreateStoreModalComponent implements OnChanges {
   @Input() open = false;
+  @Input() submitting = false;
   @Input() mode: 'CRIAR' | 'EDITAR' = 'CRIAR';
   @Input() storeId?: string | null;
   @Input() store?: { nome: string; cnpj: string; mensalidade: number; vencimento: number } | null;
@@ -110,6 +112,7 @@ export class CreateStoreModalComponent implements OnChanges {
   }
 
   onConfirm(): void {
+    if (this.submitting) return;
     this.submitted = true;
     if (!this.formValid()) return;
     this.confirm.emit({
