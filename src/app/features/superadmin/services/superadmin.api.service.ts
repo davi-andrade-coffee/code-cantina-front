@@ -135,7 +135,7 @@ export class SuperAdminApiService {
       name: payload.nome,
       cnpj: payload.cnpj,
       monthlyValue: payload.mensalidade,
-      dueDate: payload.vencimento,
+      billingDueDay: payload.vencimento,
     });
   }
 

@@ -2,6 +2,7 @@
   <div>
     <h1 class="text-lg font-semibold">Recebimentos e Indicadores</h1>
     <p class="text-sm opacity-70">Visão gerencial consolidada do SaaS.</p>
+    <p class="text-xs opacity-60">Obs.: os meses da rota de KPIs vêm abreviados (ex.: Jan, Mai, Ago).</p>
   </div>
 </div>
 
@@ -28,7 +29,7 @@
   <div class="grid gap-4 md:grid-cols-3">
     <superadmin-kpi-card label="Admins ativos" [value]="overview()?.adminsAtivos ?? '—'"></superadmin-kpi-card>
     <superadmin-kpi-card label="Lojas ativas" [value]="overview()?.lojasAtivas ?? '—'"></superadmin-kpi-card>
-    <superadmin-kpi-card label="Crescimento mensal" [value]="overview()?.novosAdminsMensal?.[3]?.total ?? '—'"></superadmin-kpi-card>
+    <superadmin-kpi-card label="Crescimento mensal" [value]="overview()?.crescimentoMensal ?? '—'"></superadmin-kpi-card>
   </div>
 
   <div class="grid gap-4 md:grid-cols-2">

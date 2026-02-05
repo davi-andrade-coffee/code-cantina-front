@@ -33,6 +33,7 @@ export interface BillingOverview {
   adminsAtivos: number;
   lojasAtivas: number;
   taxaInadimplencia: number;
+  crescimentoMensal: number;
   receitaMensal: Array<{ mes: string; valor: number }>;
   novosAdminsMensal: Array<{ mes: string; total: number }>;
   lojasAtivasMensal: Array<{ mes: string; total: number }>;
