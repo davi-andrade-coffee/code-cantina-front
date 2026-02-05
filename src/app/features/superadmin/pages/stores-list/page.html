@@ -61,7 +61,7 @@
           <th>Admin</th>
           <th>Mensalidade</th>
           <th>Status</th>
-          <th>Criada em</th>
+          <th>Vencimento</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -69,7 +69,7 @@
         <tr *ngFor="let store of paginaStores()">
           <td>
             <div class="font-semibold">{{ store.nome }}</div>
-            <div class="text-xs opacity-70">{{ store.codigo }}</div>
+            <div class="text-xs opacity-70">{{ store.cnpj }}</div>
           </td>
           <td class="text-sm">
             {{ adminNome(store.adminId) }}
@@ -78,7 +78,7 @@
           <td>
             <superadmin-status-badge [status]="store.status" kind="store"></superadmin-status-badge>
           </td>
-          <td class="text-sm">{{ store.criadoEm }}</td>
+          <td class="text-sm">{{ store.vencimento || '—' }}</td>
           <td>
             <label class="label cursor-pointer justify-start gap-2">
               <input

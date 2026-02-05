@@ -85,7 +85,7 @@
         <tr *ngFor="let item of paginaLogs(); trackBy: trackById">
           <td class="text-sm whitespace-nowrap">
             <div class="font-semibold">{{ formatDateTime(item.dataHora) }}</div>
-            <div class="text-xs opacity-60">IP {{ item.ip }}</div>
+            <div *ngIf="item.ip" class="text-xs opacity-60">IP {{ item.ip }}</div>
           </td>
           <td>
             <span [class]="categoriaBadge(item.categoria)">
@@ -93,17 +93,19 @@
             </span>
           </td>
           <td>
-            <div class="font-semibold">{{ item.operador }}</div>
-            <div class="text-xs opacity-60">{{ item.terminal }}</div>
+            <div *ngIf="item.operador" class="font-semibold">{{ item.operador }}</div>
+            <div *ngIf="item.terminal" class="text-xs opacity-60">{{ item.terminal }}</div>
+            <span *ngIf="!item.operador && !item.terminal" class="text-xs opacity-60">—</span>
           </td>
           <td class="text-sm">
-            <div>{{ item.descricao }}</div>
+            <div>{{ item.descricao || '—' }}</div>
           </td>
           <td>
-            <span [class]="origemBadge(item.origem)">{{ item.origem }}</span>
+            <span *ngIf="item.origem" [class]="origemBadge(item.origem)">{{ item.origem }}</span>
+            <span *ngIf="!item.origem" class="text-xs opacity-60">—</span>
           </td>
           <td>
-            <span class="badge badge-ghost badge-sm">{{ item.referencia }}</span>
+            <span class="badge badge-ghost badge-sm">{{ item.referencia || '—' }}</span>
           </td>
         </tr>
 

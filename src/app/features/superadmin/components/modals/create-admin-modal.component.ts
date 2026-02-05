@@ -18,24 +18,33 @@ import { FormsModule } from '@angular/forms';
               <span class="label-text text-xs opacity-70">Nome/Razão social</span>
             </div>
             <input class="input input-bordered" [(ngModel)]="nome" placeholder="Ex.: Cantina Nova" />
+            <div class="label" *ngIf="showError('nome')">
+              <span class="label-text-alt text-error">Informe o nome do admin.</span>
+            </div>
           </label>
           <label class="form-control">
             <div class="label">
               <span class="label-text text-xs opacity-70">E-mail de acesso</span>
             </div>
             <input class="input input-bordered" [(ngModel)]="email" placeholder="admin@cliente.com" />
+            <div class="label" *ngIf="showError('email')">
+              <span class="label-text-alt text-error">Informe um e-mail válido.</span>
+            </div>
           </label>
           <label class="form-control">
             <div class="label">
-              <span class="label-text text-xs opacity-70">Documento (CPF/CNPJ)</span>
+              <span class="label-text text-xs opacity-70">Telefone de contato</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="documento" placeholder="00.000.000/0000-00" />
+            <input class="input input-bordered" [(ngModel)]="telefone" placeholder="(00) 00000-0000" />
+            <div class="label" *ngIf="showError('telefone')">
+              <span class="label-text-alt text-error">Informe um telefone válido.</span>
+            </div>
           </label>
         </div>
 
         <div class="modal-action">
           <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" (click)="confirm.emit({ nome, email, documento })">
+          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
             Salvar cadastro
           </button>
         </div>
@@ -46,16 +55,53 @@ import { FormsModule } from '@angular/forms';
 export class CreateAdminModalComponent {
   @Input() open = false;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{ nome: string; email: string; documento: string }>();
+  @Output() confirm = new EventEmitter<{ nome: string; email: string; telefone: string }>();
 
   nome = '';
   email = '';
-  documento = '';
+  telefone = '';
+  submitted = false;
 
   onClose(): void {
     this.nome = '';
     this.email = '';
-    this.documento = '';
+    this.telefone = '';
+    this.submitted = false;
     this.close.emit();
+  }
+
+  onConfirm(): void {
+    this.submitted = true;
+    if (!this.formValid()) return;
+    this.confirm.emit({
+      nome: this.nome.trim(),
+      email: this.email.trim(),
+      telefone: this.telefone.trim(),
+    });
+  }
+
+  formValid(): boolean {
+    return this.isNameValid() && this.isEmailValid() && this.isPhoneValid();
+  }
+
+  showError(field: 'nome' | 'email' | 'telefone'): boolean {
+    if (!this.submitted) return false;
+    if (field === 'nome') return !this.isNameValid();
+    if (field === 'email') return !this.isEmailValid();
+    return !this.isPhoneValid();
+  }
+
+  private isNameValid(): boolean {
+    return this.nome.trim().length > 2;
+  }
+
+  private isEmailValid(): boolean {
+    const value = this.email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  private isPhoneValid(): boolean {
+    const digits = this.telefone.replace(/\D/g, '');
+    return digits.length >= 10;
   }
 }

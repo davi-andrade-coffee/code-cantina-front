@@ -3,16 +3,13 @@ export type AdminStatus = 'ATIVO' | 'BLOQUEADO';
 export interface Admin {
   id: string;
   nome: string;
-  razaoSocial: string;
   email: string;
-  documento: string;
+  telefone: string;
   lojasTotal: number;
   lojasAtivas: number;
   status: AdminStatus;
   ultimoPagamento: string;
-  plano: string;
   inadimplente: boolean;
-  criadoEm: string;
 }
 
 export interface AdminInsights {

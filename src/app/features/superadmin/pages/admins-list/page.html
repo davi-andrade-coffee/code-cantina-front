@@ -16,7 +16,7 @@
       </div>
       <input
         class="input input-bordered input-sm"
-        placeholder="Nome, e-mail, documento"
+        placeholder="Nome, e-mail, telefone"
         [value]="filtros().termo"
         (input)="patchFiltro({ termo: $any($event.target).value })"
       />
@@ -52,7 +52,7 @@
       <thead>
         <tr>
           <th>Admin</th>
-          <th>Documento</th>
+          <th>Telefone</th>
           <th>Lojas</th>
           <th>Status</th>
           <th>Último pagamento</th>
@@ -66,7 +66,7 @@
             <div class="font-semibold">{{ admin.nome }}</div>
             <div class="text-xs opacity-70">{{ admin.email }}</div>
           </td>
-          <td class="text-sm">{{ admin.documento }}</td>
+          <td class="text-sm">{{ admin.telefone || '—' }}</td>
           <td>
             <div class="text-sm">{{ admin.lojasAtivas }} ativas / {{ admin.lojasTotal }} total</div>
           </td>
@@ -119,5 +119,5 @@
 <superadmin-create-admin-modal
   [open]="modalCadastroAberto()"
   (close)="fecharCadastro()"
-  (confirm)="confirmarCadastro()"
+  (confirm)="confirmarCadastro($event)"
 ></superadmin-create-admin-modal>

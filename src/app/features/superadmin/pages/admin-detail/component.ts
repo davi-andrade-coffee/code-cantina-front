@@ -87,23 +87,54 @@ export class AdminDetailPage {
     this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(payload?: { id?: string | null; nome: string; codigo: string; mensalidade: number }): void {
+  confirmarNovaLoja(payload?: {
+    id?: string | null;
+    nome: string;
+    cnpj: string;
+    mensalidade: number;
+    vencimento: number;
+  }): void {
+    const adminId = this.admin()?.id;
     if (payload?.id) {
       this.facade
         .updateStore(payload.id, {
           nome: payload.nome,
-          codigo: payload.codigo,
+          cnpj: payload.cnpj,
           mensalidade: payload.mensalidade,
+          vencimento: payload.vencimento,
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: (updated) => {
-            if (!updated) return;
+          next: () => {
             this.stores.update((lista) =>
-              lista.map((item) => (item.id === updated.id ? updated : item))
+              lista.map((item) =>
+                item.id === payload.id
+                  ? {
+                      ...item,
+                      nome: payload.nome,
+                      cnpj: payload.cnpj,
+                      mensalidade: payload.mensalidade,
+                      vencimento: payload.vencimento,
+                    }
+                  : item
+              )
             );
           },
           error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
+        });
+    } else if (payload && adminId) {
+      this.facade
+        .createStore({
+          adminId,
+          nome: payload.nome,
+          cnpj: payload.cnpj,
+          mensalidade: payload.mensalidade,
+          vencimento: payload.vencimento,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => this.carregarDetalhes(),
+          error: () => this.errorMsg.set('Não foi possível cadastrar a loja.'),
         });
     }
     this.modalLojaAberto.set(false);
@@ -116,10 +147,9 @@ export class AdminDetailPage {
       .updateStoreStatus(store.id, status)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (updated) => {
-          if (!updated) return;
+        next: () => {
           this.stores.update((lista) =>
-            lista.map((item) => (item.id === updated.id ? updated : item))
+            lista.map((item) => (item.id === store.id ? { ...item, status } : item))
           );
         },
         error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
@@ -134,9 +164,8 @@ export class AdminDetailPage {
       .updateAdminStatus(admin.id, status)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (updated) => {
-          if (!updated) return;
-          this.admin.set(updated);
+        next: () => {
+          this.admin.set({ ...admin, status });
         },
         error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
       });
