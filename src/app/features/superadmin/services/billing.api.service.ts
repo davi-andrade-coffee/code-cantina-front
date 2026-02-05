@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { API_BASE_URL } from '../../../core/http/api.config';
-import { Invoice, InvoiceFilters, InvoiceStatus } from '../models/invoice.model';
+import { BillingOverview, Invoice, InvoiceFilters, InvoiceStatus } from '../models/invoice.model';
 
 interface BillingItem {
   id: string;
@@ -33,6 +33,24 @@ interface BillingListResponse {
   items: BillingItem[];
 }
 
+
+interface KpiResponse {
+  current: {
+    revenue: number;
+    accumulatedRevenue: number;
+    activeAdmins: number;
+    activeStores: number;
+    defaultRate: number;
+    monthlyGrowth: number;
+  };
+  history: {
+    revenuePerMonth: Array<{ month: string; value: number }>;
+    newAdminsPerMonth: Array<{ month: string; value: number }>;
+    activeStoresPerMonth: Array<{ month: string; value: number }>;
+    defaultRatePerMonth: Array<{ month: string; value: number }>;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class BillingApiService {
   constructor(private http: HttpClient) {}
@@ -58,6 +76,14 @@ export class BillingApiService {
       );
   }
 
+
+
+  getBillingOverview(): Observable<BillingOverview> {
+    return this.http
+      .get<KpiResponse>(`${API_BASE_URL}/superadmin/kpis`)
+      .pipe(map((res) => this.mapKpisToOverview(res)));
+  }
+
   private mapBillingItem(item: BillingItem): Invoice {
     return {
       id: item.id,
@@ -68,6 +94,35 @@ export class BillingApiService {
       valor: item.amount,
       vencimento: item.dueDate,
       status: this.mapStatusFromApi(item.status),
+    };
+  }
+
+
+
+  private mapKpisToOverview(payload: KpiResponse): BillingOverview {
+    return {
+      receitaMes: payload.current.revenue,
+      receitaAno: payload.current.accumulatedRevenue,
+      adminsAtivos: payload.current.activeAdmins,
+      lojasAtivas: payload.current.activeStores,
+      taxaInadimplencia: payload.current.defaultRate,
+      crescimentoMensal: payload.current.monthlyGrowth,
+      receitaMensal: payload.history.revenuePerMonth.map((item) => ({
+        mes: item.month,
+        valor: item.value,
+      })),
+      novosAdminsMensal: payload.history.newAdminsPerMonth.map((item) => ({
+        mes: item.month,
+        total: item.value,
+      })),
+      lojasAtivasMensal: payload.history.activeStoresPerMonth.map((item) => ({
+        mes: item.month,
+        total: item.value,
+      })),
+      inadimplenciaMensal: payload.history.defaultRatePerMonth.map((item) => ({
+        mes: item.month,
+        valor: item.value,
+      })),
     };
   }
 
