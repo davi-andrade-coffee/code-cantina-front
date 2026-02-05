@@ -89,8 +89,13 @@
                 class="toggle toggle-xs"
                 [checked]="admin.status === 'ATIVO'"
                 (change)="onAdminStatusChange(admin, $event)"
+                [disabled]="pendingAdminStatusById()[admin.id]"
               />
               <span class="text-xs opacity-70">{{ admin.status === 'ATIVO' ? 'Ativo' : 'Bloqueado' }}</span>
+              <span
+                *ngIf="pendingAdminStatusById()[admin.id]"
+                class="loading loading-spinner loading-xs"
+              ></span>
             </label>
           </td>
         </tr>
@@ -118,6 +123,7 @@
 
 <superadmin-create-admin-modal
   [open]="modalCadastroAberto()"
+  [submitting]="submitting()"
   (close)="fecharCadastro()"
   (confirm)="confirmarCadastro($event)"
 ></superadmin-create-admin-modal>

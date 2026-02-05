@@ -3,6 +3,13 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { FormsModule } from '@angular/forms';
 
 import { Store, UpdateStoreRequest } from '../../models/store.model';
+import {
+  digitsOnly,
+  formatCnpj,
+  formatCurrency,
+  maskCurrencyInput,
+  parseCurrency,
+} from '../../utils/form-formatters';
 
 @Component({
   standalone: true,
@@ -30,7 +37,12 @@ import { Store, UpdateStoreRequest } from '../../models/store.model';
             <div class="label">
               <span class="label-text text-xs opacity-70">CNPJ (identificador único)</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="cnpj" placeholder="00.000.000/0000-00" />
+            <input
+              class="input input-bordered"
+              [ngModel]="cnpj"
+              (ngModelChange)="onCnpjChange($event)"
+              placeholder="00.000.000/0000-00"
+            />
             <div class="label" *ngIf="showError('cnpj')">
               <span class="label-text-alt text-error">Informe um CNPJ válido.</span>
             </div>
@@ -41,10 +53,10 @@ import { Store, UpdateStoreRequest } from '../../models/store.model';
             </div>
             <input
               class="input input-bordered"
-              type="number"
-              min="0"
-              step="0.01"
-              [(ngModel)]="mensalidade"
+              type="text"
+              inputmode="decimal"
+              [ngModel]="mensalidade"
+              (ngModelChange)="onMensalidadeChange($event)"
               placeholder="Ex.: 120,00"
             />
             <div class="label" *ngIf="showError('mensalidade')">
@@ -55,17 +67,18 @@ import { Store, UpdateStoreRequest } from '../../models/store.model';
             <div class="label">
               <span class="label-text text-xs opacity-70">Vencimento da fatura</span>
             </div>
-            <input class="input input-bordered" type="number" [(ngModel)]="vencimento" />
+            <input class="input input-bordered" type="number" min="1" max="31" [(ngModel)]="vencimento" />
             <div class="label" *ngIf="showError('vencimento')">
-              <span class="label-text-alt text-error">Selecione a data de vencimento.</span>
+              <span class="label-text-alt text-error">Selecione uma data de vencimento entre 1 e 31.</span>
             </div>
           </label>
         </div>
 
         <div class="modal-action">
-          <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
-            {{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}
+          <button class="btn btn-ghost" [disabled]="submitting" (click)="onClose()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="submitting || !formValid()" (click)="onConfirm()">
+            <span *ngIf="!submitting">{{ mode === 'EDITAR' ? 'Salvar alterações' : 'Salvar loja' }}</span>
+            <span *ngIf="submitting" class="loading loading-spinner loading-xs"></span>
           </button>
         </div>
       </div>
@@ -74,6 +87,7 @@ import { Store, UpdateStoreRequest } from '../../models/store.model';
 })
 export class CreateStoreModalComponent implements OnChanges {
   @Input() open = false;
+  @Input() submitting = false;
   @Input() mode: 'CRIAR' | 'EDITAR' = 'CRIAR';
   @Input() storeId?: string | null;
   @Input() store?: Store | null;
@@ -82,15 +96,15 @@ export class CreateStoreModalComponent implements OnChanges {
 
   nome = '';
   cnpj = '';
-  mensalidade = 0;
+  mensalidade = '';
   vencimento = 1;
   submitted = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['store'] || changes['open']) {
       this.nome = this.store?.nome ?? '';
-      this.cnpj = this.store?.cnpj ?? '';
-      this.mensalidade = this.store?.mensalidade ?? 0;
+      this.cnpj = formatCnpj(this.store?.cnpj ?? '');
+      this.mensalidade = this.store?.mensalidade ? formatCurrency(this.store.mensalidade) : '';
       this.vencimento = this.store?.vencimento ?? 1;
       this.submitted = false;
     }
@@ -99,22 +113,31 @@ export class CreateStoreModalComponent implements OnChanges {
   onClose(): void {
     this.nome = '';
     this.cnpj = '';
-    this.mensalidade = 0;
+    this.mensalidade = '';
     this.vencimento = 1;
     this.submitted = false;
     this.close.emit();
   }
 
   onConfirm(): void {
+    if (this.submitting) return;
     this.submitted = true;
     if (!this.formValid()) return;
     this.confirm.emit({
       id: this.storeId,
       nome: this.nome.trim(),
-      cnpj: this.cnpj.trim(),
-      mensalidade: Number(this.mensalidade),
-      vencimento: this.vencimento,
+      cnpj: digitsOnly(this.cnpj),
+      mensalidade: parseCurrency(this.mensalidade),
+      vencimento: Number(this.vencimento),
     });
+  }
+
+  onCnpjChange(value: string): void {
+    this.cnpj = formatCnpj(value);
+  }
+
+  onMensalidadeChange(value: string): void {
+    this.mensalidade = maskCurrencyInput(value);
   }
 
   formValid(): boolean {
@@ -134,15 +157,15 @@ export class CreateStoreModalComponent implements OnChanges {
   }
 
   private isCnpjValid(): boolean {
-    const digits = this.cnpj.replace(/\D/g, '');
-    return digits.length === 14;
+    return digitsOnly(this.cnpj).length === 14;
   }
 
   private isMensalidadeValid(): boolean {
-    return Number(this.mensalidade) > 0;
+    return parseCurrency(this.mensalidade) > 0;
   }
 
   private isVencimentoValid(): boolean {
-    return Number(this.mensalidade) > 0;
+    const dia = Number(this.vencimento);
+    return Number.isInteger(dia) && dia >= 1 && dia <= 31;
   }
 }

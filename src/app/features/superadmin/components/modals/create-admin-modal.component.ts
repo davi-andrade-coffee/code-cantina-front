@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { CreateAdminRequest } from '../../models/admin.model';
+import { digitsOnly, formatPhone } from '../../utils/form-formatters';
 
 @Component({
   standalone: true,
@@ -37,7 +38,12 @@ import { CreateAdminRequest } from '../../models/admin.model';
             <div class="label">
               <span class="label-text text-xs opacity-70">Telefone de contato</span>
             </div>
-            <input class="input input-bordered" [(ngModel)]="telefone" placeholder="(00) 00000-0000" />
+            <input
+              class="input input-bordered"
+              [ngModel]="telefone"
+              (ngModelChange)="onTelefoneChange($event)"
+              placeholder="(00) 00000-0000"
+            />
             <div class="label" *ngIf="showError('telefone')">
               <span class="label-text-alt text-error">Informe um telefone válido.</span>
             </div>
@@ -45,9 +51,10 @@ import { CreateAdminRequest } from '../../models/admin.model';
         </div>
 
         <div class="modal-action">
-          <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
-            Salvar cadastro
+          <button class="btn btn-ghost" [disabled]="submitting" (click)="onClose()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="submitting || !formValid()" (click)="onConfirm()">
+            <span *ngIf="!submitting">Salvar cadastro</span>
+            <span *ngIf="submitting" class="loading loading-spinner loading-xs"></span>
           </button>
         </div>
       </div>
@@ -56,6 +63,7 @@ import { CreateAdminRequest } from '../../models/admin.model';
 })
 export class CreateAdminModalComponent {
   @Input() open = false;
+  @Input() submitting = false;
   @Output() close = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<CreateAdminRequest>();
 
@@ -73,13 +81,18 @@ export class CreateAdminModalComponent {
   }
 
   onConfirm(): void {
+    if (this.submitting) return;
     this.submitted = true;
     if (!this.formValid()) return;
     this.confirm.emit({
       nome: this.nome.trim(),
       email: this.email.trim(),
-      telefone: this.telefone.trim(),
+      telefone: digitsOnly(this.telefone),
     });
+  }
+
+  onTelefoneChange(value: string): void {
+    this.telefone = formatPhone(value);
   }
 
   formValid(): boolean {
@@ -103,7 +116,7 @@ export class CreateAdminModalComponent {
   }
 
   private isPhoneValid(): boolean {
-    const digits = this.telefone.replace(/\D/g, '');
+    const digits = digitsOnly(this.telefone);
     return digits.length >= 10;
   }
 }

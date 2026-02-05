@@ -9,6 +9,7 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateAdminModalComponent } from '../../components/modals/create-admin-modal.component';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
+import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   standalone: true,
@@ -25,10 +26,13 @@ import { StatusBadgeComponent } from '../../components/status-badge.component';
 export class AdminsListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notificationService = inject(NotificationService);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
   readonly admins = signal<Admin[]>([]);
+  readonly submitting = signal(false);
+  readonly pendingAdminStatusById = signal<Record<string, boolean>>({});
 
   readonly filtros = signal<AdminFilters>({
     termo: '',
@@ -110,30 +114,54 @@ export class AdminsListPage {
   }
 
   confirmarCadastro(payload: CreateAdminRequest): void {
+    this.submitting.set(true);
     this.facade
       .createAdmin(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.submitting.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.modalCadastroAberto.set(false);
           this.buscar();
+          this.notificationService.success('Admin created successfully.');
         },
-        error: () => this.errorMsg.set('Não foi possível cadastrar o Admin.'),
+        error: () => this.notificationService.error('Failed to create admin.'),
       });
   }
 
   toggleAdminStatus(admin: Admin, ativo: boolean): void {
     const status: AdminStatus = ativo ? 'ATIVO' : 'BLOQUEADO';
+    this.setPendingAdminStatus(admin.id, true);
+
     this.facade
       .updateAdminStatus(admin.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingAdminStatus(admin.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.admins.update((lista) =>
             lista.map((item) => (item.id === admin.id ? { ...item, status } : item))
           );
+          this.notificationService.success(
+            ativo ? 'Admin unlocked successfully.' : 'Admin blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
+        error: () => this.notificationService.error('Failed to update admin status.'),
       });
+  }
+
+  private setPendingAdminStatus(adminId: string, pending: boolean): void {
+    this.pendingAdminStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [adminId]: true };
+      }
+
+      const { [adminId]: _, ...rest } = state;
+      return rest;
+    });
   }
 }

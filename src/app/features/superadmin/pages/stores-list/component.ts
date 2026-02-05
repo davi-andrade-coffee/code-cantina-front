@@ -9,6 +9,7 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
+import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   standalone: true,
@@ -19,11 +20,13 @@ import { TableCardComponent } from '../../components/table-card.component';
 export class StoresListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notificationService = inject(NotificationService);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
   readonly stores = signal<Store[]>([]);
   readonly admins = signal<Admin[]>([]);
+  readonly pendingStoreStatusById = signal<Record<string, boolean>>({});
 
   readonly filtros = signal<{ termo: string; status: string; adminId: string }>({
     termo: '',
@@ -119,17 +122,37 @@ export class StoresListPage {
 
   toggleStoreStatus(store: Store, ativo: boolean): void {
     const status = ativo ? 'ATIVA' : 'BLOQUEADA';
+    this.setPendingStoreStatus(store.id, true);
+
     this.facade
       .updateStoreStatus(store.id, status)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        finalize(() => this.setPendingStoreStatus(store.id, false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: () => {
           this.stores.update((lista) =>
             lista.map((item) => (item.id === store.id ? { ...item, status } : item))
           );
+          this.notificationService.success(
+            ativo ? 'Store unlocked successfully.' : 'Store blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+        error: () => this.notificationService.error('Failed to update store status.'),
       });
+  }
+
+
+  private setPendingStoreStatus(storeId: string, pending: boolean): void {
+    this.pendingStoreStatusById.update((state) => {
+      if (pending) {
+        return { ...state, [storeId]: true };
+      }
+
+      const { [storeId]: _, ...rest } = state;
+      return rest;
+    });
   }
 
   adminNome(adminId: string): string {

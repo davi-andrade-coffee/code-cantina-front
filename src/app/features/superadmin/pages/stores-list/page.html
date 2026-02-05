@@ -86,8 +86,13 @@
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
                 (change)="onStoreStatusChange(store, $event)"
+                [disabled]="pendingStoreStatusById()[store.id]"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
+              <span
+                *ngIf="pendingStoreStatusById()[store.id]"
+                class="loading loading-spinner loading-xs"
+              ></span>
             </label>
           </td>
         </tr>
