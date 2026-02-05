@@ -43,9 +43,10 @@ import { FormsModule } from '@angular/forms';
         </div>
 
         <div class="modal-action">
-          <button class="btn btn-ghost" (click)="onClose()">Cancelar</button>
-          <button class="btn btn-primary" [disabled]="!formValid()" (click)="onConfirm()">
-            Salvar cadastro
+          <button class="btn btn-ghost" [disabled]="submitting" (click)="onClose()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="submitting || !formValid()" (click)="onConfirm()">
+            <span *ngIf="!submitting">Salvar cadastro</span>
+            <span *ngIf="submitting" class="loading loading-spinner loading-xs"></span>
           </button>
         </div>
       </div>
@@ -54,6 +55,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class CreateAdminModalComponent {
   @Input() open = false;
+  @Input() submitting = false;
   @Output() close = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<{ nome: string; email: string; telefone: string }>();
 
@@ -71,6 +73,7 @@ export class CreateAdminModalComponent {
   }
 
   onConfirm(): void {
+    if (this.submitting) return;
     this.submitted = true;
     if (!this.formValid()) return;
     this.confirm.emit({

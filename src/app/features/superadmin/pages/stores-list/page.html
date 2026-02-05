@@ -85,9 +85,14 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
+                [disabled]="pendingStoreStatusById()[store.id]"
                 (change)="toggleStoreStatus(store, $any($event.target).checked)"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
+              <span
+                *ngIf="pendingStoreStatusById()[store.id]"
+                class="loading loading-spinner loading-xs"
+              ></span>
             </label>
           </td>
         </tr>
