@@ -3,11 +3,12 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
-import { Invoice, InvoiceFilters } from '../../models/invoice.model';
-import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
+import { Invoice, InvoiceFilters } from '../../models/invoice.model';
+import { SuperAdminFacade } from '../../services/superadmin.facade';
+import { competenciaToDate, dateToCompetencia } from '../../utils/form-formatters';
 
 @Component({
   standalone: true,
@@ -43,6 +44,8 @@ export class InvoicesListPage {
     return this.invoices().slice(inicio, inicio + this.itensPorPagina());
   });
 
+  readonly competenciaData = computed(() => competenciaToDate(this.filtros().competencia));
+
   constructor() {
     this.buscar();
   }
@@ -66,6 +69,10 @@ export class InvoicesListPage {
       });
   }
 
+  onCompetenciaChange(value: string): void {
+    this.patchFiltro({ competencia: dateToCompetencia(value) });
+  }
+
   patchFiltro(patch: Partial<InvoiceFilters>): void {
     this.filtros.update((atual) => ({ ...atual, ...patch }));
   }
@@ -78,5 +85,4 @@ export class InvoicesListPage {
     this.itensPorPagina.set(valor);
     this.paginaAtual.set(1);
   }
-
 }

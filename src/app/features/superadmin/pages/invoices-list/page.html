@@ -6,9 +6,9 @@
       </div>
       <input
         class="input input-bordered input-sm"
-        placeholder="08/2024"
-        [value]="filtros().competencia"
-        (input)="patchFiltro({ competencia: $any($event.target).value })"
+        type="date"
+        [value]="competenciaData()"
+        (input)="onCompetenciaChange($any($event.target).value)"
       />
     </label>
 
