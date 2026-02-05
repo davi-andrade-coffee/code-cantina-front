@@ -9,6 +9,7 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
+import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ import { TableCardComponent } from '../../components/table-card.component';
 export class StoresListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notificationService = inject(NotificationService);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
@@ -112,8 +114,11 @@ export class StoresListPage {
           this.stores.update((lista) =>
             lista.map((item) => (item.id === store.id ? { ...item, status } : item))
           );
+          this.notificationService.success(
+            ativo ? 'Store unlocked successfully.' : 'Store blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+        error: () => this.notificationService.error('Failed to update store status.'),
       });
   }
 

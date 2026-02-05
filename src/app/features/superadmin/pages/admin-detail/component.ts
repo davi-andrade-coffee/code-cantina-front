@@ -10,6 +10,7 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateStoreModalComponent } from '../../components/modals/create-store-modal.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
 import { TableCardComponent } from '../../components/table-card.component';
+import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   standalone: true,
@@ -27,6 +28,7 @@ export class AdminDetailPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly notificationService = inject(NotificationService);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
@@ -131,12 +133,29 @@ export class AdminDetailPage {
                   : item
               )
             );
+            this.notificationService.success('Store updated successfully.');
             this.modalLojaAberto.set(false);
             this.lojaSelecionada.set(null);
           },
-          error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
+          error: () => this.notificationService.error('Failed to update store.'),
         });
-      return;
+    } else if (payload && adminId) {
+      this.facade
+        .createStore({
+          adminId,
+          nome: payload.nome,
+          cnpj: payload.cnpj,
+          mensalidade: payload.mensalidade,
+          vencimento: payload.vencimento,
+        })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.carregarDetalhes();
+            this.notificationService.success('Store created successfully.');
+          },
+          error: () => this.notificationService.error('Failed to create store.'),
+        });
     }
 
     if (!adminId) {
@@ -181,8 +200,11 @@ export class AdminDetailPage {
           this.stores.update((lista) =>
             lista.map((item) => (item.id === store.id ? { ...item, status } : item))
           );
+          this.notificationService.success(
+            ativo ? 'Store unlocked successfully.' : 'Store blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status da loja.'),
+        error: () => this.notificationService.error('Failed to update store status.'),
       });
   }
 
@@ -201,8 +223,11 @@ export class AdminDetailPage {
       .subscribe({
         next: () => {
           this.admin.set({ ...admin, status });
+          this.notificationService.success(
+            ativo ? 'Admin unlocked successfully.' : 'Admin blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
+        error: () => this.notificationService.error('Failed to update admin status.'),
       });
   }
 

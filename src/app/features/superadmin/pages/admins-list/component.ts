@@ -9,6 +9,7 @@ import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateAdminModalComponent } from '../../components/modals/create-admin-modal.component';
 import { PaginationComponent } from '../../components/pagination.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
+import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   standalone: true,
@@ -25,6 +26,7 @@ import { StatusBadgeComponent } from '../../components/status-badge.component';
 export class AdminsListPage {
   private readonly facade = inject(SuperAdminFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notificationService = inject(NotificationService);
 
   readonly loading = signal(false);
   readonly errorMsg = signal<string | null>(null);
@@ -108,8 +110,9 @@ export class AdminsListPage {
         next: () => {
           this.modalCadastroAberto.set(false);
           this.buscar();
+          this.notificationService.success('Admin created successfully.');
         },
-        error: () => this.errorMsg.set('Não foi possível cadastrar o Admin.'),
+        error: () => this.notificationService.error('Failed to create admin.'),
       });
   }
 
@@ -128,8 +131,11 @@ export class AdminsListPage {
           this.admins.update((lista) =>
             lista.map((item) => (item.id === admin.id ? { ...item, status } : item))
           );
+          this.notificationService.success(
+            ativo ? 'Admin unlocked successfully.' : 'Admin blocked successfully.'
+          );
         },
-        error: () => this.errorMsg.set('Não foi possível atualizar o status do Admin.'),
+        error: () => this.notificationService.error('Failed to update admin status.'),
       });
   }
 
