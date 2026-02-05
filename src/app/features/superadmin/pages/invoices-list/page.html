@@ -8,7 +8,7 @@
         class="input input-bordered input-sm"
         placeholder="08/2024"
         [value]="filtros().competencia"
-        (input)="patchFiltro({ competencia: $any($event.target).value })"
+        (input)="onCompetenciaInput($event)"
       />
     </label>
 
@@ -19,7 +19,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().status"
-        (change)="patchFiltro({ status: $any($event.target).value })"
+        (change)="onStatusChange($event)"
       >
         <option value="TODOS">Todos</option>
         <option value="EM_ABERTO">Em aberto</option>
@@ -36,7 +36,7 @@
         class="input input-bordered input-sm"
         placeholder="Nome do admin"
         [value]="filtros().termo"
-        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (input)="onSearchInput($event)"
       />
     </label>
 
@@ -47,7 +47,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().somenteVencidas ? 'SIM' : 'NAO'"
-        (change)="patchFiltro({ somenteVencidas: $any($event.target).value === 'SIM' })"
+        (change)="onOverdueFilterChange($event)"
       >
         <option value="NAO">Todas</option>
         <option value="SIM">Somente vencidas</option>

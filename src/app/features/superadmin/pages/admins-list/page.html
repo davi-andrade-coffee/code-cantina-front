@@ -18,7 +18,7 @@
         class="input input-bordered input-sm"
         placeholder="Nome, e-mail, telefone"
         [value]="filtros().termo"
-        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (input)="onSearchInput($event)"
       />
     </label>
 
@@ -29,7 +29,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().status"
-        (change)="patchFiltro({ status: $any($event.target).value })"
+        (change)="onStatusChange($event)"
       >
         <option value="TODOS">Todos</option>
         <option value="ATIVO">Ativo</option>
@@ -88,7 +88,7 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="admin.status === 'ATIVO'"
-                (change)="toggleAdminStatus(admin, $any($event.target).checked)"
+                (change)="onAdminStatusChange(admin, $event)"
               />
               <span class="text-xs opacity-70">{{ admin.status === 'ATIVO' ? 'Ativo' : 'Bloqueado' }}</span>
             </label>

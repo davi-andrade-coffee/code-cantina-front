@@ -9,7 +9,7 @@
         class="input input-bordered input-sm"
         placeholder="Loja ou admin"
         [value]="filtros().termo"
-        (input)="patchFiltro({ termo: $any($event.target).value })"
+        (input)="onSearchInput($event)"
       />
     </label>
 
@@ -20,7 +20,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().status"
-        (change)="patchFiltro({ status: $any($event.target).value })"
+        (change)="onStatusChange($event)"
       >
         <option value="TODOS">Todos</option>
         <option value="ATIVA">Ativa</option>
@@ -36,7 +36,7 @@
       <select
         class="select select-bordered select-sm"
         [value]="filtros().adminId"
-        (change)="patchFiltro({ adminId: $any($event.target).value })"
+        (change)="onAdminChange($event)"
       >
         <option value="TODOS">Todos</option>
         <option *ngFor="let admin of admins()" [value]="admin.id">{{ admin.nome }}</option>
@@ -85,7 +85,7 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
-                (change)="toggleStoreStatus(store, $any($event.target).checked)"
+                (change)="onStoreStatusChange(store, $event)"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
             </label>

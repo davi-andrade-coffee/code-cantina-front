@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "typecheck": "ng build --configuration development",
+    "lint:templates": "bash -lc \"if rg -n -F '$$any(' src/app/features/superadmin; then exit 1; fi\"",
+    "lint": "npm run lint:templates && npm run typecheck"
   },
   "prettier": {
     "printWidth": 100,

@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 
 import { Admin, AdminStatus } from '../../models/admin.model';
-import { Store } from '../../models/store.model';
+import { CreateStoreRequest, Store, UpdateStoreRequest } from '../../models/store.model';
 import { SuperAdminFacade } from '../../services/superadmin.facade';
 import { CreateStoreModalComponent } from '../../components/modals/create-store-modal.component';
 import { StatusBadgeComponent } from '../../components/status-badge.component';
@@ -87,22 +87,11 @@ export class AdminDetailPage {
     this.lojaSelecionada.set(null);
   }
 
-  confirmarNovaLoja(payload?: {
-    id?: string | null;
-    nome: string;
-    cnpj: string;
-    mensalidade: number;
-    vencimento: number;
-  }): void {
+  confirmarNovaLoja(payload?: (UpdateStoreRequest & { id?: string | null }) | undefined): void {
     const adminId = this.admin()?.id;
     if (payload?.id) {
       this.facade
-        .updateStore(payload.id, {
-          nome: payload.nome,
-          cnpj: payload.cnpj,
-          mensalidade: payload.mensalidade,
-          vencimento: payload.vencimento,
-        })
+        .updateStore(payload.id, payload)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -123,14 +112,9 @@ export class AdminDetailPage {
           error: () => this.errorMsg.set('Não foi possível atualizar a loja.'),
         });
     } else if (payload && adminId) {
+      const createRequest: CreateStoreRequest = { ...payload, adminId };
       this.facade
-        .createStore({
-          adminId,
-          nome: payload.nome,
-          cnpj: payload.cnpj,
-          mensalidade: payload.mensalidade,
-          vencimento: payload.vencimento,
-        })
+        .createStore(createRequest)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => this.carregarDetalhes(),
@@ -139,6 +123,17 @@ export class AdminDetailPage {
     }
     this.modalLojaAberto.set(false);
     this.lojaSelecionada.set(null);
+  }
+
+
+  onAdminStatusChange(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.toggleAdminStatus(target?.checked ?? false);
+  }
+
+  onStoreStatusChange(store: Store, event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.toggleStoreStatus(store, target?.checked ?? false);
   }
 
   toggleStoreStatus(store: Store, ativo: boolean): void {

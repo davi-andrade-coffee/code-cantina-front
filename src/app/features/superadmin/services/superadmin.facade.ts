@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import { AdminFilters, AdminStatus } from '../models/admin.model';
-import { StoreStatus } from '../models/store.model';
+import { AdminFilters, AdminStatus, CreateAdminRequest } from '../models/admin.model';
+import { CreateStoreRequest, StoreFilters, StoreStatus, UpdateStoreRequest } from '../models/store.model';
 import { InvoiceFilters } from '../models/invoice.model';
 import { SuperAdminApiService } from './superadmin.api.service';
 import { BillingApiService } from './billing.api.service';
@@ -27,19 +27,19 @@ export class SuperAdminFacade {
     return this.superadminSource.updateStoreStatus(storeId, status);
   }
 
-  updateStore(storeId: string, payload: { nome: string; cnpj: string; mensalidade: number; vencimento: number }) {
+  updateStore(storeId: string, payload: UpdateStoreRequest) {
     return this.superadminSource.updateStore(storeId, payload);
   }
 
-  createAdmin(payload: { nome: string; email: string; telefone: string }) {
+  createAdmin(payload: CreateAdminRequest) {
     return this.superadminSource.createAdmin(payload);
   }
 
-  createStore(payload: { adminId: string; nome: string; cnpj: string; mensalidade: number; vencimento: number }) {
+  createStore(payload: CreateStoreRequest) {
     return this.superadminSource.createStore(payload);
   }
 
-  listStores(filters?: { termo?: string; status?: string; adminId?: string }) {
+  listStores(filters?: StoreFilters) {
     return this.superadminSource.listStores(filters);
   }
 

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { Store, UpdateStoreRequest } from '../../models/store.model';
+
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule],
@@ -74,15 +76,9 @@ export class CreateStoreModalComponent implements OnChanges {
   @Input() open = false;
   @Input() mode: 'CRIAR' | 'EDITAR' = 'CRIAR';
   @Input() storeId?: string | null;
-  @Input() store?: { nome: string; cnpj: string; mensalidade: number; vencimento: number } | null;
+  @Input() store?: Store | null;
   @Output() close = new EventEmitter<void>();
-  @Output() confirm = new EventEmitter<{
-    id?: string | null;
-    nome: string;
-    cnpj: string;
-    mensalidade: number;
-    vencimento: number;
-  }>();
+  @Output() confirm = new EventEmitter<UpdateStoreRequest & { id?: string | null }>();
 
   nome = '';
   cnpj = '';

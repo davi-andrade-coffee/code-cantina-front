@@ -47,7 +47,7 @@
           type="checkbox"
           class="toggle toggle-success"
           [checked]="admin()?.status === 'ATIVO'"
-          (change)="toggleAdminStatus($any($event.target).checked)"
+          (change)="onAdminStatusChange($event)"
         />
       </div>
     </div>
@@ -94,7 +94,7 @@
                 type="checkbox"
                 class="toggle toggle-xs"
                 [checked]="store.status === 'ATIVA'"
-                (change)="toggleStoreStatus(store, $any($event.target).checked)"
+                (change)="onStoreStatusChange(store, $event)"
               />
               <span class="text-xs opacity-70">{{ store.status === 'ATIVA' ? 'Ativa' : 'Bloqueada' }}</span>
             </label>

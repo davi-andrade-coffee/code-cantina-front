@@ -14,7 +14,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
         <select
           class="select select-bordered select-xs"
           [value]="pageSize"
-          (change)="pageSizeChange.emit(+($any($event.target).value))"
+          (change)="onPageSizeChange($event)"
         >
           <option *ngFor="let size of pageSizes" [value]="size">{{ size }} / pág.</option>
         </select>
@@ -46,5 +46,10 @@ export class PaginationComponent {
 
   nextPage(): void {
     this.pageChange.emit(Math.min(this.totalPages, this.page + 1));
+  }
+
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    this.pageSizeChange.emit(Number(target?.value ?? this.pageSize));
   }
 }
