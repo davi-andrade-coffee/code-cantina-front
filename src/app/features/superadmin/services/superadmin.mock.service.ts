@@ -61,7 +61,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2023-10-20',
-    vencimento: '2024-09-15',
+    vencimento: 15,
   },
   {
     id: 'sto-101',
@@ -71,7 +71,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 120,
     status: 'BLOQUEADA',
     criadoEm: '2024-01-05',
-    vencimento: '2024-09-05',
+    vencimento: 15,
   },
   {
     id: 'sto-102',
@@ -81,7 +81,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 120,
     status: 'ATIVA',
     criadoEm: '2024-02-11',
-    vencimento: '2024-09-20',
+    vencimento: 15,
   },
   {
     id: 'sto-200',
@@ -91,7 +91,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-02-20',
-    vencimento: '2024-09-10',
+    vencimento: 15,
   },
   {
     id: 'sto-201',
@@ -101,7 +101,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-03-10',
-    vencimento: '2024-09-12',
+    vencimento: 15,
   },
   {
     id: 'sto-202',
@@ -111,7 +111,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 150,
     status: 'BLOQUEADA',
     criadoEm: '2024-03-18',
-    vencimento: '2024-08-30',
+    vencimento: 15,
   },
   {
     id: 'sto-203',
@@ -121,7 +121,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 150,
     status: 'ATIVA',
     criadoEm: '2024-04-02',
-    vencimento: '2024-09-18',
+    vencimento: 15,
   },
   {
     id: 'sto-300',
@@ -131,7 +131,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 110,
     status: 'BLOQUEADA',
     criadoEm: '2023-07-01',
-    vencimento: '2024-08-25',
+    vencimento: 15,
   },
   {
     id: 'sto-400',
@@ -141,7 +141,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-05-15',
-    vencimento: '2024-09-08',
+    vencimento: 15,
   },
   {
     id: 'sto-401',
@@ -151,7 +151,7 @@ const STORE_DATA: Store[] = [
     mensalidade: 130,
     status: 'ATIVA',
     criadoEm: '2024-06-01',
-    vencimento: '2024-09-22',
+    vencimento: 15,
   },
 ];
 
@@ -197,7 +197,7 @@ export class SuperAdminMockService {
 
   updateStore(
     storeId: string,
-    payload: { nome: string; cnpj: string; mensalidade: number; vencimento: string }
+    payload: { nome: string; cnpj: string; mensalidade: number; vencimento: number }
   ): Observable<Store | undefined> {
     const store = STORE_DATA.find((item) => item.id === storeId);
     if (store) {

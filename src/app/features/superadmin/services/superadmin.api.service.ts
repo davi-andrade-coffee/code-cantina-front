@@ -35,7 +35,7 @@ interface AdminStoreItem {
   blockedReason: 'NONE' | 'ADMIN' | 'MANUAL' | 'OVERDUE';
   lastPaymentAt: string | null;
   latestBilling?: {
-    dueDate?: string | null;
+    dueDate?: number | null;
   };
 }
 
@@ -56,6 +56,7 @@ interface ShopListItem {
   name: string;
   cnpj: string;
   monthlyValue: number;
+  billingDueDay: number;
   status: 'ACTIVE' | 'BLOCKED' | 'OVERDUE';
   blockedReason: 'NONE' | 'ADMIN' | 'MANUAL' | 'OVERDUE';
   lastPayment: string | null;
@@ -128,7 +129,7 @@ export class SuperAdminApiService {
 
   updateStore(
     storeId: string,
-    payload: { nome: string; cnpj: string; mensalidade: number; vencimento: string }
+    payload: { nome: string; cnpj: string; mensalidade: number; vencimento: number }
   ): Observable<void> {
     return this.http.put<void>(`${API_BASE_URL}/superadmin/shops/${storeId}`, {
       name: payload.nome,
@@ -151,14 +152,14 @@ export class SuperAdminApiService {
     nome: string;
     cnpj: string;
     mensalidade: number;
-    vencimento: string;
+    vencimento: number;
   }): Observable<{ shopId: string }> {
     return this.http.post<{ shopId: string }>(`${API_BASE_URL}/superadmin/shops`, {
       adminId: payload.adminId,
       name: payload.nome,
       cnpj: payload.cnpj,
       monthlyValue: payload.mensalidade,
-      dueDate: payload.vencimento,
+      billingDueDay: payload.vencimento,
     });
   }
 
@@ -199,7 +200,7 @@ export class SuperAdminApiService {
       mensalidade: store.monthlyValue,
       status: this.mapStoreStatus(store.status),
       criadoEm: '—',
-      vencimento: store.latestBilling?.dueDate ?? undefined,
+      vencimento: store.latestBilling?.dueDate ?? 1,
     };
   }
 
@@ -212,7 +213,7 @@ export class SuperAdminApiService {
       mensalidade: item.monthlyValue,
       status: this.mapStoreStatus(item.status),
       criadoEm: item.lastPayment ?? '—',
-      vencimento: undefined,
+      vencimento: item.billingDueDay,
     };
   }
 

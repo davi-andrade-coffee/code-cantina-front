@@ -92,7 +92,7 @@ export class AdminDetailPage {
     nome: string;
     cnpj: string;
     mensalidade: number;
-    vencimento: string;
+    vencimento: number;
   }): void {
     const adminId = this.admin()?.id;
     if (payload?.id) {

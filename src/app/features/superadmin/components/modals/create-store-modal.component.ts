@@ -53,7 +53,7 @@ import { FormsModule } from '@angular/forms';
             <div class="label">
               <span class="label-text text-xs opacity-70">Vencimento da fatura</span>
             </div>
-            <input class="input input-bordered" type="date" [(ngModel)]="vencimento" />
+            <input class="input input-bordered" type="number" [(ngModel)]="vencimento" />
             <div class="label" *ngIf="showError('vencimento')">
               <span class="label-text-alt text-error">Selecione a data de vencimento.</span>
             </div>
@@ -74,20 +74,20 @@ export class CreateStoreModalComponent implements OnChanges {
   @Input() open = false;
   @Input() mode: 'CRIAR' | 'EDITAR' = 'CRIAR';
   @Input() storeId?: string | null;
-  @Input() store?: { nome: string; cnpj: string; mensalidade: number } | null;
+  @Input() store?: { nome: string; cnpj: string; mensalidade: number; vencimento: number } | null;
   @Output() close = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<{
     id?: string | null;
     nome: string;
     cnpj: string;
     mensalidade: number;
-    vencimento: string;
+    vencimento: number;
   }>();
 
   nome = '';
   cnpj = '';
   mensalidade = 0;
-  vencimento = '';
+  vencimento = 1;
   submitted = false;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -95,7 +95,7 @@ export class CreateStoreModalComponent implements OnChanges {
       this.nome = this.store?.nome ?? '';
       this.cnpj = this.store?.cnpj ?? '';
       this.mensalidade = this.store?.mensalidade ?? 0;
-      this.vencimento = this.store?.vencimento ?? '';
+      this.vencimento = this.store?.vencimento ?? 1;
       this.submitted = false;
     }
   }
@@ -104,7 +104,7 @@ export class CreateStoreModalComponent implements OnChanges {
     this.nome = '';
     this.cnpj = '';
     this.mensalidade = 0;
-    this.vencimento = '';
+    this.vencimento = 1;
     this.submitted = false;
     this.close.emit();
   }
@@ -147,6 +147,6 @@ export class CreateStoreModalComponent implements OnChanges {
   }
 
   private isVencimentoValid(): boolean {
-    return !!this.vencimento;
+    return Number(this.mensalidade) > 0;
   }
 }
